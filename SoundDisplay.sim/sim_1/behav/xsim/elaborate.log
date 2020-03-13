@@ -1,0 +1,21 @@
+Vivado Simulator 2018.2
+Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
+Running: C:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe -wto 0917254c695c4cb5998f17b74e73445e --incr --debug typical --relax --mt 2 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot simClk_behav xil_defaultlib.simClk xil_defaultlib.glbl -log elaborate.log 
+Using 2 slave threads.
+Starting static elaboration
+WARNING: [VRFC 10-278] actual bit length 32 differs from formal bit length 1 for port J_MIC3_Pin3 [F:/NUS_Files/CEG Files/Y1S2/EE2026/FGPA_Project/SoundDisplay/SoundDisplay.srcs/sim_1/new/simclock.v:10]
+Completed static elaboration
+Starting simulation data flow analysis
+WARNING: [XSIM 43-4099] "F:/NUS_Files/CEG Files/Y1S2/EE2026/FGPA_Project/SoundDisplay/SoundDisplay.srcs/sources_1/new/Oled_Display.v" Line 36. Module Oled_Display_default doesn't have a timescale but at least one module in design has a timescale.
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module xil_defaultlib.TripleChannelClock
+Compiling module xil_defaultlib.dff
+Compiling module xil_defaultlib.pulser
+Compiling module xil_defaultlib.btnDebouncer
+Compiling module xil_defaultlib.Peripherals
+Compiling module xil_defaultlib.Oled_Display_default
+Compiling module xil_defaultlib.Top_Student
+Compiling module xil_defaultlib.simClk
+Compiling module xil_defaultlib.glbl
+Built simulation snapshot simClk_behav

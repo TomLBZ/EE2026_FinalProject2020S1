@@ -1,0 +1,17 @@
+INFO: [VRFC 10-2263] Analyzing Verilog file "F:/NUS_Files/CEG Files/Y1S2/EE2026/FGPA_Project/SoundDisplay/SoundDisplay.srcs/sources_1/new/Oled_Display.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module Oled_Display
+WARNING: [VRFC 10-756] identifier state is used before its declaration [F:/NUS_Files/CEG Files/Y1S2/EE2026/FGPA_Project/SoundDisplay/SoundDisplay.srcs/sources_1/new/Oled_Display.v:106]
+WARNING: [VRFC 10-756] identifier state is used before its declaration [F:/NUS_Files/CEG Files/Y1S2/EE2026/FGPA_Project/SoundDisplay/SoundDisplay.srcs/sources_1/new/Oled_Display.v:108]
+WARNING: [VRFC 10-756] identifier state is used before its declaration [F:/NUS_Files/CEG Files/Y1S2/EE2026/FGPA_Project/SoundDisplay/SoundDisplay.srcs/sources_1/new/Oled_Display.v:110]
+WARNING: [VRFC 10-756] identifier state is used before its declaration [F:/NUS_Files/CEG Files/Y1S2/EE2026/FGPA_Project/SoundDisplay/SoundDisplay.srcs/sources_1/new/Oled_Display.v:111]
+WARNING: [VRFC 10-756] identifier state is used before its declaration [F:/NUS_Files/CEG Files/Y1S2/EE2026/FGPA_Project/SoundDisplay/SoundDisplay.srcs/sources_1/new/Oled_Display.v:112]
+INFO: [VRFC 10-2263] Analyzing Verilog file "F:/NUS_Files/CEG Files/Y1S2/EE2026/FGPA_Project/SoundDisplay/SoundDisplay.srcs/sources_1/new/Peripherals.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module TripleChannelClock
+INFO: [VRFC 10-311] analyzing module dff
+INFO: [VRFC 10-311] analyzing module pulser
+INFO: [VRFC 10-311] analyzing module btnDebouncer
+INFO: [VRFC 10-311] analyzing module Peripherals
+INFO: [VRFC 10-2263] Analyzing Verilog file "F:/NUS_Files/CEG Files/Y1S2/EE2026/FGPA_Project/SoundDisplay/SoundDisplay.srcs/sources_1/new/Top_Student.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module Top_Student
+INFO: [VRFC 10-2263] Analyzing Verilog file "F:/NUS_Files/CEG Files/Y1S2/EE2026/FGPA_Project/SoundDisplay/SoundDisplay.srcs/sim_1/new/simclock.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module simClk

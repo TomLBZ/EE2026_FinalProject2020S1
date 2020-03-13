@@ -1,0 +1,76 @@
+Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
+----------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2018.2 (win64) Build 2258646 Thu Jun 14 20:03:12 MDT 2018
+| Date         : Fri Mar 13 23:42:37 2020
+| Host         : LAPTOP-H1BTD71J running 64-bit major release  (build 9200)
+| Command      : report_control_sets -verbose -file Top_Student_control_sets_placed.rpt
+| Design       : Top_Student
+| Device       : xc7a35t
+----------------------------------------------------------------------------------------
+
+Control Set Information
+
+Table of Contents
+-----------------
+1. Summary
+2. Histogram
+3. Flip-Flop Distribution
+4. Detailed Control Set Information
+
+1. Summary
+----------
+
++----------------------------------------------------------+-------+
+|                          Status                          | Count |
++----------------------------------------------------------+-------+
+| Number of unique control sets                            |     9 |
+| Unused register locations in slices containing registers |    26 |
++----------------------------------------------------------+-------+
+
+
+2. Histogram
+------------
+
++--------+--------------+
+| Fanout | Control Sets |
++--------+--------------+
+|      2 |            1 |
+|      4 |            1 |
+|     12 |            1 |
+|    16+ |            6 |
++--------+--------------+
+
+
+3. Flip-Flop Distribution
+-------------------------
+
++--------------+-----------------------+------------------------+-----------------+--------------+
+| Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
++--------------+-----------------------+------------------------+-----------------+--------------+
+| No           | No                    | No                     |              18 |            5 |
+| No           | No                    | Yes                    |               0 |            0 |
+| No           | Yes                   | No                     |             148 |           29 |
+| Yes          | No                    | No                     |              24 |            3 |
+| Yes          | No                    | Yes                    |               0 |            0 |
+| Yes          | Yes                   | No                     |             104 |           17 |
++--------------+-----------------------+------------------------+-----------------+--------------+
+
+
+4. Detailed Control Set Information
+-----------------------------------
+
++----------------------+-------------------------------+----------------------------------+------------------+----------------+
+|     Clock Signal     |         Enable Signal         |         Set/Reset Signal         | Slice Load Count | Bel Load Count |
++----------------------+-------------------------------+----------------------------------+------------------+----------------+
+| ~CLK_BUFG[2]         |                               |                                  |                1 |              2 |
+|  CLK_BUFG[2]         |                               |                                  |                1 |              4 |
+|  CLK100MHZ_IBUF_BUFG |                               |                                  |                3 |             12 |
+|  CLK100MHZ_IBUF_BUFG |                               | peripherals/tcc/JAU_OBUF[0]      |                3 |             24 |
+|  CLK100MHZ_IBUF_BUFG | peripherals/tcc/cm[0]_i_1_n_0 |                                  |                3 |             24 |
+| ~CLK_BUFG[2]         |                               | peripherals/bd/p0/dff1/btnPulses |                5 |             34 |
+| ~CLK_BUFG[2]         | oled/delay[0]_i_1_n_0         | peripherals/bd/p0/dff1/btnPulses |                5 |             40 |
+| ~CLK_BUFG[2]         | oled/state                    | peripherals/bd/p0/dff1/btnPulses |               12 |             64 |
+| ~CLK_BUFG[2]         |                               | oled/spi_word[39]_i_1_n_0        |               21 |             90 |
++----------------------+-------------------------------+----------------------------------+------------------+----------------+
+
+
