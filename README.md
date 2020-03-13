@@ -9,7 +9,7 @@ It utilises a Digilent Pmod 96x64 pixel RGB OLED as display, and a Digilent Pmod
 
 |*Name*|*Role*|
 | ---- | ---- |
-| ![TomLBZ](tomlbz.github.io) | ![Jingming517](jingming517.github.io) |
+| ![TomLBZ](http://tomlbz.github.io) | ![Jingming517](http://jingming517.github.io) |
 
 ## Objective of this project
 
