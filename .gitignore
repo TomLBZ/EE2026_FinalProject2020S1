@@ -1,0 +1,22 @@
+# Ignore Mac system files
+.DS_store
+
+# Ignore node_modules folder
+.Xil
+SoundDisplay.cache
+SoundDisplay.hw
+SoundDisplay.ip_user_files
+SoundDisplay.ipdefs
+SoundDisplay.runs
+SoundDisplay.sim
+
+# Ignore all text and log files
+*.txt
+*.log
+*.jou
+
+# Ignore files related to API keys
+.env
+
+# Ignore SASS config files
+.sass-cache
