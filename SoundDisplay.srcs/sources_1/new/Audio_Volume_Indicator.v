@@ -8,3 +8,6 @@ module Audio_Volume_Indicator(
     output [3:0] an
     );
 endmodule
+
+module RandomMoule();
+endmodule
