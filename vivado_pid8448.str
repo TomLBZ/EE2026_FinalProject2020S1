@@ -157,3 +157,312 @@ selectButton(RDIResourceCommand.RDICommands_SAVE_FILE, (String) null); // B (f, 
 closeMainWindow("SoundDisplay - [C:/EE2026_FinalProject2020S1/SoundDisplay.xpr] - Vivado 2018.2"); // ck
 // A (ck): Exit Vivado: addNotify
 dismissDialog("Exit Vivado"); // A (ck)
+// [GUI Memory]: 85 MB (+1383kb) [00:04:21]
+// [GUI Memory]: 90 MB (+767kb) [00:09:46]
+// Elapsed time: 382 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 88, 164); // ce (w, ck)
+// Elapsed time: 23 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 85, 186); // ce (w, ck)
+// Elapsed time: 15 seconds
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, Top_Student (Top_Student.v)]", 1, true); // B (D, ck) - Node
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, Top_Student (Top_Student.v)]", 1, true, false, false, false, false, true); // B (D, ck) - Double Click - Node
+// Elapsed time: 47 seconds
+selectTab("PlanAheadTabBaseWorkspace_JideTabbedPane", (HResource) null, "Audio_Volume_Indicator.v", 2); // k (j, ck)
+// Elapsed time: 15 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 126, 200); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 146, 221); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 23, 240); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 75, 213); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 189, 214); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 114, 174); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 161, 218); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'c'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 58, 184); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 118, 158); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 146, 198); // ce (w, ck)
+// Elapsed time: 32 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 173, 196); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 126, 195); // ce (w, ck)
+// Elapsed time: 67 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 127, 202); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 74, 262); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 162, 263); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 155, 259); // ce (w, ck)
+// Elapsed time: 44 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 126, 257); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 240, 248); // ce (w, ck)
+// Elapsed time: 11 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 243, 257); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 193, 257); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 240, 257); // ce (w, ck)
+// Elapsed time: 16 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 119, 343); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 270, 256); // ce (w, ck)
+// Elapsed time: 17 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 178, 161); // ce (w, ck)
+selectTab("PlanAheadTabBaseWorkspace_JideTabbedPane", (HResource) null, "Top_Student.v", 1); // k (j, ck)
+selectCodeEditor("Top_Student.v", 114, 160); // ce (w, ck)
+// [GUI Memory]: 95 MB (+1219kb) [00:15:48]
+typeControlKey((HResource) null, "Top_Student.v", 'c'); // ce (w, ck)
+selectTab("PlanAheadTabBaseWorkspace_JideTabbedPane", (HResource) null, "Audio_Volume_Indicator.v", 2); // k (j, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 119, 81); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 222, 209); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 119, 290); // ce (w, ck)
+selectButton(RDIResourceCommand.RDICommands_SAVE_FILE, (String) null); // B (f, ck)
+// TclEventType: DG_GRAPH_STALE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: DG_ANALYSIS_MSG_RESET
+// TclEventType: DG_GRAPH_GENERATED
+selectCodeEditor("Audio_Volume_Indicator.v", 369, 275); // ce (w, ck)
+// Elapsed time: 37 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 272, 254); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 129, 338); // ce (w, ck)
+// Elapsed time: 29 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 108, 333); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 189, 353); // ce (w, ck)
+// Elapsed time: 92 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 125, 274); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'c'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 90, 321); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 73, 337); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 143, 351); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 144, 373); // ce (w, ck)
+// Elapsed time: 11 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 168, 350); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 115, 339); // ce (w, ck)
+// Elapsed time: 30 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 71, 218); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 71, 256); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 106, 181); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 101, 179); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 123, 206); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 214, 182); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 81, 199); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 220, 178); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'c'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 236, 181); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 96, 193); // ce (w, ck)
+// Elapsed time: 16 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 250, 334); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 128, 126); // ce (w, ck)
+// Elapsed time: 44 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 149, 154); // ce (w, ck)
+// Elapsed time: 10 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 232, 312); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 234, 191); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 68, 126); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 66, 138); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 66, 164); // ce (w, ck)
+selectButton(RDIResourceCommand.RDICommands_SAVE_FILE, (String) null); // B (f, ck)
+// TclEventType: DG_GRAPH_STALE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: DG_ANALYSIS_MSG_RESET
+// TclEventType: DG_GRAPH_GENERATED
+selectCodeEditor("Audio_Volume_Indicator.v", 202, 162); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 201, 182); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 200, 179); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 203, 201); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+// Elapsed time: 90 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 202, 222); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 202, 238); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 201, 257); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 201, 276); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 200, 296); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'v'); // ce (w, ck)
+selectButton(RDIResourceCommand.RDICommands_SAVE_FILE, (String) null); // B (f, ck)
+// TclEventType: DG_GRAPH_STALE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: DG_ANALYSIS_MSG_RESET
+// TclEventType: DG_GRAPH_GENERATED
+// Elapsed time: 17 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 41, 181); // ce (w, ck)
+typeControlKey((HResource) null, "Audio_Volume_Indicator.v", 'c'); // ce (w, ck)
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, Top_Student (Top_Student.v)]", 1, true); // B (D, ck) - Node
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, Top_Student (Top_Student.v)]", 1, true, false, false, false, false, true); // B (D, ck) - Double Click - Node
+selectCodeEditor("Top_Student.v", 684, 393); // ce (w, ck)
+typeControlKey((HResource) null, "Top_Student.v", 'v'); // ce (w, ck)
+selectCodeEditor("Top_Student.v", 66, 274); // ce (w, ck)
+selectCodeEditor("Top_Student.v", 155, 275); // ce (w, ck)
+selectCodeEditor("Top_Student.v", 83, 296); // ce (w, ck)
+selectCodeEditor("Top_Student.v", 122, 297); // ce (w, ck)
+selectCodeEditor("Top_Student.v", 157, 294); // ce (w, ck)
+selectCodeEditor("Top_Student.v", 155, 294); // ce (w, ck)
+selectCodeEditor("Top_Student.v", 154, 292); // ce (w, ck)
+selectCodeEditor("Top_Student.v", 49, 292); // ce (w, ck)
+selectCodeEditor("Top_Student.v", 162, 324); // ce (w, ck)
+// Elapsed time: 27 seconds
+selectCodeEditor("Top_Student.v", 122, 216); // ce (w, ck)
+// Elapsed time: 47 seconds
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Constraints]", 16, true); // B (D, ck) - Node
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Constraints, constrs_1, Basys3_Master.xdc]", 18, false); // B (D, ck)
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Constraints, constrs_1, Basys3_Master.xdc]", 18, false, false, false, false, false, true); // B (D, ck) - Double Click
+// Elapsed time: 69 seconds
+selectTab("PlanAheadTabBaseWorkspace_JideTabbedPane", (HResource) null, "Audio_Volume_Indicator.v", 2); // k (j, ck)
+selectCodeEditor("Audio_Volume_Indicator.v", 202, 163); // ce (w, ck)
+// [GUI Memory]: 101 MB (+718kb) [00:29:52]
+// Elapsed time: 141 seconds
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, Top_Student (Top_Student.v)]", 1, true); // B (D, ck) - Node
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, Top_Student (Top_Student.v)]", 1, true, false, false, false, false, true); // B (D, ck) - Double Click - Node
+// Elapsed time: 11 seconds
+selectCodeEditor("Top_Student.v", 220, 260); // ce (w, ck)
+selectTab("PlanAheadTabBaseWorkspace_JideTabbedPane", (HResource) null, "Basys3_Master.xdc", 3); // k (j, ck)
+selectCodeEditor("Basys3_Master.xdc", 6, 161); // ce (w, ck)
+selectCodeEditor("Basys3_Master.xdc", 12, 196); // ce (w, ck)
+selectCodeEditor("Basys3_Master.xdc", 10, 142); // ce (w, ck)
+selectCodeEditor("Basys3_Master.xdc", 6, 202); // ce (w, ck)
+selectCodeEditor("Basys3_Master.xdc", 31, 213); // ce (w, ck)
+// Elapsed time: 14 seconds
+selectCodeEditor("Basys3_Master.xdc", 129, 138); // ce (w, ck)
+// Elapsed time: 40 seconds
+selectCodeEditor("Basys3_Master.xdc", 328, 107); // ce (w, ck)
+typeControlKey((HResource) null, "Basys3_Master.xdc", 'c'); // ce (w, ck)
+// HMemoryUtils.trashcanNow. Engine heap size: 636 MB. GUI used memory: 44 MB. Current time: 3/14/20 9:20:54 PM SGT
+selectCodeEditor("Basys3_Master.xdc", 206, 84); // ce (w, ck)
+typeControlKey((HResource) null, "Basys3_Master.xdc", 'v'); // ce (w, ck)
+selectCodeEditor("Basys3_Master.xdc", 309, 101); // ce (w, ck)
+selectCodeEditor("Basys3_Master.xdc", 397, 92); // ce (w, ck)
+selectCodeEditor("Basys3_Master.xdc", 295, 104); // ce (w, ck)
+selectCodeEditor("Basys3_Master.xdc", 9, 198); // ce (w, ck)
+// Elapsed time: 29 seconds
+selectCodeEditor("Basys3_Master.xdc", 5, 347); // ce (w, ck)
+selectCodeEditor("Basys3_Master.xdc", 33, 373); // ce (w, ck)
+selectCodeEditor("Basys3_Master.xdc", 5, 179); // ce (w, ck)
+// Elapsed time: 13 seconds
+selectButton(RDIResourceCommand.RDICommands_SAVE_FILE, (String) null); // B (f, ck)
+// TclEventType: FILE_SET_CHANGE
+selectTab("PlanAheadTabBaseWorkspace_JideTabbedPane", (HResource) null, "Audio_Volume_Indicator.v", 2); // k (j, ck)
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, Top_Student (Top_Student.v)]", 1, true); // B (D, ck) - Node
+selectTree(PAResourceEtoH.FileSetPanel_FILE_SET_PANEL_TREE, "[root, Design Sources, Top_Student (Top_Student.v)]", 1, true, false, false, false, false, true); // B (D, ck) - Double Click - Node
+selectCodeEditor("Top_Student.v", 212, 258); // ce (w, ck)
+// Elapsed time: 18 seconds
+selectButton(RDIResourceCommand.RDICommands_SAVE_FILE, (String) null); // B (f, ck)
+// TclEventType: DG_GRAPH_STALE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: DG_ANALYSIS_MSG_RESET
+// TclEventType: DG_GRAPH_GENERATED
+// TclEventType: DG_GRAPH_STALE
+// TclEventType: FILE_SET_CHANGE
+// Tcl Message: update_compile_order -fileset sources_1 
+// TclEventType: DG_ANALYSIS_MSG_RESET
+// TclEventType: DG_GRAPH_GENERATED
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Synthesis, Run Synthesis]", 14, false); // u (O, ck)
+// Run Command: PAResourceCommand.PACommandNames_RUN_SYNTHESIS
+// A (ck): Run Synthesis: addNotify
+selectButton(RDIResource.BaseDialog_OK, "OK"); // a (A)
+// bx (ck):  Resetting Runs : addNotify
+// TclEventType: RUN_MODIFY
+dismissDialog("Run Synthesis"); // A (ck)
+// TclEventType: RUN_RESET
+// Tcl Message: reset_run synth_1 
+// TclEventType: RUN_RESET
+// TclEventType: RUN_MODIFY
+// bx (ck):  Starting Design Runs : addNotify
+// TclEventType: RUN_LAUNCH
+// TclEventType: RUN_MODIFY
+// Tcl Message: launch_runs synth_1 -jobs 2 
+// Tcl Message: [Sat Mar 14 21:22:34 2020] Launched synth_1... Run output will be captured here: C:/EE2026_FinalProject2020S1/SoundDisplay.runs/synth_1/runme.log 
+dismissDialog("Starting Design Runs"); // bx (ck)
+// TclEventType: RUN_COMPLETED
+// WARNING: HTimer (ActiveMsgMonitor Process Messages Timer) is taking 202ms to process. Increasing delay to 2000 ms.
+// ah (ck): Synthesis Completed: addNotify
+// Elapsed time: 54 seconds
+selectButton(RDIResource.BaseDialog_OK, "OK"); // a (ah)
+// Run Command: PAResourceCommand.PACommandNames_RUN_IMPLEMENTATION
+// bx (ck):  Starting Design Runs : addNotify
+// TclEventType: RUN_LAUNCH
+// TclEventType: RUN_MODIFY
+// Tcl Message: launch_runs impl_1 -jobs 2 
+// Tcl Message: [Sat Mar 14 21:23:29 2020] Launched impl_1... Run output will be captured here: C:/EE2026_FinalProject2020S1/SoundDisplay.runs/impl_1/runme.log 
+dismissDialog("Starting Design Runs"); // bx (ck)
+// TclEventType: RUN_STEP_COMPLETED
+// Elapsed time: 63 seconds
+selectTab("PlanAheadTabBaseWorkspace_JideTabbedPane", (HResource) null, "Audio_Volume_Indicator.v", 2); // k (j, ck)
+// TclEventType: RUN_COMPLETED
+// ah (ck): Implementation Completed: addNotify
+selectRadioButton(PAResourceCommand.PACommandNames_RUN_BITGEN, "Generate Bitstream"); // a (Q, ah)
+selectButton(RDIResource.BaseDialog_OK, "OK"); // a (ah)
+// Run Command: PAResourceCommand.PACommandNames_RUN_BITGEN
+dismissDialog("Implementation Completed"); // ah (ck)
+// TclEventType: RUN_LAUNCH
+// TclEventType: RUN_MODIFY
+// Tcl Message: launch_runs impl_1 -to_step write_bitstream -jobs 2 
+// Tcl Message: [Sat Mar 14 21:24:39 2020] Launched impl_1... Run output will be captured here: C:/EE2026_FinalProject2020S1/SoundDisplay.runs/impl_1/runme.log 
+// TclEventType: RUN_FAILED
+// ah (ck): Bitstream Generation Failed: addNotify
+// Elapsed time: 59 seconds
+selectButton(RDIResource.BaseDialog_OK, "OK"); // a (ah)
+// Run Command: PAResourceCommand.PACommandNames_LOG_WINDOW
+dismissDialog("Bitstream Generation Failed"); // ah (ck)
+selectTab((HResource) null, (HResource) null, "Messages", 1); // aE (Q, ck)
+selectTree(PAResourceItoN.MsgTreePanel_MESSAGE_VIEW_TREE, "[, Implementation, Write Bitstream, DRC, Pin Planning, [DRC UCIO-1] Unconstrained Logical Port: 1 out of 57 logical ports have no user assigned specific location constraint (LOC). This may cause I/O contention or incompatibility with the board power or connectivity affecting performance, signal integrity or in extreme cases cause damage to the device or the components to which it is connected. To correct this violation, specify all pin locations. This design will fail to generate a bitstream unless all logical ports have a user specified site LOC constraint defined.  To allow bitstream creation with unspecified pin locations (not recommended), use this command: set_property SEVERITY {Warning} [get_drc_checks UCIO-1].  NOTE: When using the Vivado Runs infrastructure (e.g. launch_runs Tcl command), add this command to a .tcl file and add that file as a pre-hook for write_bitstream step for the implementation run.  Problem ports: seg[7].. ]", 4, false); // ah (O, ck)
+selectTree(PAResourceItoN.MsgTreePanel_MESSAGE_VIEW_TREE, "[, Implementation, Write Bitstream, DRC, Pin Planning, [DRC UCIO-1] Unconstrained Logical Port: 1 out of 57 logical ports have no user assigned specific location constraint (LOC). This may cause I/O contention or incompatibility with the board power or connectivity affecting performance, signal integrity or in extreme cases cause damage to the device or the components to which it is connected. To correct this violation, specify all pin locations. This design will fail to generate a bitstream unless all logical ports have a user specified site LOC constraint defined.  To allow bitstream creation with unspecified pin locations (not recommended), use this command: set_property SEVERITY {Warning} [get_drc_checks UCIO-1].  NOTE: When using the Vivado Runs infrastructure (e.g. launch_runs Tcl command), add this command to a .tcl file and add that file as a pre-hook for write_bitstream step for the implementation run.  Problem ports: seg[7].. ]", 4, false); // ah (O, ck)
+messagesViewCrossProbe(PAResourceItoN.MsgTreePanel_MESSAGE_VIEW_TREE, "port;-;seg[7];-;;-;10;-;"); // ah (O, ck)
+selectButton("PAResourceItoN.MsgUtils_TO_SELECT_THIS_OBJECT_YOU_MUST_OPEN_Yes", "Yes"); // JButton (A, G)
+// bx (ck):  Open Implemented Design : addNotify
+// Tcl Message: open_run impl_1 
+// [Engine Memory]: 713 MB (+52156kb) [00:36:45]
+// HMemoryUtils.trashcanNow. Engine heap size: 713 MB. GUI used memory: 46 MB. Current time: 3/14/20 9:25:54 PM SGT
+selectButton(RDIResource.ProgressDialog_CANCEL, "Cancel"); // a (bx)
+// [Engine Memory]: 891 MB (+149935kb) [00:36:50]
+// [Engine Memory]: 945 MB (+9234kb) [00:36:55]
+// HMemoryUtils.trashcanNow. Engine heap size: 1,043 MB. GUI used memory: 45 MB. Current time: 3/14/20 9:26:09 PM SGT
+// [Engine Memory]: 1,043 MB (+53611kb) [00:37:00]
+// TclEventType: SDC_CONSTRAINT_ADD
+// TclEventType: FLOORPLAN_MODIFY
+// TclEventType: DESIGN_CLOSE
+// TclEventType: DESIGN_NEW_FAILED
+// Tcl Message: INFO: [Netlist 29-17] Analyzing 34 Unisim elements for replacement INFO: [Netlist 29-28] Unisim Transformation completed in 1 CPU seconds INFO: [Project 1-479] Netlist was created with Vivado 2018.2 INFO: [Device 21-403] Loading part xc7a35tcpg236-1 INFO: [Project 1-570] Preparing netlist for logic optimization INFO: [Common 17-41] Interrupt caught. Command should exit soon. INFO: [Timing 38-478] Restoring timing data from binary archive. INFO: [Timing 38-479] Binary timing data restore complete. INFO: [Project 1-856] Restoring constraints from binary archive. INFO: [Project 1-853] Binary constraint restore complete. 
+// Tcl Message: Reading XDEF placement. Reading placer database... Reading XDEF routing. Restored from archive | CPU: 0.000000 secs | Memory: 0.000000 MB | 
+// Tcl Message: Finished XDEF File Restore: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.027 . Memory (MB): peak = 1733.824 ; gain = 0.000 open_run: Time (s): cpu = 00:00:18 ; elapsed = 00:00:21 . Memory (MB): peak = 1733.824 ; gain = 823.488 
+// Tcl Message: INFO: [Common 17-344] 'open_run' was cancelled 
+// CommandFailedException: ERROR: [Common 17-69] Command failed:  
+// [Engine Memory]: 1,340 MB (+256791kb) [00:37:02]
+// Elapsed time: 14 seconds
+dismissDialog("Open Implemented Design"); // bx (ck)
+// Elapsed time: 30 seconds
+selectCodeEditor("Audio_Volume_Indicator.v", 205, 181); // ce (w, ck)
+selectTab("PlanAheadTabBaseWorkspace_JideTabbedPane", (HResource) null, "Basys3_Master.xdc", 3); // k (j, ck)
+// Elapsed time: 14 seconds
+selectTab("PlanAheadTabBaseWorkspace_JideTabbedPane", (HResource) null, "Audio_Volume_Indicator.v", 2); // k (j, ck)
+// Elapsed time: 27 seconds
+selectTab("PlanAheadTabBaseWorkspace_JideTabbedPane", (HResource) null, "Top_Student.v", 1); // k (j, ck)
+selectCodeEditor("Top_Student.v", 209, 155); // ce (w, ck)
+selectButton(RDIResourceCommand.RDICommands_SAVE_FILE, (String) null); // B (f, ck)
+// TclEventType: DG_GRAPH_STALE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: DG_ANALYSIS_MSG_RESET
+// TclEventType: DG_GRAPH_GENERATED
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Program and Debug, Generate Bitstream]", 20, false); // u (O, ck)
+// Run Command: PAResourceCommand.PACommandNames_RUN_BITGEN
+// bx (ck):  Resetting Runs : addNotify
+// TclEventType: RUN_MODIFY
+// TclEventType: RUN_RESET
+// TclEventType: RUN_MODIFY
+// Tcl Message: reset_run synth_1 
+dismissDialog("Resetting Runs"); // bx (ck)
+// TclEventType: RUN_LAUNCH
+// TclEventType: RUN_MODIFY
+// Tcl Message: launch_runs impl_1 -to_step write_bitstream -jobs 2 
+// Tcl Message: [Sat Mar 14 21:27:44 2020] Launched synth_1... Run output will be captured here: C:/EE2026_FinalProject2020S1/SoundDisplay.runs/synth_1/runme.log [Sat Mar 14 21:27:44 2020] Launched impl_1... Run output will be captured here: C:/EE2026_FinalProject2020S1/SoundDisplay.runs/impl_1/runme.log 
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STEP_COMPLETED
+// TclEventType: RUN_COMPLETED

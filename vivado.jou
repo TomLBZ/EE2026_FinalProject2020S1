@@ -12,9 +12,18 @@
 start_gui
 open_project {C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.xpr}
 update_compile_order -fileset sources_1
-reset_run impl_1 -prev_step 
-launch_runs impl_1 -to_step write_bitstream -jobs 12
+close [ open C:/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Audio_Volume_Indicator.v w ]
+add_files C:/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Audio_Volume_Indicator.v
+update_compile_order -fileset sources_1
+update_compile_order -fileset sources_1
+reset_run synth_1
+launch_runs synth_1 -jobs 2
+wait_on_run synth_1
+launch_runs impl_1 -jobs 2
 wait_on_run impl_1
-reset_run impl_1 -prev_step 
-launch_runs impl_1 -to_step write_bitstream -jobs 12
+launch_runs impl_1 -to_step write_bitstream -jobs 2
+wait_on_run impl_1
+open_run impl_1
+reset_run synth_1
+launch_runs impl_1 -to_step write_bitstream -jobs 2
 wait_on_run impl_1

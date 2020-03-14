@@ -18,7 +18,7 @@ module Top_Student (
     input CLK100MHZ, [4:0] btn,[15:0] sw,
     input JAI,
     output [1:0] JAO,
-    output [7:0] JB, [15:0] led
+    output [7:0] JB, [15:0] led, [6:0] seg, [3:0] an
     );                  //JAU[0] is pin 1, JAU[1] is pin 4; JAU[2] is pin 3
     reg taskMode = 1;//for lab tasks use 1, for project use 0.
     reg [2:0] rst = 0;
@@ -45,4 +45,6 @@ module Top_Student (
     //Oled_Display(clk, reset, frame_begin, sending_pixels,sample_pixel, pixel_index, pixel_data, cs, sdin, sclk, d_cn, resn, vccen,pmoden,teststate);
     Oled_Display oled(clk6p25m,reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
     //Graphics g(CLK[3],CLK[2],onRefresh,graphicsState,255,255,255,0,currentPixelData);//flush screen with white
+    
+    Audio_Volume_Indicator ind(mic_in,CLK,led,seg,an);
 endmodule
