@@ -3,18 +3,18 @@
 
 # Ignore node_modules folder
 .Xil/**
-SoundDisplay.cache/**
-SoundDisplay.hw/**
-SoundDisplay.ip_user_files/**
-SoundDisplay.ipdefs/**
-SoundDisplay.runs/**
-SoundDisplay.sim/**
+*.cache/**
+*.hw/**
+*.ip_user_files/**
+*.ipdefs/**
+*.runs/**
+*.sim/**
 
 # Ignore all text and log files
-**.txt
-**.log
-**.jou
-**.str
+.txt
+.log
+.jou
+.str
 
 # Ignore files related to API keys
 .env
