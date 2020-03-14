@@ -82,12 +82,18 @@ module B12_MUX(input [11:0] D1, input [11:0] D2, input S, output [11:0] Q);
     M21 M11(D1[11],D2[11],S,Q[11]);
 endmodule
 
+module swState(input [15:0] sw, input [15:0] password, output state);
+    assign state = sw == password ? 1:0;
+endmodule
+
 module Peripherals(
-    input CLOCK, [2:0] clkReset, [4:0] slowBit, [4:0] btns,
+    input CLOCK, [2:0] clkReset, [4:0] slowBit, [4:0] btns,[15:0] sw,
     output [3:0] Clock,//100M, 6.25M, 20k, _flexible_
-    output [4:0] debouncedBtns
+    output [4:0] debouncedBtns,
+    output sw_state
     );
     TripleChannelClock tcc(CLOCK,clkReset,slowBit,Clock[2],Clock[1],Clock[0]);
     btnDebouncer bd(Clock[2],btns,debouncedBtns);
+    swState(sw, 1, sw_state);
     assign Clock[3] = CLOCK;
 endmodule

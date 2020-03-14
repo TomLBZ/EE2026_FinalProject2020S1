@@ -15,7 +15,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module Top_Student (
-    input CLK100MHZ, [4:0] btn,
+    input CLK100MHZ, [4:0] btn,[15:0] sw,
     input JAI,
     output [1:0] JAO,
     output [7:0] JB, [15:0] led
@@ -35,11 +35,13 @@ module Top_Student (
     wire onRefresh;//asserted for 1 clk cycle when drawing new frame on the screen
     wire sendingPixels;
     wire samplePixel;
+    wire led_MUX_toggle;
     wire [15:0] currentPixelData;
-    always @ (currentPixelData) oled_data = currentPixelData;
-    Peripherals peripherals(CLK100MHZ,rst,sbit,btn,CLK,btnPulses);
+    //always @ (currentPixelData) oled_data = currentPixelData;
+    always @ (mic_in) oled_data = mic_in >> 7;
+    Peripherals peripherals(CLK100MHZ,rst,sbit,btn,sw,CLK,btnPulses,led_MUX_toggle);
     Audio_Capture ac(CLK[3],CLK[1],JAI, JAO[0], JAO[1], mic_in);
-    B12_MUX led_mux(mic_in,0,JAI,led[11:0]);
+    B12_MUX led_mux(mic_in,0,led_MUX_toggle,led[11:0]);
     //Oled_Display(clk, reset, frame_begin, sending_pixels,sample_pixel, pixel_index, pixel_data, cs, sdin, sclk, d_cn, resn, vccen,pmoden,teststate);
     Oled_Display oled(clk6p25m,reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
     //Graphics g(CLK[3],CLK[2],onRefresh,graphicsState,255,255,255,0,currentPixelData);//flush screen with white

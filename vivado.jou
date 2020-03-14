@@ -2,94 +2,35 @@
 # Vivado v2018.2 (64-bit)
 # SW Build 2258646 on Thu Jun 14 20:03:12 MDT 2018
 # IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
-# Start of session at: Sat Mar 14 16:53:37 2020
-# Process ID: 8444
-# Current directory: C:/EE2026_FinalProject2020S1-master
-# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent1876 C:\EE2026_FinalProject2020S1-master\SoundDisplay.xpr
-# Log file: C:/EE2026_FinalProject2020S1-master/vivado.log
-# Journal file: C:/EE2026_FinalProject2020S1-master\vivado.jou
+# Start of session at: Sat Mar 14 20:22:48 2020
+# Process ID: 4444
+# Current directory: C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent7520 C:\Users\Li Bozhao\source\repos\EE2026_FinalProject2020S1\SoundDisplay.xpr
+# Log file: C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/vivado.log
+# Journal file: C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1\vivado.jou
 #-----------------------------------------------------------
 start_gui
-open_project C:/EE2026_FinalProject2020S1-master/SoundDisplay.xpr
+open_project {C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.xpr}
 update_compile_order -fileset sources_1
-launch_runs impl_1 -to_step write_bitstream -jobs 2
-wait_on_run impl_1
 reset_run synth_1
-launch_runs impl_1 -to_step write_bitstream -jobs 2
+launch_runs impl_1 -to_step write_bitstream -jobs 12
 wait_on_run impl_1
 open_hw
 connect_hw_server
 open_hw_target
-set_property PROGRAM.FILE {C:/EE2026_FinalProject2020S1-master/SoundDisplay.runs/impl_1/Top_Student.bit} [get_hw_devices xc7a35t_0]
+set_property PROGRAM.FILE {C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.runs/impl_1/Top_Student.bit} [get_hw_devices xc7a35t_0]
 current_hw_device [get_hw_devices xc7a35t_0]
 refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a35t_0] 0]
 set_property PROBES.FILE {} [get_hw_devices xc7a35t_0]
 set_property FULL_PROBES.FILE {} [get_hw_devices xc7a35t_0]
-set_property PROGRAM.FILE {C:/EE2026_FinalProject2020S1-master/SoundDisplay.runs/impl_1/Top_Student.bit} [get_hw_devices xc7a35t_0]
+set_property PROGRAM.FILE {C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.runs/impl_1/Top_Student.bit} [get_hw_devices xc7a35t_0]
 program_hw_devices [get_hw_devices xc7a35t_0]
 refresh_hw_device [lindex [get_hw_devices xc7a35t_0] 0]
-close_hw
 reset_run synth_1
-launch_runs impl_1 -to_step write_bitstream -jobs 2
+launch_runs impl_1 -to_step write_bitstream -jobs 12
 wait_on_run impl_1
-open_hw
-connect_hw_server
-open_hw_target
-set_property PROGRAM.FILE {C:/EE2026_FinalProject2020S1-master/SoundDisplay.runs/impl_1/Top_Student.bit} [get_hw_devices xc7a35t_0]
-current_hw_device [get_hw_devices xc7a35t_0]
-refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a35t_0] 0]
 set_property PROBES.FILE {} [get_hw_devices xc7a35t_0]
 set_property FULL_PROBES.FILE {} [get_hw_devices xc7a35t_0]
-set_property PROGRAM.FILE {C:/EE2026_FinalProject2020S1-master/SoundDisplay.runs/impl_1/Top_Student.bit} [get_hw_devices xc7a35t_0]
+set_property PROGRAM.FILE {C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.runs/impl_1/Top_Student.bit} [get_hw_devices xc7a35t_0]
 program_hw_devices [get_hw_devices xc7a35t_0]
 refresh_hw_device [lindex [get_hw_devices xc7a35t_0] 0]
-close_hw
-open_hw
-connect_hw_server
-disconnect_hw_server localhost:3121
-connect_hw_server
-disconnect_hw_server localhost:3121
-connect_hw_server
-open_hw_target
-set_property PROGRAM.FILE {C:/EE2026_FinalProject2020S1-master/SoundDisplay.runs/impl_1/Top_Student.bit} [get_hw_devices xc7a35t_0]
-current_hw_device [get_hw_devices xc7a35t_0]
-refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a35t_0] 0]
-set_property PROBES.FILE {} [get_hw_devices xc7a35t_0]
-set_property FULL_PROBES.FILE {} [get_hw_devices xc7a35t_0]
-set_property PROGRAM.FILE {C:/EE2026_FinalProject2020S1-master/SoundDisplay.runs/impl_1/Top_Student.bit} [get_hw_devices xc7a35t_0]
-program_hw_devices [get_hw_devices xc7a35t_0]
-refresh_hw_device [lindex [get_hw_devices xc7a35t_0] 0]
-disconnect_hw_server localhost:3121
-connect_hw_server
-open_hw_target
-set_property PROGRAM.FILE {C:/EE2026_FinalProject2020S1-master/SoundDisplay.runs/impl_1/Top_Student.bit} [get_hw_devices xc7a35t_0]
-current_hw_device [get_hw_devices xc7a35t_0]
-refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a35t_0] 0]
-disconnect_hw_server localhost:3121
-connect_hw_server
-disconnect_hw_server localhost:3121
-connect_hw_server
-open_hw_target
-set_property PROGRAM.FILE {C:/EE2026_FinalProject2020S1-master/SoundDisplay.runs/impl_1/Top_Student.bit} [get_hw_devices xc7a35t_0]
-current_hw_device [get_hw_devices xc7a35t_0]
-refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a35t_0] 0]
-set_property PROBES.FILE {} [get_hw_devices xc7a35t_0]
-set_property FULL_PROBES.FILE {} [get_hw_devices xc7a35t_0]
-set_property PROGRAM.FILE {C:/EE2026_FinalProject2020S1-master/SoundDisplay.runs/impl_1/Top_Student.bit} [get_hw_devices xc7a35t_0]
-program_hw_devices [get_hw_devices xc7a35t_0]
-refresh_hw_device [lindex [get_hw_devices xc7a35t_0] 0]
-disconnect_hw_server localhost:3121
-connect_hw_server
-open_hw_target
-set_property PROGRAM.FILE {C:/EE2026_FinalProject2020S1-master/SoundDisplay.runs/impl_1/Top_Student.bit} [get_hw_devices xc7a35t_0]
-current_hw_device [get_hw_devices xc7a35t_0]
-refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a35t_0] 0]
-disconnect_hw_server localhost:3121
-connect_hw_server
-disconnect_hw_server localhost:3121
-connect_hw_server
-disconnect_hw_server localhost:3121
-connect_hw_server
-disconnect_hw_server localhost:3121
-connect_hw_server
-close_hw
