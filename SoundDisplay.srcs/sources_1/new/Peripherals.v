@@ -86,6 +86,16 @@ module swState(input [15:0] sw, input [15:0] password, output state);
     assign state = sw == password ? 1:0;
 endmodule
 
+module srLatch(input S, input R, output Q);
+    wire trigger = S || R;
+    reg out = 0;
+    always @ (posedge trigger) begin
+        if (S) out = 1;
+        if (R) out = 0;
+    end
+    assign Q = out;
+endmodule
+
 module Peripherals(
     input CLOCK, [2:0] clkReset, [4:0] slowBit, [4:0] btns,[15:0] sw,
     output [3:0] Clock,//100M, 6.25M, 20k, _flexible_
