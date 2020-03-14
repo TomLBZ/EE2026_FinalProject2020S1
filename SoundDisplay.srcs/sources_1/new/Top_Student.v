@@ -28,6 +28,7 @@ module Top_Student (
     wire [4:0] btnPulses;
     wire [3:0] CLK;//[100M, 6.25M, 20k, _flexible_]
     wire [11:0] mic_in;//mic sample input from the mic
+    wire [11:0] mic_mapped;//processed data for led display
     wire [12:0] currentPixel;//current pixel being updated, goes from 0 to 6143.
     wire [4:0] testState;
     wire reset = taskMode ? btnPulses[0] : (rst ? 1 : 0);
@@ -41,10 +42,10 @@ module Top_Student (
     always @ (mic_in) oled_data = mic_in >> 7;
     Peripherals peripherals(CLK100MHZ,rst,sbit,btn,sw,CLK,btnPulses,led_MUX_toggle);
     Audio_Capture ac(CLK[3],CLK[1],JAI, JAO[0], JAO[1], mic_in);
-    B12_MUX led_mux(mic_in,0,led_MUX_toggle,led[11:0]);
+    B12_MUX led_mux(mic_mapped,0,led_MUX_toggle,led[11:0]);
     //Oled_Display(clk, reset, frame_begin, sending_pixels,sample_pixel, pixel_index, pixel_data, cs, sdin, sclk, d_cn, resn, vccen,pmoden,teststate);
     Oled_Display oled(clk6p25m,reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
     //Graphics g(CLK[3],CLK[2],onRefresh,graphicsState,255,255,255,0,currentPixelData);//flush screen with white
     
-    Audio_Volume_Indicator ind(mic_in,CLK,led,seg,an);
+    Audio_Volume_Indicator volind(mic_in,CLK[0],CLK100MHZ,mic_mapped,seg,an);
 endmodule
