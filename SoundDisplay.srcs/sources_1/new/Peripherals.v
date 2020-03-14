@@ -5,7 +5,7 @@
 // 
 // Create Date: 03/13/2020 07:10:27 PM
 // Design Name: FGPA Project for EE2026
-// Module Name: Peripherals
+// Module Name: TripleChannelClock,dff, pulser, btnDebouncer, M21,B12_MUX,swState,srLatch,Peripherals
 // Project Name: FGPA Project for EE2026
 // Target Devices: Basys3
 // Tool Versions: Vivado 2018.2
@@ -84,6 +84,16 @@ endmodule
 
 module swState(input [15:0] sw, input [15:0] password, output state);
     assign state = sw == password ? 1:0;
+endmodule
+
+module srLatch(input S, input R, output Q);
+    wire trigger = S || R;
+    reg out = 0;
+    always @ (posedge trigger) begin
+        if (S) out = 1;
+        if (R) out = 0;
+    end
+    assign Q = out;
 endmodule
 
 module Peripherals(

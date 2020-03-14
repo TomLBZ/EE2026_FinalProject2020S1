@@ -19,31 +19,18 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module CurrentPixel(input ReadCLK, input FIN, input [98303:0] Block, output [15:0] Pixel);
-    reg [98303:0] block;
-    always @ (posedge FIN) block = Block;
-    reg [15:0] pixel;
-    always @ (posedge ReadCLK) begin
-        if (FIN) begin
-            pixel = block[15:0];
-            block = block >> 16;
-        end else pixel = 16'h07E0;
-    end
-    assign Pixel = FIN ? pixel : 16'h07E0;
-endmodule
 module Graphics(
-    input calcCLK,//this clock must be as fast as possible
-    input readCLK,//this clock must be in sync with the API
     input onRefresh,
     input [3:0] state,
     input [4:0] R, [5:0] G, [4:0] B,
-    input [2:0] stateInfo,//radius, width, etc.
+    input [31:0] Info,//radius, width, etc.
+    input [12:0] currentPixel,
     output [15:0] pixelData
     );
     localparam FlushScreen = 0;
     localparam GradientFlush = 1;
     localparam DrawLine = 2;
-    localparam DrawLines = 3;
+    localparam DrawCoordinateSystem = 3;
     localparam DrawRectangle = 4;
     localparam FillRectangle = 5;
     localparam DrawCircle = 6;
@@ -57,28 +44,63 @@ module Graphics(
         RGBtoColor = {r, g, b};
     endfunction
     wire [15:0] Color = RGBtoColor(R,G,B);
-    reg newBlock = 0;
-    reg [6:0] X; reg [5:0] Y;
-    reg FIN = 0;
-    wire [98303:0] Block;
-    integer x,y;
-    BlockPixelSetter BPS(newBlock,FIN, X,  Y, Color, Block);
-    CurrentPixel CP(readCLK, FIN, Block, pixelData);
-    always @ (posedge onRefresh) begin
-        newBlock = 0;
-        FIN = 0;
+    wire [15:0] _Color = RGBtoColor(31 - R, 63 - G, 31 - B);
+    reg [15:0] color; reg [6:0] rX; reg [5:0] rY;
+    reg [3:0] evalParam;
+    always @ (currentPixel) begin
+        rY <= (currentPixel / 96);
+        rX <= (currentPixel - rY * 96);
         case (state)
             FlushScreen:begin 
-                for (x = 0; x < 96; x = x + 1) begin
-                    for (y = 0; y < 64; y = y + 1) begin
-                        X <= x;
-                        Y <= y;
-                    end
-                end
+                color <= Color;
+            end
+            GradientFlush:begin
+                color <= RGBtoColor(R - rX / 3, G - rY, B);
+            end
+            DrawLine:begin//Info:P1([6:0],[12:7]),P2([19:13],[25:20])-- x=x1+(y-y1)(x2-x1)/(y2-y1)
+                color <= rX==Info[6:0]+(rY-Info[12:7])*(Info[19:13]-Info[6:0])/(Info[25:20]-Info[12:7]) ? Color : _Color;
+            end
+            DrawCoordinateSystem:begin
+                color <= rX==47 || rY==31 ? Color : _Color;
+            end
+            DrawRectangle: begin//Info:TL([6:0],[12:7]),BR([19:13],[25:20])
+                evalParam[0] = (rX==Info[6:0]||rX==Info[19:13])&&(rY<Info[25:20]&&rY>Info[12:7]);
+                evalParam[1] = (rX>Info[6:0]&&rX<Info[19:13])&&(rY==Info[25:20]||rY==Info[12:7]);
+                color = evalParam[0] | evalParam[1] ? Color : _Color;
+            end
+            FillRectangle:begin//Info:TL([6:0],[12:7]),BR([19:13],[25:20])
+                evalParam[0] = rX>Info[6:0] && rX<Info[19:13];
+                evalParam[1] = rY>Info[12:7] && rY<Info[25:20];
+                color = evalParam[0] & evalParam[1] ? Color : _Color;
+            end
+            DrawCircle:begin//Info:C([6:0],[12:7]),R[16:13]
+                color <= rX*rX + Info[6:0]*Info[6:0] - 2*rX*Info[6:0] + rY*rY + Info[12:7]*Info[12:7] - 2*rY*Info[12:7] == Info[16:13]*Info[16:13] ? Color : _Color;
+            end
+            FillCircle:begin//Info:C([6:0],[12:7]),R[16:13]
+                color <= rX*rX + Info[6:0]*Info[6:0] - 2*rX*Info[6:0] + rY*rY + Info[12:7]*Info[12:7] - 2*rY*Info[12:7] < Info[16:13]*Info[16:13] ? Color : _Color;
+            end
+            DrawPolygon:begin
+                
+            end
+            FillPolygon:begin
+            
+            end
+            DrawChar:begin//Info:T1([6:0],[12:7]),T2([19:13],[25:20])
+            
+            end
+            DrawBorder:begin//Info:TL([6:0],[12:7]),BR([19:13],[25:20]),W[29:26]
+                evalParam[0] = (rX>(Info[6:0]-Info[29:26]))&&(rX<(Info[19:13]+Info[29:26]));//|.........|
+                evalParam[1] = (rX<(Info[6:0]+Info[29:26]))||(rX>(Info[19:13]-Info[29:26]));//...|   |...
+                evalParam[2] = (rY>(Info[12:7]-Info[29:26]))&&(rY<(Info[25:20]+Info[29:26]));//|.........|
+                evalParam[3] = (rY<(Info[12:7]+Info[29:26]))||(rY>(Info[25:20]-Info[29:26]));//...|   |...              
+                color <= (evalParam[0] && evalParam[2]) && (evalParam[1] || evalParam[3]) ? _Color : Color;
+            end
+            CheckerBoard: begin
+                color <= ((rX / 16) % 2) ^ ((rY / 16) % 2) ? _Color : Color;
             end
             default:begin 
             end
         endcase
-        FIN = 1;
-    end
+    end    
+    assign pixelData = color;
 endmodule
