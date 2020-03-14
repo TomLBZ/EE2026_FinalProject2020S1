@@ -77,10 +77,7 @@ module B12_MUX(input [11:0] D1, input [11:0] D2, input S, output [11:0] Q);
     M21 M11(D1[11],D2[11],S,Q[11]);
 endmodule
 module Peripherals(
-    input CLOCK,
-    input [2:0] clkReset,
-    input [4:0] slowBit,
-    input [4:0] btns,
+    input CLOCK, [2:0] clkReset, [4:0] slowBit, [4:0] btns,
     output [3:0] Clock,//100M, 6.25M, 20k, _flexible_
     output [4:0] debouncedBtns
     );
