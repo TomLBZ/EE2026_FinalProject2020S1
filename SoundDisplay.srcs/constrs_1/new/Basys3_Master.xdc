@@ -151,31 +151,31 @@ set_property PACKAGE_PIN U17 [get_ports {btn[4]}]
 	#set_property IOSTANDARD LVCMOS33 [get_ports {JA[7]}]
 	
 ##Pmod Header JAI
-#set_property IOSTANDARD LVCMOS33 [get_ports {JAI}]
+set_property IOSTANDARD LVCMOS33 [get_ports {JAO}]
 ##Sch name = JA1
-#set_property PACKAGE_PIN J1 [get_ports {JAI[0]}]                    
-    #set_property IOSTANDARD LVCMOS33 [get_ports {JAI[0]}]
+set_property PACKAGE_PIN J1 [get_ports {JAO[0]}]                    
+    set_property IOSTANDARD LVCMOS33 [get_ports {JAO[0]}]
 ##Sch name = JA4
-#set_property PACKAGE_PIN G2 [get_ports {JAI[1]}]                    
-    #set_property IOSTANDARD LVCMOS33 [get_ports {JAI[1]}]
+set_property PACKAGE_PIN G2 [get_ports {JAO[1]}]                    
+    set_property IOSTANDARD LVCMOS33 [get_ports {JAO[1]}]
     
 ##Pmod Header JAO
 ##Sch name = JA3
-#set_property PACKAGE_PIN J2 [get_ports {JAO}]                    
-    #set_property IOSTANDARD LVCMOS33 [get_ports {JAO}]
+set_property PACKAGE_PIN J2 [get_ports {JAI}]                    
+    set_property IOSTANDARD LVCMOS33 [get_ports {JAI}]
 
 
 ##Pmod Header JAU
-set_property IOSTANDARD LVCMOS33 [get_ports {JAU}]
+#set_property IOSTANDARD LVCMOS33 [get_ports {JAU}]
 ##Sch name = JA1
-set_property PACKAGE_PIN J1 [get_ports {JAU[0]}]                    
-    set_property IOSTANDARD LVCMOS33 [get_ports {JAU[0]}]
+#set_property PACKAGE_PIN J1 [get_ports {JAU[0]}]                    
+    #set_property IOSTANDARD LVCMOS33 [get_ports {JAU[0]}]
 ##Sch name = JA4
-set_property PACKAGE_PIN G2 [get_ports {JAU[1]}]                    
-    set_property IOSTANDARD LVCMOS33 [get_ports {JAU[1]}]
+#set_property PACKAGE_PIN G2 [get_ports {JAU[1]}]                    
+    #set_property IOSTANDARD LVCMOS33 [get_ports {JAU[1]}]
 ##Sch name = JA3
-set_property PACKAGE_PIN J2 [get_ports {JAU[2]}]                    
-    set_property IOSTANDARD LVCMOS33 [get_ports {JAU[2]}]
+#set_property PACKAGE_PIN J2 [get_ports {JAU[2]}]                    
+    #set_property IOSTANDARD LVCMOS33 [get_ports {JAU[2]}]
 
         
 

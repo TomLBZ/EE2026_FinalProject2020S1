@@ -40,11 +40,13 @@ module TripleChannelClock(input CLOCK, input [2:0] RST, input [4:0] SlowBit, out
     assign SCLK = cs[SlowBit];//(0.005us ahead of main clk)
     assign MCLK = mid;//20kHz (0.005us ahead of main clk)
 endmodule
+
 module dff(input CLK, D, output reg Q=0);
     always @ (posedge CLK) begin
         Q<=D;
     end
 endmodule
+
 module pulser(input D,input CLK, output out);
     wire Q1;
     wire Q2;
@@ -52,6 +54,7 @@ module pulser(input D,input CLK, output out);
     dff dff2(CLK,Q1,Q2);
     assign out=Q1&~Q2;
 endmodule
+
 module btnDebouncer(input CLOCK, input [4:0] btn, output [4:0] BTN_PULSE);
     pulser p0(btn[0],CLOCK,BTN_PULSE[0]);
     pulser p1(btn[1],CLOCK,BTN_PULSE[1]);
@@ -59,9 +62,11 @@ module btnDebouncer(input CLOCK, input [4:0] btn, output [4:0] BTN_PULSE);
     pulser p3(btn[3],CLOCK,BTN_PULSE[3]);
     pulser p4(btn[4],CLOCK,BTN_PULSE[4]);
 endmodule
+
 module M21(input D1, input D2, input S, output Q);
     assign Q = S ? D1 : D2;
 endmodule
+
 module B12_MUX(input [11:0] D1, input [11:0] D2, input S, output [11:0] Q);
     M21 M0(D1[0],D2[0],S,Q[0]);
     M21 M1(D1[1],D2[1],S,Q[1]);
@@ -76,6 +81,7 @@ module B12_MUX(input [11:0] D1, input [11:0] D2, input S, output [11:0] Q);
     M21 M10(D1[10],D2[10],S,Q[10]);
     M21 M11(D1[11],D2[11],S,Q[11]);
 endmodule
+
 module Peripherals(
     input CLOCK, [2:0] clkReset, [4:0] slowBit, [4:0] btns,
     output [3:0] Clock,//100M, 6.25M, 20k, _flexible_
