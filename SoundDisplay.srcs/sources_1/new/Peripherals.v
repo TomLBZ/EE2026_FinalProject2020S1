@@ -82,8 +82,32 @@ module B12_MUX(input [11:0] D1, input [11:0] D2, input S, output [11:0] Q);
     M21 M11(D1[11],D2[11],S,Q[11]);
 endmodule
 
-module swState(input [15:0] sw, input [15:0] password, output state);
+module swState #(parameter START = 15, END = 0)(input [START:END] sw, input [START:END] password, output state);
     assign state = sw == password ? 1:0;
+endmodule
+
+module swBitsToState (input [14:0] sw, output [3:0] state);
+    reg mask = 15'b000000000000001;
+    reg [3:0] outstate = 0;
+    always @ (sw) begin
+        outstate = 0;
+        if(sw & (mask << 0)) outstate = 1;
+        if(sw & (mask << 1)) outstate = 2;
+        if(sw & (mask << 2)) outstate = 3;
+        if(sw & (mask << 3)) outstate = 4;
+        if(sw & (mask << 4)) outstate = 5;
+        if(sw & (mask << 5)) outstate = 6;
+        if(sw & (mask << 6)) outstate = 7;
+        if(sw & (mask << 7)) outstate = 8;
+        if(sw & (mask << 8)) outstate = 9;
+        if(sw & (mask << 9)) outstate = 10;
+        if(sw & (mask << 10)) outstate = 11;
+        if(sw & (mask << 11)) outstate = 12;
+        if(sw & (mask << 12)) outstate = 13;
+        if(sw & (mask << 13)) outstate = 14;
+        if(sw & (mask << 14)) outstate = 15;
+    end
+    assign state = outstate;
 endmodule
 
 module srLatch(input S, input R, output Q);
@@ -100,10 +124,12 @@ module Peripherals(
     input CLOCK, [2:0] clkReset, [4:0] slowBit, [4:0] btns,[15:0] sw,
     output [3:0] Clock,//100M, 6.25M, 20k, _flexible_
     output [4:0] debouncedBtns,
-    output sw_state
+    output led_MUX_toggle,
+    output [3:0] led_oled_state
     );
     TripleChannelClock tcc(CLOCK,clkReset,slowBit,Clock[2],Clock[1],Clock[0]);
     btnDebouncer bd(Clock[2],btns,debouncedBtns);
-    swState(sw, 1, sw_state);
+    swState #(15,15) sws(sw[15], 1, led_MUX_toggle);
+    swBitsToState swbts(sw[14:0], led_oled_state);
     assign Clock[3] = CLOCK;
 endmodule

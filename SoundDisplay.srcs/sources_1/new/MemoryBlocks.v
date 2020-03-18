@@ -24,6 +24,19 @@ module MemoryBlocks(
 
     );
 endmodule
+module oledBuffer96x64 #(parameter ADDR_WIDTH = 13, DATA_WIDTH = 16, DEPTH = 6144, MEMFILE="")
+(input wire clk, input wire [ADDR_WIDTH-1:0] addi, input wire wi, input wire [DATA_WIDTH-1:0] dati, output reg [DATA_WIDTH-1:0] dato);
+    reg [DATA_WIDTH-1:0] mem[0:DEPTH-1];
+    initial begin
+        if (MEMFILE>0) begin
+            $readmemh(MEMFILE, mem);
+        end
+    end
+    always @ (posedge clk) begin
+        if(wi) mem[addi]<=dati;
+        else dato<=mem[addi];
+    end
+endmodule
 module fifo #(parameter WSIZE = 16,parameter DSIZE = 32)
 (
     input wr_clk, rst_n, wr_en, [WSIZE-1 : 0]din, rd_clk, rd_en,

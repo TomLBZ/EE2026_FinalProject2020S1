@@ -27,19 +27,22 @@ module Graphics(
     input [12:0] currentPixel,
     output [15:0] pixelData
     );
-    localparam FlushScreen = 0;
-    localparam GradientFlush = 1;
-    localparam DrawLine = 2;
-    localparam DrawCoordinateSystem = 3;
-    localparam DrawRectangle = 4;
-    localparam FillRectangle = 5;
-    localparam DrawCircle = 6;
-    localparam FillCircle = 7;
-    localparam DrawPolygon = 8;
-    localparam FillPolygon = 9;
-    localparam DrawChar = 10;
-    localparam DrawBorder = 11;
-    localparam CheckerBoard = 12;
+    localparam DefaultGreen = 0;
+    localparam FlushScreen = 1;
+    localparam GradientFlush = 2;
+    localparam DrawLine = 3;
+    localparam DrawCoordinateSystem = 4;
+    localparam DrawRectangle = 5;
+    localparam FillRectangle = 6;
+    localparam DrawCircle = 7;
+    localparam FillCircle = 8;
+    localparam DrawPolygon = 9;
+    localparam FillPolygon = 10;
+    localparam DrawChar = 11;
+    localparam DrawBorder = 12;
+    localparam CheckerBoard = 13;
+    localparam VolumeBars = 14;
+    localparam BlueVolTask = 15;
     function [15:0] RGBtoColor(input [4:0] r, input [5:0] g, input [4:0] b);
         RGBtoColor = {r, g, b};
     endfunction
@@ -51,6 +54,9 @@ module Graphics(
         rY <= (currentPixel / 96);
         rX <= (currentPixel - rY * 96);
         case (state)
+            DefaultGreen: begin
+                color <= 16'h07E0;
+            end
             FlushScreen:begin 
                 color <= Color;
             end
@@ -98,7 +104,14 @@ module Graphics(
             CheckerBoard: begin
                 color <= ((rX / 16) % 2) ^ ((rY / 16) % 2) ? _Color : Color;
             end
+            VolumeBars:begin
+            
+            end
+            BlueVolTask: begin//Info:[4:0]blue
+                color <= Info[4:0];
+            end
             default:begin 
+                color <= 16'h07E0;
             end
         endcase
     end    
