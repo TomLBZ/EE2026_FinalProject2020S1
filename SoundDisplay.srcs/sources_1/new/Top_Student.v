@@ -47,5 +47,5 @@ module Top_Student (
     Oled_Display oled(clk6p25m,reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
     Graphics g(onRefresh,graphicsState,255,255,255,graphicsStateInfo,currentPixel,currentPixelData);//flush screen with white
     
-    Audio_Volume_Indicator volind(mic_in,CLK[0],CLK100MHZ,mic_mapped,seg,an);
+    AV_Indicator volind(mic_in,CLK[0],CLK100MHZ,mic_mapped,seg,an);
 endmodule
