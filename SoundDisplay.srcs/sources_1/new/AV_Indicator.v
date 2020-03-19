@@ -32,6 +32,7 @@ module AV_Indicator(
         if(counter[27]==1'b0) mic_max <= mic_max - 1'b1;
         
         //Controls the 7-segment display according to volume
+        if (counter[22]==1'b0) begin
         if (volume <4'd10) begin 
                 an = 4'b1110;
                 case (volume)
@@ -65,6 +66,6 @@ module AV_Indicator(
                 endcase
             end
     end
-   
+   end
 end    
 endmodule
