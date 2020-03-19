@@ -26,7 +26,90 @@ module PixelSetter(input CLK, input ON, input [6:0] X, input [5:0] Y, input [15:
     assign CO = COLOR;
     assign WR = write;
 endmodule
-module Graphics(
+
+module DrawPoint(input [6:0] X, input [5:0] Y, input [15:0] COLOR, output [63:0] CMD);
+    reg [63:0] cmd;//cmd[0:6]X,[7:12]Y,[13:28]C
+    always @ (X, Y, COLOR) begin
+        cmd[63] <= 1;//Enable
+        cmd[62:59] <= 4'd1;//PT
+        cmd[6:0] <= X;
+        cmd[12:7] <= Y;
+        cmd[28:13] <= COLOR;
+    end
+    assign CMD = cmd;
+endmodule
+
+module DrawLine(input [6:0] X1, input [5:0] Y1, input [6:0] X2, input [5:0] Y2, input [15:0] COLOR, output [63:0] CMD);
+    reg [63:0] cmd;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
+    always @ (X1, Y1, X2, Y2, COLOR) begin
+        cmd[63] <= 1;//Enable
+        cmd[62:59] <= 4'd2;//LN
+        cmd[6:0] <= X1;
+        cmd[12:7] <= Y1;
+        cmd[28:13] <= COLOR;
+        cmd[35:29] <= X2;
+        cmd[41:36] <= Y2;
+    end
+    assign CMD = cmd;
+endmodule
+
+module DrawChar(input [6:0] X, input [5:0] Y, input [29:0] CHR, input [15:0] COLOR, output [63:0] CMD);
+    reg [63:0] cmd; //cmd[0:6]X,[7:12]Y,[13:28]C,[29:58]CHR//30-bit char set{[29:54]AZ,[55:58]", . [ ]"}
+    always @ (X, Y, CHR, COLOR) begin
+        cmd[63] <= 1;//Enable
+        cmd[62:59] <= 4'd3;//CHR
+        cmd[6:0] <= X;
+        cmd[12:7] <= Y;
+        cmd[28:13] <= COLOR;
+        cmd[58:29] <= CHR;
+    end
+    assign CMD = cmd;
+endmodule
+
+module DrawRect(input [6:0] X1, input [5:0] Y1, input [6:0] X2, input [5:0] Y2, input [15:0] COLOR, output [63:0] CMD);
+    reg [63:0] cmd;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
+    always @ (X1, Y1, X2, Y2, COLOR) begin
+        cmd[63] <= 1;//Enable
+        cmd[62:59] <= 4'd4;//RECT
+        cmd[6:0] <= X1;
+        cmd[12:7] <= Y1;
+        cmd[28:13] <= COLOR;
+        cmd[35:29] <= X2;
+        cmd[41:36] <= Y2;
+    end
+    assign CMD = cmd;
+endmodule
+
+module DrawCirc(input [6:0] X, input [5:0] Y, input [4:0] R, input [15:0] COLOR, output [63:0] CMD);
+    reg [63:0] cmd;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
+    always @ (X, Y, R, COLOR) begin
+        cmd[63] <= 1;//Enable
+        cmd[62:59] <= 4'd5;//CIRC
+        cmd[6:0] <= X;
+        cmd[12:7] <= Y;
+        cmd[28:13] <= COLOR;
+        cmd[33:29] <= R;
+    end
+    assign CMD = cmd;
+endmodule
+
+module Graphics(input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM);
+    wire [63:0] Cmd;
+    wire [6:0] CmdX;
+    wire [5:0] CmdY;
+    wire [15:0] CmdCol;
+    wire pixSet;
+    wire CmdBusy;
+    wire [6:0] psX;
+    wire [5:0] psY;
+    wire [15:0] psC;
+    wire write;
+    DisplayCommands DCMD(Cmd, WCLK, pixSet, CmdX, CmdY, CmdCol, CmdBusy);
+    PixelSetter PSET(WCLK,pixSet,CmdX,CmdY,CmdCol,psX,psY,psC,write);
+    DisplayRAM DRAM(Pix, WCLK, write, psX, psY, psC, STREAM);
+endmodule
+
+module MyGraphics(
     input onRefresh,
     input [3:0] state,
     input [4:0] R, [5:0] G, [4:0] B,

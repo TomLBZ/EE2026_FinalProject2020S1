@@ -46,7 +46,7 @@ module Top_Student (
     B12_MUX led_mux(mic_mapped,mic_in,led_MUX_toggle,led[15:0]);
     //Oled_Display(clk, reset, frame_begin, sending_pixels,sample_pixel, pixel_index, pixel_data, cs, sdin, sclk, d_cn, resn, vccen,pmoden,teststate);
     Oled_Display oled(clk6p25m,reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
-    Graphics g(onRefresh,graphicsState,255,255,255,graphicsStateInfo,currentPixel,currentPixelData);//flush screen with white
+    MyGraphics g(onRefresh,graphicsState,255,255,255,graphicsStateInfo,currentPixel,currentPixelData);//flush screen with white
     
     AV_Indicator volind(mic_in,CLK[0],CLK100MHZ,mic_mapped,seg,an);
 endmodule
