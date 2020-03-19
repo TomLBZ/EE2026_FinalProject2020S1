@@ -18,7 +18,14 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
+module PixelSetter(input CLK, input ON, input [6:0] X, input [5:0] Y, input [15:0] COLOR, output [6:0] XO, output [5:0] YO, output [15:0] CO, output WR);
+    reg write = 0;
+    always @ (posedge CLK) write = ON ? 1 : 0;
+    assign XO = X;
+    assign YO = Y;
+    assign CO = COLOR;
+    assign WR = write;
+endmodule
 module Graphics(
     input onRefresh,
     input [3:0] state,
@@ -117,3 +124,4 @@ module Graphics(
     end    
     assign pixelData = color;
 endmodule
+
