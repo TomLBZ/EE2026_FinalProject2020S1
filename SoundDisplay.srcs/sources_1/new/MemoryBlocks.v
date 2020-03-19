@@ -5,11 +5,11 @@
 // 
 // Create Date: 03/16/2020 08:58:28 AM
 // Design Name: FGPA Project for EE2026
-// Module Name: MemoryBlocks, fifo, RAM
+// Module Name: DisplayRAM, DisplayCommands, CharBlocks
 // Project Name: FGPA Project for EE2026
 // Target Devices: Basys3
 // Tool Versions: Vivado 2018.2
-// Description: This module provides data structures to store relatively large amount of data and interact with them
+// Description: This module provides data structures to store relatively large amount of data and interact with them.The screen and the user input are decoupled here.
 // 
 // Dependencies: NULL
 // 
@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 module DisplayRAM(input [12:0] readPix, input CLK, input Write, input [6:0] X, input [5:0] Y, input [15:0] COLOR, output [15:0] STREAM);
     reg [15:0] DRAM [6:0][5:0];//DRAM[x][y]
-    reg stream;
+    reg [15:0] stream;
     reg dX, dY;
     always @(readPix) begin
         dX = readPix % 96;
@@ -35,7 +35,8 @@ module DisplayRAM(input [12:0] readPix, input CLK, input Write, input [6:0] X, i
     end
 endmodule
 
-module DisplayCommands(input [63:0] Command, input CLK, output PixelSet, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);//64-bit command
+module DisplayCommandCore(input [63:0] Command, input CLK, output PixelSet, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);//64-bit command
+    reg ON = 0;
     reg busy = 0;
     reg pixelSet = 0;
     reg [6:0] XO;
@@ -43,42 +44,53 @@ module DisplayCommands(input [63:0] Command, input CLK, output PixelSet, output 
     reg [15:0] CO;
     wire commandHead = Command[62:59];//4 bit head
     wire OnCommand = Command[63];//enabling signal
+    reg onLN = 1;
+    wire [6:0] LNXout;
+    wire [5:0] LNYout;
+    wire [15:0] LNCout;
+    wire LNBUSY;
     localparam IDLE = 0;
-    localparam PT = 1;
-    localparam LN = 2;
-    localparam CHR = 3;
-    localparam RECT = 4;
-    localparam CIRC = 5;
-    localparam PIC = 6;
-    always @ (posedge CLK) begin
+    localparam PT = 1;//cmd[0:6]X,[7:12]Y,[13:28]C
+    localparam LN = 2;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
+    localparam CHR = 3;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:58]CHR//30-bit char set{[29:54]AZ,[55:58]", . [ ]"}
+    localparam RECT = 4;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
+    localparam CIRC = 5;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
+    localparam PIC = 6;//cmd[0:6]X1,[7:12]Y1,[13:19]X2,[20;25]Y2,[26:32]PX1,[33:38]PY1,[39:45]PX2,[46:51]PY2
+    OnLineCommand OLNC(CLK, onLN, Command,LNXout, LNYout, LNCout, LNBUSY);
+    always @ (*) begin
         if (OnCommand) begin
             case (commandHead)
                 IDLE:begin 
-                    pixelSet <= 0;
-                    busy <= 0;
+                    pixelSet = 0;
+                    busy = 0;
                 end
-                PT:begin //cmd[0:6]X,[7:12]Y,[13:28]C
-                    pixelSet <= 1;
-                    XO <= Command[0:6];
-                    YO <= Command[7:12];
-                    CO <= Command[13:28];
-                    busy <= 0;
+                PT:begin 
+                    pixelSet = 1;
+                    XO = Command[6:0];
+                    YO = Command[12:7];
+                    CO = Command[28:13];
+                    busy = LNBUSY;
                 end
-                LN:begin //cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
-                    pixelSet <= 1;
-                    busy <= 1;
+                LN:begin 
+                    pixelSet = 1;
+                    onLN = 1;
+                    ON = onLN;
+                    XO = LNXout;
+                    YO = LNYout;
+                    CO = LNCout;
+                    busy = 1;
                 end
-                CHR:begin //cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:58]CHR//30-bit char set{[29:54]AZ,[55:58]", . [ ]"}
+                CHR:begin 
                 end
-                RECT:begin //cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
+                RECT:begin 
                 end
-                CIRC:begin //cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
+                CIRC:begin 
                 end
-                PIC:begin //cmd[0:6]X1,[7:12]Y1,[13:19]X2,[20;25]Y2,[26:32]PX1,[33:38]PY1,[39:45]PX2,[46:51]PY2
+                PIC:begin 
                 end
                 default:begin //assume IDLE
-                    pixelSet <= 0;
-                    busy <= 0;
+                    pixelSet = 0;
+                    busy = 0;
                 end
             endcase
         end
@@ -120,17 +132,12 @@ module CharBlocks(input [29:0] CHR, output [34:0] MAP);
             23:begin map = 35'b10001_10001_01010_00100_01010_10001_10001; end//X
             24:begin map = 35'b10001_10001_01010_00100_00100_00100_00100; end//Y
             25:begin map = 35'b11111_00001_00010_00100_01000_10000_11111; end//Z
-            26:begin map = 35'b00100_01010_10001_11111_10001_10001_10001; end//A
-            27:begin map = 35'b00100_01010_10001_11111_10001_10001_10001; end//A
-            28:begin map = 35'b00100_01010_10001_11111_10001_10001_10001; end//A
-            29:begin map = 35'b00100_01010_10001_11111_10001_10001_10001; end//A
+            26:begin map = 35'b00000_00000_00000_00000_01100_00100_01000; end//,
+            27:begin map = 35'b00000_00000_00000_00000_00000_01100_01100; end//.
+            28:begin map = 35'b00110_00100_00100_00100_00100_00100_00110; end//[
+            29:begin map = 35'b01100_00100_00100_00100_00100_00100_01100; end//]
             default: begin map = 35'b0; end//Nothing
         endcase
     end
     assign MAP = map;
-endmodule
-
-module MemoryBlocks(
-
-    );
 endmodule

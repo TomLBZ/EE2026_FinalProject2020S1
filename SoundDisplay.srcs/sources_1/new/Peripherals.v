@@ -9,7 +9,7 @@
 // Project Name: FGPA Project for EE2026
 // Target Devices: Basys3
 // Tool Versions: Vivado 2018.2
-// Description: This module provides peripheral utilities needed for the project that are unrelated to sound or display.
+// Description: This module provides peripheral utilities needed for the project that are unrelated to sound or display but might be useful for both.
 // 
 // Dependencies: NULL
 // 
@@ -80,6 +80,25 @@ module B12_MUX(input [11:0] D1, input [11:0] D2, input S, output [11:0] Q);
     M21 M9(D1[9],D2[9],S,Q[9]);
     M21 M10(D1[10],D2[10],S,Q[10]);
     M21 M11(D1[11],D2[11],S,Q[11]);
+endmodule
+
+module B16_MUX(input [15:0] D1, input [15:0] D2, input S, output [15:0] Q);
+    M21 M0(D1[0],D2[0],S,Q[0]);
+    M21 M1(D1[1],D2[1],S,Q[1]);
+    M21 M2(D1[2],D2[2],S,Q[2]);
+    M21 M3(D1[3],D2[3],S,Q[3]);
+    M21 M4(D1[4],D2[4],S,Q[4]);
+    M21 M5(D1[5],D2[5],S,Q[5]);
+    M21 M6(D1[6],D2[6],S,Q[6]);
+    M21 M7(D1[7],D2[7],S,Q[7]);
+    M21 M8(D1[8],D2[8],S,Q[8]);
+    M21 M9(D1[9],D2[9],S,Q[9]);
+    M21 M10(D1[10],D2[10],S,Q[10]);
+    M21 M11(D1[11],D2[11],S,Q[11]);
+    M21 M12(D1[12],D2[12],S,Q[12]);
+    M21 M13(D1[13],D2[13],S,Q[13]);
+    M21 M14(D1[14],D2[14],S,Q[14]);
+    M21 M15(D1[15],D2[15],S,Q[15]);
 endmodule
 
 module swState #(parameter START = 15, END = 0)(input [START:END] sw, input [START:END] password, output state);

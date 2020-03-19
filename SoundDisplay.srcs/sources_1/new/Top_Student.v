@@ -22,7 +22,7 @@ module Top_Student (
     );                  //JAU[0] is pin 1, JAU[1] is pin 4; JAU[2] is pin 3
     reg taskMode = 1;//for lab tasks use 1, for project use 0.
     reg [2:0] clkrst = 0;//reset clock
-    reg [15:0] oled_data = 16'h07E0;//pixel data to be sent
+    wire [15:0] oled_data;// = 16'h07E0;//pixel data to be sent
     reg [4:0] sbit = 0;//slow clock's reading bit. Freq(sclk) = Freq(CLK) / 2^(sbit + 1).
     wire [3:0] graphicsState;//determines state of graphics
     wire [31:0] graphicsStateInfo;//relevant state info:Info:TL([6:0],[12:7]),BR([19:13],[25:20]),W[29:26]
@@ -38,15 +38,15 @@ module Top_Student (
     wire sendingPixels;
     wire samplePixel;
     wire led_MUX_toggle;
-    wire [15:0] currentPixelData;
+    //wire [15:0] currentPixelData;
     assign graphicsStateInfo =  graphicsState == 15 ? (mic_in >> 7) : {2'd0,4'd5,6'd48,7'd64,6'd16,7'd32};
-    always @ (currentPixelData) oled_data = currentPixelData;
+    //always @ (currentPixelData) oled_data = currentPixelData;
     Peripherals peripherals(CLK100MHZ,clkrst,sbit,btn,sw,CLK,btnPulses,led_MUX_toggle, graphicsState);
     Audio_Capture ac(CLK[3],CLK[1],JAI, JAO[0], JAO[1], mic_in);
-    B12_MUX led_mux(mic_mapped,mic_in,led_MUX_toggle,led[15:0]);
+    B16_MUX led_mux(mic_mapped,{4'b0,mic_in},led_MUX_toggle,led[15:0]);
     //Oled_Display(clk, reset, frame_begin, sending_pixels,sample_pixel, pixel_index, pixel_data, cs, sdin, sclk, d_cn, resn, vccen,pmoden,teststate);
     Oled_Display oled(clk6p25m,reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
-    MyGraphics g(onRefresh,graphicsState,255,255,255,graphicsStateInfo,currentPixel,currentPixelData);//flush screen with white
-    
+    //MyGraphics g(onRefresh,graphicsState,255,255,255,graphicsStateInfo,currentPixel,currentPixelData);//flush screen with white
+    Graphics g(sw[14:0], onRefresh, CLK[3], currentPixel, oled_data);
     AV_Indicator volind(mic_in,CLK[0],CLK100MHZ,mic_mapped,seg,an);
 endmodule

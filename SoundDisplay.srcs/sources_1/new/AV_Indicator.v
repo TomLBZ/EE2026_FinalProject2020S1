@@ -1,5 +1,25 @@
 `timescale 1ns / 1ps
 
+//////////////////////////////////////////////////////////////////////////////////
+// Company: EE2026
+// Engineer: Liu Jingjing
+// 
+// Create Date: 03/19/2020 10:53:20 AM
+// Design Name: FGPA Project for EE2026
+// Module Name: AV_Indicator
+// Project Name: FGPA Project for EE2026
+// Target Devices: Basys3
+// Tool Versions: Vivado 2018.2
+// Description: This module operates 7-seg display based on mic input.
+// 
+// Dependencies: NULL
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments: 
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
 module AV_Indicator(
     input [11:0] mic_in,
     input CLK,      //use 20kHz

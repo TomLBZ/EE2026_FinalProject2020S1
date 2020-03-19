@@ -5,13 +5,13 @@
 // 
 // Create Date: 03/13/2020 09:51:11 AM
 // Design Name: FGPA Project for EE2026
-// Module Name: Graphics
+// Module Name: PixelSetter, DrawPoint, DrawLine, DrawChar, DrawRect, DrawCirc, Graphics
 // Project Name: FGPA Project for EE2026
 // Target Devices: Basys 3
 // Tool Versions: Vivado 2018.2
 // Description: This module can be used to draw geometric shapes and texts conveniently.
 // 
-// Dependencies: PixelSetter
+// Dependencies: MemoryBlocks.v
 // 
 // Revision:
 // Revision 0.01 - File Created
@@ -51,6 +51,89 @@ module DrawLine(input [6:0] X1, input [5:0] Y1, input [6:0] X2, input [5:0] Y2, 
         cmd[41:36] <= Y2;
     end
     assign CMD = cmd;
+endmodule
+
+module OnLineCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
+    wire [6:0] X1 = CMD[6:0];
+    wire [5:0] Y1 = CMD[12:7];
+    wire [6:0] X2 = CMD[35:29];
+    wire [5:0] Y2 = CMD[41:36];
+    assign COLOR = CMD[28:13];
+    reg [6:0] XO;
+    reg [5:0] YO;
+    reg busy = 0;
+    reg [6:0] x1;
+    reg [6:0] x2;
+    reg [6:0] x3;
+    reg [5:0] y1;
+    reg [5:0] y2;
+    reg [5:0] y3;
+    reg [12:0] pt[7:0];
+    integer res [7:0];
+    integer cross, square, tx, ty, minindex;
+    reg [6:0] nx;
+    reg [5:0] ny;
+    reg [3:0] count;
+    reg reached;
+    always @ (XO,YO) begin
+        if (busy) begin
+            reached = X2 == nx && Y2 == ny;
+            x1 = XO == 0 ? 0 : XO - 1;
+            x2 = XO;
+            x3 = XO == 95 ? 95 : XO + 1;
+            y1 = YO == 0 ? 0 : YO - 1;
+            y2 = YO;
+            y3 = YO == 63 ? 63 : YO + 1;
+            pt[0] = {y1,x1};
+            pt[1] = {y1,x2};
+            pt[2] = {y1,x3};
+            pt[3] = {y2,x1};
+            pt[4] = {y2,x3};
+            pt[5] = {y3,x1};
+            pt[6] = {y3,x2};
+            pt[7] = {y3,x3};
+            for (count = 0; count < 8; count = count + 1) begin
+                cross = (X2 - X1) * (pt[count][6:0] - X1) + (Y2 - Y1) * (pt[count][12:7] - Y1);
+                square = (X2 - X1) * (X2 - X1) + (Y2 - Y1) * (Y2 - Y1);
+                if (cross > 0 && cross < square) begin//between end points
+                    tx = X1 + (X2 - X1) * cross / square;
+                    ty = Y1 + (Y2 - Y1) * cross / square;
+                    res[count] = (pt[count][6:0] - tx) * (pt[count][6:0] - tx) + (ty - pt[count][12:7]) * (ty - pt[count][12:7]); //dist from line
+                    minindex = ~count ? 0 : res[count] < res[count - 1] ? count : count - 1;
+                end
+            end
+            nx = pt[minindex][6:0];
+            ny = pt[minindex][12:7];
+        end else begin
+            for (count = 0; count < 8; count = count + 1) res[count] = 0;
+            reached = 0;
+            nx = 0;
+            ny = 0;
+            minindex = 0;
+            XO = 0;
+            YO = 0;
+        end
+    end
+    always @ (posedge CLK) begin
+        if (ON) begin
+            if (~busy) begin
+                busy = 1;
+                XO <= X1;
+                YO <= Y1;
+            end else if (~reached) begin //(x-x1)/(y-y1)=(x2-x1)/(y2-y1)
+                XO <= nx;
+                YO <= ny;
+                busy = 1;
+            end else begin
+                XO <= nx;
+                YO <= ny;
+                busy = 0;
+            end
+        end
+    end
+    assign BUSY = busy;
+    assign X = XO;
+    assign Y = YO;
 endmodule
 
 module DrawChar(input [6:0] X, input [5:0] Y, input [29:0] CHR, input [15:0] COLOR, output [63:0] CMD);
@@ -93,8 +176,9 @@ module DrawCirc(input [6:0] X, input [5:0] Y, input [4:0] R, input [15:0] COLOR,
     assign CMD = cmd;
 endmodule
 
-module Graphics(input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM);
-    wire [63:0] Cmd;
+module Graphics(input [14:0] sw, input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM);
+    reg [63:0] Cmd;
+    wire [63:0] LNcmd;
     wire [6:0] CmdX;
     wire [5:0] CmdY;
     wire [15:0] CmdCol;
@@ -104,9 +188,15 @@ module Graphics(input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STR
     wire [5:0] psY;
     wire [15:0] psC;
     wire write;
-    DisplayCommands DCMD(Cmd, WCLK, pixSet, CmdX, CmdY, CmdCol, CmdBusy);
+    DisplayCommandCore DCMD(Cmd, WCLK, pixSet, CmdX, CmdY, CmdCol, CmdBusy);
     PixelSetter PSET(WCLK,pixSet,CmdX,CmdY,CmdCol,psX,psY,psC,write);
     DisplayRAM DRAM(Pix, WCLK, write, psX, psY, psC, STREAM);
+    DrawLine DL(5, 5, 60, 40, {0,32,32}, LNcmd);
+    always @ (sw) begin//redraw onto the DRAM as a new frame
+        if (sw[0]) begin
+            Cmd = LNcmd;
+        end
+    end
 endmodule
 
 module MyGraphics(
