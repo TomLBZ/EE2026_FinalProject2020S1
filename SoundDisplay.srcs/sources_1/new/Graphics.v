@@ -39,6 +39,37 @@ module DrawPoint(input [6:0] X, input [5:0] Y, input [15:0] COLOR, output [63:0]
     assign CMD = cmd;
 endmodule
 
+module OnPointCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
+    wire [6:0] pX = CMD[6:0];
+    wire [5:0] pY = CMD[12:7];
+    assign COLOR = CMD[28:13];
+    reg busy = 0;
+    reg completed = 0;
+    reg [6:0] XO;
+    reg [5:0] YO;
+    always @ (XO, YO) begin
+        if (busy) completed = 1;
+        else completed = 0;
+    end
+    always @ (posedge CLK) begin
+        if (ON) begin
+            if (~busy) begin
+                XO <= pX;
+                YO <= pY;
+                busy = 1;
+            end else begin
+                if (completed) busy = 0;
+            end
+        end else begin
+            XO <= 0;
+            YO <= 0;
+        end
+    end
+    assign BUSY = busy;
+    assign X = XO;
+    assign Y = YO;
+endmodule
+
 module DrawLine(input [6:0] X1, input [5:0] Y1, input [6:0] X2, input [5:0] Y2, input [15:0] COLOR, output [63:0] CMD);
     reg [63:0] cmd;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
     always @ (X1, Y1, X2, Y2, COLOR) begin
@@ -59,81 +90,58 @@ module OnLineCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
     wire [6:0] X2 = CMD[35:29];
     wire [5:0] Y2 = CMD[41:36];
     assign COLOR = CMD[28:13];
-    reg [6:0] XO;
-    reg [5:0] YO;
-    reg busy = 0;
-    reg [6:0] x1;
-    reg [6:0] x2;
-    reg [6:0] x3;
-    reg [5:0] y1;
-    reg [5:0] y2;
-    reg [5:0] y3;
-    reg [12:0] pt[7:0];
-    integer res [7:0];
-    integer cross, square, tx, ty, minindex;
-    reg [6:0] nx;
-    reg [5:0] ny;
-    reg [3:0] count;
-    reg reached;
-    always @ (XO,YO) begin
-        if (busy) begin
-            reached = X2 == nx && Y2 == ny;
-            x1 = XO == 0 ? 0 : XO - 1;
-            x2 = XO;
-            x3 = XO == 95 ? 95 : XO + 1;
-            y1 = YO == 0 ? 0 : YO - 1;
-            y2 = YO;
-            y3 = YO == 63 ? 63 : YO + 1;
-            pt[0] = {y1,x1};
-            pt[1] = {y1,x2};
-            pt[2] = {y1,x3};
-            pt[3] = {y2,x1};
-            pt[4] = {y2,x3};
-            pt[5] = {y3,x1};
-            pt[6] = {y3,x2};
-            pt[7] = {y3,x3};
-            for (count = 0; count < 8; count = count + 1) begin
-                cross = (X2 - X1) * (pt[count][6:0] - X1) + (Y2 - Y1) * (pt[count][12:7] - Y1);
-                square = (X2 - X1) * (X2 - X1) + (Y2 - Y1) * (Y2 - Y1);
-                if (cross > 0 && cross < square) begin//between end points
-                    tx = X1 + (X2 - X1) * cross / square;
-                    ty = Y1 + (Y2 - Y1) * cross / square;
-                    res[count] = (pt[count][6:0] - tx) * (pt[count][6:0] - tx) + (ty - pt[count][12:7]) * (ty - pt[count][12:7]); //dist from line
-                    minindex = ~count ? 0 : res[count] < res[count - 1] ? count : count - 1;
-                end
-            end
-            nx = pt[minindex][6:0];
-            ny = pt[minindex][12:7];
-        end else begin
-            for (count = 0; count < 8; count = count + 1) res[count] = 0;
-            reached = 0;
-            nx = 0;
-            ny = 0;
-            minindex = 0;
-            XO = 0;
-            YO = 0;
-        end
+    localparam [1:0] IDL = 0;//idle
+    localparam [1:0] STR = 1;//start drawing
+    localparam [1:0] END = 2;//end drawing
+    reg [1:0] STATE;//current state
+    reg signed [8:0] e;//error
+    reg signed [7:0] x;//x
+    reg signed [6:0] y;//y
+    wire loop = (STATE == STR);//if started, then loops
+    wire signed [7:0] dX = X2 - X1;//signed, msb is the sign, actually is [6:0] X data.
+    wire signed [7:0] rSignX = ~(dX[7]);//reverse sign of dX. if dX was positive, this would return 1.
+    wire signed [7:0] DX = (!rSignX) ? -dX : dX;//if dX was positive, DX = dX. else DX = -dX. -> always positive
+    wire signed [6:0] dY = Y2 - Y1;//signed, msb is the sign, actually is [5:0] Y data.
+    wire signed [6:0] rSignY = ~(dY[6]);//reverse sign of dY. if dY was positive, this would return 1.
+    wire signed [6:0] DY = rSignY ? -dY : dY;//if dY was positive, DY = -dY. else DY = dY. -> always negative
+    wire signed [8:0] e2 = e << 1;//left shift, equivalent to times 2.
+    wire e2bDY = (e2 > DY) ? 1 : 0;//is 2e bigger than DY?
+    wire e2sDX = (e2 < DX) ? 1 : 0;//is 2e smaller than DX?
+    wire signed [8:0] ei = e2bDY ? (e + DY) : e;//next e
+    wire signed [8:0] eii = e2sDX ? (ei + DX) : e;//next next e
+    wire signed [8:0] E = loop ? eii : (DX + DY);//get next correct value of e
+    wire signed [7:0] XA = rSignX ? (x + 1) : (x - 1);//if dX positive, XA = x increments, else decrements
+    wire signed [7:0] XB = e2bDY ? XA : x;//if 2e bigger than DY (eg. ini, DY < 0) then XB = XA. else x.
+    wire signed [7:0] NX = loop ? XB: X1;//next x is XB unless not in loop
+    wire signed [6:0] YA = rSignY ? (y + 1) : (y - 1);//if dY positive, YA = y increments, else decrements.
+    wire signed [6:0] YB = e2sDX ? YA : y;//if 2e smaller than DX (eg. ini, DX > 0) then YB = YA. else y.
+    wire signed [6:0] NY = loop ? YB : Y1;//next y is YB unless not in loop
+    wire DONE = (x == X2) && (y == Y2);//reached end point
+    always @ (posedge CLK) begin//update variable registers
+        e <= E;
+        x <= NX;
+        y = NY;
     end
-    always @ (posedge CLK) begin
-        if (ON) begin
-            if (~busy) begin
-                busy = 1;
-                XO <= X1;
-                YO <= Y1;
-            end else if (~reached) begin //(x-x1)/(y-y1)=(x2-x1)/(y2-y1)
-                XO <= nx;
-                YO <= ny;
-                busy = 1;
-            end else begin
-                XO <= nx;
-                YO <= ny;
-                busy = 0;
+    always @ (posedge CLK) begin//change state
+        case (STATE)
+            IDL: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
             end
-        end
+            STR: begin
+                if (DONE) STATE <= END;//if done then stop
+                else STATE <= STR;//else start
+            end
+            END: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            default: STATE <= IDL;//default idle
+        endcase
     end
-    assign BUSY = busy;
-    assign X = XO;
-    assign Y = YO;
+    assign BUSY = loop;//if looping then busy
+    assign X = x[6:0];//without the sign
+    assign Y = y[5:0];//without the sign
 endmodule
 
 module DrawChar(input [6:0] X, input [5:0] Y, input [29:0] CHR, input [15:0] COLOR, output [63:0] CMD);
@@ -178,6 +186,7 @@ endmodule
 
 module Graphics(input [14:0] sw, input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM);
     reg [63:0] Cmd;
+    wire [63:0] PTcmd;
     wire [63:0] LNcmd;
     wire [6:0] CmdX;
     wire [5:0] CmdY;
@@ -188,113 +197,22 @@ module Graphics(input [14:0] sw, input onRefresh, input WCLK, input [12:0] Pix, 
     wire [5:0] psY;
     wire [15:0] psC;
     wire write;
+    wire [3:0] swState;
+    swBitsToState swB2S(sw,swState);
     DisplayCommandCore DCMD(Cmd, WCLK, pixSet, CmdX, CmdY, CmdCol, CmdBusy);
     PixelSetter PSET(WCLK,pixSet,CmdX,CmdY,CmdCol,psX,psY,psC,write);
     DisplayRAM DRAM(Pix, WCLK, write, psX, psY, psC, STREAM);
-    DrawLine DL(5, 5, 60, 40, {0,32,32}, LNcmd);
-    always @ (sw) begin//redraw onto the DRAM as a new frame
-        if (sw[0]) begin
-            Cmd = LNcmd;
+    DrawPoint DP(7'd48, 6'd32, {5'd31,6'd63,5'd0}, PTcmd);
+    DrawLine DL(7'd50, 6'd16, 7'd60, 6'd48, {5'd0,6'd32,5'd31}, LNcmd);
+    always @ (*) begin//redraw onto the DRAM as a new frame
+        if(~CmdBusy) begin
+            case (swState)
+                4'd1: begin Cmd = PTcmd; end // 1 - point
+                4'd2: begin Cmd = LNcmd; end // 2 - line
+                4'd3: begin end
+                4'd4: begin end
+                default: begin Cmd = 5'b10000 << 59; end // 0 - idle
+            endcase
         end
     end
 endmodule
-
-module MyGraphics(
-    input onRefresh,
-    input [3:0] state,
-    input [4:0] R, [5:0] G, [4:0] B,
-    input [31:0] Info,//radius, width, etc.
-    input [12:0] currentPixel,
-    output [15:0] pixelData
-    );
-    localparam DefaultGreen = 0;
-    localparam FlushScreen = 1;
-    localparam GradientFlush = 2;
-    localparam DrawLine = 3;
-    localparam DrawCoordinateSystem = 4;
-    localparam DrawRectangle = 5;
-    localparam FillRectangle = 6;
-    localparam DrawCircle = 7;
-    localparam FillCircle = 8;
-    localparam DrawPolygon = 9;
-    localparam FillPolygon = 10;
-    localparam DrawChar = 11;
-    localparam DrawBorder = 12;
-    localparam CheckerBoard = 13;
-    localparam VolumeBars = 14;
-    localparam BlueVolTask = 15;
-    function [15:0] RGBtoColor(input [4:0] r, input [5:0] g, input [4:0] b);
-        RGBtoColor = {r, g, b};
-    endfunction
-    wire [15:0] Color = RGBtoColor(R,G,B);
-    wire [15:0] _Color = RGBtoColor(31 - R, 63 - G, 31 - B);
-    reg [15:0] color; reg [6:0] rX; reg [5:0] rY;
-    reg [3:0] evalParam;
-    always @ (currentPixel) begin
-        rY <= (currentPixel / 96);
-        rX <= (currentPixel - rY * 96);
-        case (state)
-            DefaultGreen: begin
-                color <= 16'h07E0;
-            end
-            FlushScreen:begin 
-                color <= Color;
-            end
-            GradientFlush:begin
-                color <= RGBtoColor(R - rX / 3, G - rY, B);
-            end
-            DrawLine:begin//Info:P1([6:0],[12:7]),P2([19:13],[25:20])-- x=x1+(y-y1)(x2-x1)/(y2-y1)
-                color <= rX==Info[6:0]+(rY-Info[12:7])*(Info[19:13]-Info[6:0])/(Info[25:20]-Info[12:7]) ? Color : _Color;
-            end
-            DrawCoordinateSystem:begin
-                color <= rX==47 || rY==31 ? Color : _Color;
-            end
-            DrawRectangle: begin//Info:TL([6:0],[12:7]),BR([19:13],[25:20])
-                evalParam[0] = (rX==Info[6:0]||rX==Info[19:13])&&(rY<Info[25:20]&&rY>Info[12:7]);
-                evalParam[1] = (rX>Info[6:0]&&rX<Info[19:13])&&(rY==Info[25:20]||rY==Info[12:7]);
-                color = evalParam[0] | evalParam[1] ? Color : _Color;
-            end
-            FillRectangle:begin//Info:TL([6:0],[12:7]),BR([19:13],[25:20])
-                evalParam[0] = rX>Info[6:0] && rX<Info[19:13];
-                evalParam[1] = rY>Info[12:7] && rY<Info[25:20];
-                color = evalParam[0] & evalParam[1] ? Color : _Color;
-            end
-            DrawCircle:begin//Info:C([6:0],[12:7]),R[16:13]
-                color <= rX*rX + Info[6:0]*Info[6:0] - 2*rX*Info[6:0] + rY*rY + Info[12:7]*Info[12:7] - 2*rY*Info[12:7] == Info[16:13]*Info[16:13] ? Color : _Color;
-            end
-            FillCircle:begin//Info:C([6:0],[12:7]),R[16:13]
-                color <= rX*rX + Info[6:0]*Info[6:0] - 2*rX*Info[6:0] + rY*rY + Info[12:7]*Info[12:7] - 2*rY*Info[12:7] < Info[16:13]*Info[16:13] ? Color : _Color;
-            end
-            DrawPolygon:begin
-                
-            end
-            FillPolygon:begin
-            
-            end
-            DrawChar:begin//Info:T1([6:0],[12:7]),T2([19:13],[25:20])
-            
-            end
-            DrawBorder:begin//Info:TL([6:0],[12:7]),BR([19:13],[25:20]),W[29:26]
-                evalParam[0] = (rX>(Info[6:0]-Info[29:26]))&&(rX<(Info[19:13]+Info[29:26]));//|.........|
-                evalParam[1] = (rX<(Info[6:0]+Info[29:26]))||(rX>(Info[19:13]-Info[29:26]));//...|   |...
-                evalParam[2] = (rY>(Info[12:7]-Info[29:26]))&&(rY<(Info[25:20]+Info[29:26]));//|.........|
-                evalParam[3] = (rY<(Info[12:7]+Info[29:26]))||(rY>(Info[25:20]-Info[29:26]));//...|   |...              
-                color <= (evalParam[0] && evalParam[2]) && (evalParam[1] || evalParam[3]) ? _Color : Color;
-            end
-            CheckerBoard: begin
-                color <= ((rX / 16) % 2) ^ ((rY / 16) % 2) ? _Color : Color;
-            end
-            VolumeBars:begin
-            
-            end
-            BlueVolTask: begin//Info:[4:0]blue
-                color <= Info[4:0];
-            end
-            default:begin 
-                color <= 16'h07E0;
-            end
-        endcase
-    end    
-    assign pixelData = color;
-endmodule
-

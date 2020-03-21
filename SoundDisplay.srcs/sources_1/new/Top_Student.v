@@ -38,15 +38,12 @@ module Top_Student (
     wire sendingPixels;
     wire samplePixel;
     wire led_MUX_toggle;
-    //wire [15:0] currentPixelData;
     assign graphicsStateInfo =  graphicsState == 15 ? (mic_in >> 7) : {2'd0,4'd5,6'd48,7'd64,6'd16,7'd32};
-    //always @ (currentPixelData) oled_data = currentPixelData;
     Peripherals peripherals(CLK100MHZ,clkrst,sbit,btn,sw,CLK,btnPulses,led_MUX_toggle, graphicsState);
     Audio_Capture ac(CLK[3],CLK[1],JAI, JAO[0], JAO[1], mic_in);
     B16_MUX led_mux(mic_mapped,{4'b0,mic_in},led_MUX_toggle,led[15:0]);
     //Oled_Display(clk, reset, frame_begin, sending_pixels,sample_pixel, pixel_index, pixel_data, cs, sdin, sclk, d_cn, resn, vccen,pmoden,teststate);
     Oled_Display oled(clk6p25m,reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
-    //MyGraphics g(onRefresh,graphicsState,255,255,255,graphicsStateInfo,currentPixel,currentPixelData);//flush screen with white
     Graphics g(sw[14:0], onRefresh, CLK[3], currentPixel, oled_data);
     AV_Indicator volind(mic_in,CLK[0],CLK100MHZ,mic_mapped,seg,an);
 endmodule

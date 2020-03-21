@@ -19,18 +19,20 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 module DisplayRAM(input [12:0] readPix, input CLK, input Write, input [6:0] X, input [5:0] Y, input [15:0] COLOR, output [15:0] STREAM);
-    reg [15:0] DRAM [6:0][5:0];//DRAM[x][y]
+    reg [15:0] DRAM [6143:0];//DRAM[y*96+x]//[95:0][63:0];//DRAM[x][y]
     reg [15:0] stream;
-    reg dX, dY;
+    //reg [6:0] dX;
+    //reg [5:0] dY;
     always @(readPix) begin
-        dX = readPix % 96;
-        dY = readPix / 96;
-        stream = DRAM[dX][dY];
+        //dX = readPix % 96;
+        //dY = readPix / 96;
+        stream = DRAM[readPix]; // DRAM[dX][dY];
     end
     assign STREAM = stream;
     always @(posedge CLK) begin
         if (Write) begin
-            DRAM[X][Y] = COLOR;
+            //DRAM[X][Y] = COLOR;
+            DRAM[Y * 96 + X] = COLOR;
         end
     end
 endmodule
@@ -42,21 +44,27 @@ module DisplayCommandCore(input [63:0] Command, input CLK, output PixelSet, outp
     reg [6:0] XO;
     reg [5:0] YO;
     reg [15:0] CO;
-    wire commandHead = Command[62:59];//4 bit head
+    wire [3:0] commandHead = Command[62:59];//4 bit head
     wire OnCommand = Command[63];//enabling signal
-    reg onLN = 1;
+    reg onLN = 0;
+    reg onPT = 0;
     wire [6:0] LNXout;
     wire [5:0] LNYout;
     wire [15:0] LNCout;
+    wire [6:0] PTXout;
+    wire [5:0] PTYout;
+    wire [15:0] PTCout;
     wire LNBUSY;
-    localparam IDLE = 0;
-    localparam PT = 1;//cmd[0:6]X,[7:12]Y,[13:28]C
-    localparam LN = 2;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
-    localparam CHR = 3;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:58]CHR//30-bit char set{[29:54]AZ,[55:58]", . [ ]"}
-    localparam RECT = 4;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
-    localparam CIRC = 5;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
-    localparam PIC = 6;//cmd[0:6]X1,[7:12]Y1,[13:19]X2,[20;25]Y2,[26:32]PX1,[33:38]PY1,[39:45]PX2,[46:51]PY2
+    wire PTBUSY;
+    localparam [3:0] IDLE = 0;
+    localparam [3:0] PT = 1;//cmd[0:6]X,[7:12]Y,[13:28]C
+    localparam [3:0] LN = 2;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
+    localparam [3:0] CHR = 3;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:58]CHR//30-bit char set{[29:54]AZ,[55:58]", . [ ]"}
+    localparam [3:0] RECT = 4;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
+    localparam [3:0] CIRC = 5;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
+    localparam [3:0] PIC = 6;//cmd[0:6]X1,[7:12]Y1,[13:19]X2,[20;25]Y2,[26:32]PX1,[33:38]PY1,[39:45]PX2,[46:51]PY2
     OnLineCommand OLNC(CLK, onLN, Command,LNXout, LNYout, LNCout, LNBUSY);
+    OnPointCommand OPC(CLK, onPT, Command,PTXout, PTYout, PTCout, PTBUSY);
     always @ (*) begin
         if (OnCommand) begin
             case (commandHead)
@@ -66,19 +74,22 @@ module DisplayCommandCore(input [63:0] Command, input CLK, output PixelSet, outp
                 end
                 PT:begin 
                     pixelSet = 1;
-                    XO = Command[6:0];
-                    YO = Command[12:7];
-                    CO = Command[28:13];
-                    busy = LNBUSY;
+                    onPT = 1;
+                    onLN = 0;
+                    XO = PTXout;
+                    YO = PTYout;
+                    CO = PTCout;
+                    busy = PTBUSY;
                 end
                 LN:begin 
                     pixelSet = 1;
+                    onPT = 0;
                     onLN = 1;
                     ON = onLN;
                     XO = LNXout;
                     YO = LNYout;
                     CO = LNCout;
-                    busy = 1;
+                    busy = LNBUSY;
                 end
                 CHR:begin 
                 end

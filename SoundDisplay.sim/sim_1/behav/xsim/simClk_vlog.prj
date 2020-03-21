@@ -1,5 +1,9 @@
 # compile verilog/system verilog design source files
 verilog xil_defaultlib  \
+"../../../../SoundDisplay.srcs/sources_1/new/AV_Indicator.v" \
+"../../../../SoundDisplay.srcs/sources_1/new/Audio_Capture.v" \
+"../../../../SoundDisplay.srcs/sources_1/new/Graphics.v" \
+"../../../../SoundDisplay.srcs/sources_1/new/MemoryBlocks.v" \
 "../../../../SoundDisplay.srcs/sources_1/new/Oled_Display.v" \
 "../../../../SoundDisplay.srcs/sources_1/new/Peripherals.v" \
 "../../../../SoundDisplay.srcs/sources_1/new/Top_Student.v" \
