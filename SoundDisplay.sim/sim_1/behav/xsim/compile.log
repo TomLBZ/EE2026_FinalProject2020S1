@@ -11,8 +11,8 @@ INFO: [VRFC 10-311] analyzing module OnLineCommand
 INFO: [VRFC 10-311] analyzing module DrawChar
 INFO: [VRFC 10-311] analyzing module DrawRect
 INFO: [VRFC 10-311] analyzing module DrawCirc
+INFO: [VRFC 10-311] analyzing module OnCircleCommand
 INFO: [VRFC 10-311] analyzing module Graphics
-INFO: [VRFC 10-311] analyzing module MyGraphics
 INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/MemoryBlocks.v" into library xil_defaultlib
 INFO: [VRFC 10-311] analyzing module DisplayRAM
 INFO: [VRFC 10-311] analyzing module DisplayCommandCore

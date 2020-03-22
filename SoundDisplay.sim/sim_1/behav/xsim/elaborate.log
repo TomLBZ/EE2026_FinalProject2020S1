@@ -19,13 +19,15 @@ Compiling module xil_defaultlib.Audio_Capture
 Compiling module xil_defaultlib.M21
 Compiling module xil_defaultlib.B16_MUX
 Compiling module xil_defaultlib.Oled_Display_default
-Compiling module xil_defaultlib.OnLineCommand
 Compiling module xil_defaultlib.OnPointCommand
+Compiling module xil_defaultlib.OnLineCommand
+Compiling module xil_defaultlib.OnCircleCommand
 Compiling module xil_defaultlib.DisplayCommandCore
 Compiling module xil_defaultlib.PixelSetter
 Compiling module xil_defaultlib.DisplayRAM
 Compiling module xil_defaultlib.DrawPoint
 Compiling module xil_defaultlib.DrawLine
+Compiling module xil_defaultlib.DrawCirc
 Compiling module xil_defaultlib.Graphics
 Compiling module xil_defaultlib.AV_Indicator
 Compiling module xil_defaultlib.Top_Student

@@ -25,7 +25,6 @@ module Top_Student (
     wire [15:0] oled_data;// = 16'h07E0;//pixel data to be sent
     reg [4:0] sbit = 0;//slow clock's reading bit. Freq(sclk) = Freq(CLK) / 2^(sbit + 1).
     wire [3:0] graphicsState;//determines state of graphics
-    wire [31:0] graphicsStateInfo;//relevant state info:Info:TL([6:0],[12:7]),BR([19:13],[25:20]),W[29:26]
     wire [11:0] mic_in;//mic sample input from the mic
     wire [4:0] btnPulses;
     wire [3:0] CLK;//[100M, 6.25M, 20k, _flexible_]
@@ -38,12 +37,11 @@ module Top_Student (
     wire sendingPixels;
     wire samplePixel;
     wire led_MUX_toggle;
-    assign graphicsStateInfo =  graphicsState == 15 ? (mic_in >> 7) : {2'd0,4'd5,6'd48,7'd64,6'd16,7'd32};
     Peripherals peripherals(CLK100MHZ,clkrst,sbit,btn,sw,CLK,btnPulses,led_MUX_toggle, graphicsState);
     Audio_Capture ac(CLK[3],CLK[1],JAI, JAO[0], JAO[1], mic_in);
     B16_MUX led_mux(mic_mapped,{4'b0,mic_in},led_MUX_toggle,led[15:0]);
     //Oled_Display(clk, reset, frame_begin, sending_pixels,sample_pixel, pixel_index, pixel_data, cs, sdin, sclk, d_cn, resn, vccen,pmoden,teststate);
     Oled_Display oled(clk6p25m,reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
-    Graphics g(sw[14:0], onRefresh, CLK[3], currentPixel, oled_data);
+    Graphics g(graphicsState, onRefresh, CLK[3], currentPixel, oled_data);
     AV_Indicator volind(mic_in,CLK[0],CLK100MHZ,mic_mapped,seg,an);
 endmodule

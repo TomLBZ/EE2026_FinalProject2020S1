@@ -43,31 +43,40 @@ module OnPointCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, out
     wire [6:0] pX = CMD[6:0];
     wire [5:0] pY = CMD[12:7];
     assign COLOR = CMD[28:13];
-    reg busy = 0;
-    reg completed = 0;
-    reg [6:0] XO;
-    reg [5:0] YO;
-    always @ (XO, YO) begin
-        if (busy) completed = 1;
-        else completed = 0;
-    end
+    localparam [1:0] IDL = 0;//idle
+    localparam [1:0] STR = 1;//start drawing
+    localparam [1:0] END = 2;//end drawing
+    reg [1:0] STATE;//current state
+    reg drawn = 0;
+    wire DONE = drawn;
+    wire busy = (STATE == STR);
+    reg [6:0] x;
+    reg [5:0] y;
     always @ (posedge CLK) begin
-        if (ON) begin
-            if (~busy) begin
-                XO <= pX;
-                YO <= pY;
-                busy = 1;
-            end else begin
-                if (completed) busy = 0;
+        x <= pX;
+        y <= pY;
+        drawn <= drawn + 1;
+    end
+    always @ (posedge CLK) begin//change state
+        case (STATE)
+            IDL: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
             end
-        end else begin
-            XO <= 0;
-            YO <= 0;
-        end
+            STR: begin
+                if (DONE) STATE <= END;//if done then stop
+                else STATE <= STR;//else start
+            end
+            END: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            default: STATE <= IDL;//default idle
+        endcase
     end
     assign BUSY = busy;
-    assign X = XO;
-    assign Y = YO;
+    assign X = x;
+    assign Y = y;
 endmodule
 
 module DrawLine(input [6:0] X1, input [5:0] Y1, input [6:0] X2, input [5:0] Y2, input [15:0] COLOR, output [63:0] CMD);
@@ -157,6 +166,66 @@ module DrawChar(input [6:0] X, input [5:0] Y, input [29:0] CHR, input [15:0] COL
     assign CMD = cmd;
 endmodule
 
+module OnCharCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
+    wire [6:0] LX = CMD[6:0];
+    wire [5:0] TY = CMD[12:7];
+    wire [29:0] CHR = CMD[58:29];
+    wire [34:0] MAP;
+    wire [6:0] RX = LX + 3'd4;
+    wire [5:0] BY = TY + 3'd6;
+    CharBlocks CB(CHR, MAP);
+    assign COLOR = CMD[28:13];
+    localparam [1:0] IDL = 0;//idle
+    localparam [1:0] STR = 1;//start drawing
+    localparam [1:0] END = 2;//end drawing
+    reg [1:0] STATE;//current state
+    wire loop = (STATE == STR);//if started, then loops
+    reg [6:0] XO;
+    reg [5:0] YO;
+    reg [6:0] xcount;
+    reg [5:0] ycount;
+    wire [2:0] chrX = xcount - LX;
+    wire [2:0] chrY = ycount - TY;
+    wire [5:0] index = chrX + (3'd6 - chrY) * 3'd5;
+    wire DONE = (xcount == RX && ycount == BY);//reached end point
+    always @ (posedge CLK) begin // count x and y and update variables
+        if (loop) begin
+            if (MAP[index]==1'b1) begin
+                XO <= xcount;
+                YO <= ycount;
+            end
+            if (xcount == RX) begin
+                xcount <= LX;
+                if (ycount == BY) ycount <= TY;
+                else ycount <= ycount + 1;
+            end else xcount <= xcount + 1;
+        end else begin
+            xcount <= LX;
+            ycount <= TY;
+        end
+    end
+    always @ (posedge CLK) begin//change state
+        case (STATE)
+            IDL: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            STR: begin
+                if (DONE) STATE <= END;//if done then stop
+                else STATE <= STR;//else start
+            end
+            END: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            default: STATE <= IDL;//default idle
+        endcase
+    end
+    assign BUSY = loop;
+    assign X = XO;
+    assign Y = YO;
+endmodule
+
 module DrawRect(input [6:0] X1, input [5:0] Y1, input [6:0] X2, input [5:0] Y2, input [15:0] COLOR, output [63:0] CMD);
     reg [63:0] cmd;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
     always @ (X1, Y1, X2, Y2, COLOR) begin
@@ -184,10 +253,167 @@ module DrawCirc(input [6:0] X, input [5:0] Y, input [4:0] R, input [15:0] COLOR,
     assign CMD = cmd;
 endmodule
 
-module Graphics(input [14:0] sw, input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM);
+module OnCircleCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
+    wire [6:0] CX = CMD[6:0];
+    wire [5:0] CY = CMD[12:7];
+    wire [4:0] R = CMD[33:29];
+    assign COLOR = CMD[28:13];
+    localparam [1:0] IDL = 0;//idle
+    localparam [1:0] STR = 1;//start drawing
+    localparam [1:0] END = 2;//end drawing
+    reg [1:0] STATE;//current state
+    wire loop = (STATE == STR);//if started, then loops
+    reg signed [9:0] e;//error
+    reg signed [7:0] x;//x
+    reg signed [6:0] y;//y
+    wire signed [5:0] r2 = R << 1;//2R
+    wire signed [9:0] xx4 = x << 2;//4x
+    wire signed [8:0] yx4 = y << 2;//4y
+    wire eb0 = (e > 0) ? 1 : 0;//e bigger than 0
+    wire signed [9:0] ei = eb0 ? e + xx4 - yx4 + 10 : e + xx4 + 6;
+    wire signed [9:0] E = loop ? ei : 3 - r2;
+    wire signed [6:0] dY = eb0 ? y - 1 : y;
+    wire signed [7:0] NX = loop ? x + 1 : 0;
+    wire signed [6:0] NY = loop ? dY : R;
+    wire signed [7:0] xN [7:0];
+    wire signed [6:0] yN [7:0];
+    assign xN[0] = CX + x;//octadrant1
+    assign yN[0] = CY + y;
+    assign xN[1] = CX - x;//octadrant2
+    assign yN[1] = CY + y;
+    assign xN[2] = CX + x;//octadrant3
+    assign yN[2] = CY - y;
+    assign xN[3] = CX - x;//octadrant4
+    assign yN[3] = CY - y;
+    assign xN[4] = CX + y;//octadrant5
+    assign yN[4] = CY + x;
+    assign xN[5] = CX - y;//octadrant6
+    assign yN[5] = CY + x;
+    assign xN[6] = CX + y;//octadrant7
+    assign yN[6] = CY - x;
+    assign xN[7] = CX - y;//octadrant8
+    assign yN[7] = CY - x;
+    reg signed [7:0] XO;
+    reg signed [6:0] YO;
+    reg [2:0] c = 0;
+    reg pt8done = 0;
+    wire DONE = (y < x);//reached end point
+    always @ (posedge CLK) begin//update variable registers
+        if (x[0] === 1'bX || pt8done) begin
+            e <= E;
+            x <= NX;
+            y <= NY;
+            pt8done <= 0;
+        end else begin
+            c <= c + 1;
+            XO <= xN[c];
+            YO <= yN[c];
+            pt8done = c == 7 ? 1 : 0;
+        end
+    end
+    always @ (posedge CLK) begin//change state
+        case (STATE)
+            IDL: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            STR: begin
+                if (DONE) STATE <= END;//if done then stop
+                else STATE <= STR;//else start
+            end
+            END: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            default: STATE <= IDL;//default idle
+        endcase
+    end
+    assign BUSY = loop;
+    assign X = XO[6:0];
+    assign Y = YO[5:0];
+endmodule
+
+module FillCirc(input [6:0] X, input [5:0] Y, input [4:0] R, input [15:0] COLOR, output [63:0] CMD);
+    reg [63:0] cmd;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
+    always @ (X, Y, R, COLOR) begin
+        cmd[63] <= 1;//Enable
+        cmd[62:59] <= 4'd8;//FCIRC
+        cmd[6:0] <= X;
+        cmd[12:7] <= Y;
+        cmd[28:13] <= COLOR;
+        cmd[33:29] <= R;
+    end
+    assign CMD = cmd;
+endmodule
+
+module OnFillCircCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
+    wire [6:0] CX = CMD[6:0];
+    wire [5:0] CY = CMD[12:7];
+    wire [4:0] R = CMD[33:29];
+    wire [6:0] LX = CX - R;
+    wire [5:0] TY = CY - R;
+    wire [7:0] RX = CX + R;
+    wire [6:0] BY = CY + R;
+    assign COLOR = CMD[28:13];
+    localparam [1:0] IDL = 0;//idle
+    localparam [1:0] STR = 1;//start drawing
+    localparam [1:0] END = 2;//end drawing
+    reg [1:0] STATE;//current state
+    wire loop = (STATE == STR);//if started, then loops
+    reg [6:0] XO;
+    reg [5:0] YO;
+    reg [6:0] xcount;
+    reg [5:0] ycount;
+    wire [4:0] dx = xcount > CX ? xcount - CX : CX - xcount;
+    wire [4:0] dy = ycount > CY ? ycount - CY : CY - ycount;
+    wire [10:0] sum = dx * dx + dy * dy;
+    wire [9:0] r2 = R * R;
+    wire DONE = (xcount == RX && ycount == BY);//reached end point
+    always @ (posedge CLK) begin // count x and y and update variables
+        if (loop) begin
+            if (r2 >= sum) begin
+                XO <= xcount;
+                YO <= ycount;
+            end
+            if (xcount == RX) begin
+                xcount <= LX;
+                if (ycount == BY) ycount <= TY;
+                else ycount <= ycount + 1;
+            end else xcount <= xcount + 1;
+        end else begin
+            xcount <= LX;
+            ycount <= TY;
+        end
+    end
+    always @ (posedge CLK) begin//change state
+        case (STATE)
+            IDL: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            STR: begin
+                if (DONE) STATE <= END;//if done then stop
+                else STATE <= STR;//else start
+            end
+            END: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            default: STATE <= IDL;//default idle
+        endcase
+    end
+    assign BUSY = loop;
+    assign X = XO;
+    assign Y = YO;
+endmodule
+
+module Graphics(input [3:0] swState, input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM);
     reg [63:0] Cmd;
     wire [63:0] PTcmd;
     wire [63:0] LNcmd;
+    wire [63:0] CHRcmd;
+    wire [63:0] CIRCcmd;
+    wire [63:0] FCIRCcmd;
     wire [6:0] CmdX;
     wire [5:0] CmdY;
     wire [15:0] CmdCol;
@@ -197,21 +423,28 @@ module Graphics(input [14:0] sw, input onRefresh, input WCLK, input [12:0] Pix, 
     wire [5:0] psY;
     wire [15:0] psC;
     wire write;
-    wire [3:0] swState;
-    swBitsToState swB2S(sw,swState);
-    DisplayCommandCore DCMD(Cmd, WCLK, pixSet, CmdX, CmdY, CmdCol, CmdBusy);
+    wire CMD_ON = swState > 0;
+    wire LastCommandDone;//add command queue later, this will be useful.
+    DisplayCommandCore DCMD(Cmd, CMD_ON, WCLK, pixSet, CmdX, CmdY, CmdCol, CmdBusy,LastCommandDone);
     PixelSetter PSET(WCLK,pixSet,CmdX,CmdY,CmdCol,psX,psY,psC,write);
     DisplayRAM DRAM(Pix, WCLK, write, psX, psY, psC, STREAM);
-    DrawPoint DP(7'd48, 6'd32, {5'd31,6'd63,5'd0}, PTcmd);
-    DrawLine DL(7'd50, 6'd16, 7'd60, 6'd48, {5'd0,6'd32,5'd31}, LNcmd);
+    DrawPoint DPT(7'd48, 6'd32, {5'd31, 6'd63, 5'd0}, PTcmd);
+    DrawLine DLN(7'd16, 6'd48, 7'd80, 6'd48, {5'd31,6'd32,5'd0}, LNcmd);
+    DrawChar DCHR(7'd46, 6'd29, 30'd0, {5'd0, 6'd0, 5'd31}, CHRcmd);
+    DrawCirc DCIRC(7'd48, 6'd32, 5'd31, {5'd31, 6'd63, 5'd31}, CIRCcmd);
+    FillCirc FCIRC(7'd48, 6'd32, 5'd16, {5'd31, 6'd0, 5'd31}, FCIRCcmd);
     always @ (*) begin//redraw onto the DRAM as a new frame
         if(~CmdBusy) begin
             case (swState)
                 4'd1: begin Cmd = PTcmd; end // 1 - point
                 4'd2: begin Cmd = LNcmd; end // 2 - line
-                4'd3: begin end
+                4'd3: begin Cmd = CHRcmd; end // 3 - char
                 4'd4: begin end
-                default: begin Cmd = 5'b10000 << 59; end // 0 - idle
+                4'd5: begin Cmd = CIRCcmd; end // 5 - circle
+                4'd6: begin end
+                4'd7: begin end
+                4'd8: begin Cmd = FCIRCcmd; end //8 - fill circle
+                default: begin Cmd = 0; end // 0 - idle
             endcase
         end
     end
