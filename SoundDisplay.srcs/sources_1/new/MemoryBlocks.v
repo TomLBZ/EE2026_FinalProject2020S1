@@ -32,7 +32,7 @@ module DisplayRAM(input [12:0] readPix, input CLK, input Write, input [6:0] X, i
     end
 endmodule
 
-module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output PixelSet, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY, output DonePulse);//64-bit command
+module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output PixelSet, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY, output Done);//64-bit command
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
     localparam [1:0] END = 2;//end drawing
@@ -41,15 +41,15 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
     wire PTBUSY;
     wire LNBUSY;
     wire CHRBUSY;
+    wire RECTBUSY;
     wire CIRCBUSY;
+    wire FRECTBUSY;
     wire FCIRCBUSY;
-    wire CMDBUSY = PTBUSY || LNBUSY || CHRBUSY || CIRCBUSY || FCIRCBUSY;//initially is zero
+    wire CMDBUSY = PTBUSY || LNBUSY || CHRBUSY || RECTBUSY || CIRCBUSY || FRECTBUSY || FCIRCBUSY;//initially is zero
     wire [63:0] cmd = CMDBUSY ? cmd : Command;
     wire OnCommand = cmd[63];//enabling signal
-    reg DONE = 0;//if everything not busy and no new command then done
+    wire DONE = !CMDBUSY;//if everything not busy then done
     always @ (posedge CLK) begin//change state
-        if (busy && !CMDBUSY) DONE = 1;
-        else DONE = 0;
         case (STATE)
             IDL: begin
                 if (ON) STATE <= STR;//if on then start
@@ -94,11 +94,21 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
     wire [5:0] CHRYout;
     wire [15:0] CHRCout;
     OnCharCommand OCHRC(CLK, onCHR, cmd, CHRXout, CHRYout, CHRCout, CHRBUSY);
+    wire onRECT = busy && OnCommand && (commandHead == RECT);
+    wire [6:0] RECTXout;
+    wire [5:0] RECTYout;
+    wire [15:0] RECTCout;
+    OnRectCommand ORECTC(CLK, onRECT, cmd, RECTXout, RECTYout, RECTCout, RECTBUSY);
     wire onCIRC = busy && OnCommand && (commandHead == CIRC);
     wire [6:0] CIRCXout;
     wire [5:0] CIRCYout;
     wire [15:0] CIRCCout;
     OnCircleCommand OCIRCC(CLK, onCIRC, cmd, CIRCXout, CIRCYout, CIRCCout, CIRCBUSY);
+    wire onFRECT = busy && OnCommand && (commandHead == FRECT);
+    wire [6:0] FRECTXout;
+    wire [5:0] FRECTYout;
+    wire [15:0] FRECTCout;
+    OnFillRectCommand OFRECTC(CLK, onFRECT, cmd, FRECTXout, FRECTYout, FRECTCout, FRECTBUSY);
     wire onFCIRC = busy && OnCommand && (commandHead == FCIRC);
     wire [6:0] FCIRCXout;
     wire [5:0] FCIRCYout;
@@ -128,6 +138,9 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
                     CO = CHRCout;
                 end
                 RECT:begin 
+                    XO = RECTXout;
+                    YO = RECTYout;
+                    CO = RECTCout;
                 end
                 CIRC:begin 
                     XO = CIRCXout;
@@ -137,6 +150,9 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
                 PIC:begin 
                 end
                 FRECT:begin 
+                    XO = FRECTXout;
+                    YO = FRECTYout;
+                    CO = FRECTCout;
                 end
                 FCIRC:begin
                     XO = FCIRCXout;
@@ -156,7 +172,7 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
     assign X = XO;
     assign Y = YO;
     assign COLOR = CO;
-    assign DonePulse = DONE;
+    assign Done = DONE;
 endmodule
 
 module CharBlocks(input [29:0] CHR, output [34:0] MAP);

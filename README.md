@@ -5,7 +5,11 @@
 This project is written in Verilog HDL and runs on Basys3 FPGA board.  
 It utilises a Digilent Pmod 96x64 pixel RGB OLED as display, and a Digilent Pmod Mic 3 as audio input.
 
-![OLED Display](OLED.jpg)
+<p align="center">
+  <b>Current Progress: </b><br>
+  <br>
+  <img src="OLED.jpg">
+</p>
 
 ## Group Members
 
@@ -20,4 +24,14 @@ We aim to utilize what we have learnt in EE2026 and develop an entertainment dev
 
 | ***Index*** | ***Function*** | ***Description*** | ***Operation Manual*** |
 | ----------- | -------------- | ----------------- | ---------------------- |
-| 1           | in development | -                 | -                      |
+| 1    | Real-time volume indicator | Using LEDs and 7-seg displays to display the audio volume | Dedault mode |
+| 2    | OLED graphics | Use switches to change color theme or toggle elements on and off | Switch control |
+| 3    | In development | - | - |
+
+## Algorithms and Design Features
+
+- Bresenham Line Generation Algorithm
+- Bresenham Circle Generation Algorithm
+- Dual Port Random Access Memory
+- Command Parser and Command Queue
+- Fast Fourier Transformation
