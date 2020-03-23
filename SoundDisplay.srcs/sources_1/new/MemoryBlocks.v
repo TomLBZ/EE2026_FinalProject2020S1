@@ -76,7 +76,7 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
     localparam [3:0] CHR = 3;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:58]CHR//30-bit char set{[29:54]AZ,[55:58]", . [ ]"}
     localparam [3:0] RECT = 4;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
     localparam [3:0] CIRC = 5;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
-    localparam [3:0] PIC = 6;//cmd[0:6]X1,[7:12]Y1,[13:19]X2,[20;25]Y2,[26:32]PX1,[33:38]PY1,[39:45]PX2,[46:51]PY2
+    localparam [3:0] SPR = 6;//cmd[0:6]X1,[7:12]Y1,[14:13]MODE,[19:15]INDEX
     localparam [3:0] FRECT = 7;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
     localparam [3:0] FCIRC = 8;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
     wire onPT = busy && OnCommand && (commandHead == PT);
@@ -147,7 +147,7 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
                     YO = CIRCYout;
                     CO = CIRCCout;
                 end
-                PIC:begin 
+                SPR:begin 
                 end
                 FRECT:begin 
                     XO = FRECTXout;
@@ -213,4 +213,65 @@ module CharBlocks(input [29:0] CHR, output [34:0] MAP);
         endcase
     end
     assign MAP = map;
+endmodule
+
+module SceneSpriteBlocks(input [29:0] SCN, output reg [15:0] COLOR[255:0]);
+    localparam [1:0] BRICK = 0;
+    localparam [1:0] GRASS = 1;    
+    localparam [1:0] CACTUS = 2;
+    localparam [15:0] Br[8:0]={{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0}};//Brown
+    localparam [15:0] Gr[8:0]={{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0},{5'd0,6'd0,5'd0}};//Green
+    always @(*) begin
+        case (SCN)
+            BRICK: COLOR = {Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0]};
+            GRASS: COLOR = {Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0]};
+            CACTUS: COLOR ={Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
+                            Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0]};
+            default: begin COLOR = {0}; end
+        endcase
+    end
 endmodule

@@ -395,6 +395,93 @@ module OnCircleCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, ou
     assign Y = YO[5:0];
 endmodule
 
+module DrawSprite(input [6:0] X, input [5:0] Y, input [1:0] MODE, input [4:0] INDEX, output [63:0] CMD);
+    reg [63:0] cmd;    //cmd[0:6]X,[7:12]Y,[13:14]MODE,[15:19]INDEX
+    always @ (X, Y, MODE, INDEX) begin
+        cmd[63] <= 1;//Enable
+        cmd[62:59] <= 4'd6;//SPR
+        cmd[6:0] <= X;
+        cmd[12:7] <= Y;
+        cmd[14:13] <= MODE;
+        cmd[19:15] <= INDEX;
+    end
+    assign CMD = cmd;
+endmodule
+
+module OnSpriteCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
+    localparam [1:0] SCN = 0;//scene
+    localparam [1:0] CHR = 1;//character
+    localparam [1:0] EFF = 2;//effect
+
+endmodule
+
+module FillRect(input [6:0] X1, input [5:0] Y1, input [6:0] X2, input [5:0] Y2, input [15:0] COLOR, output [63:0] CMD);
+    reg [63:0] cmd;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
+    always @ (X1, Y1, X2, Y2, COLOR) begin
+        cmd[63] <= 1;//Enable
+        cmd[62:59] <= 4'd7;//FRECT
+        cmd[6:0] <= X1;
+        cmd[12:7] <= Y1;
+        cmd[28:13] <= COLOR;
+        cmd[35:29] <= X2;
+        cmd[41:36] <= Y2;
+    end
+    assign CMD = cmd;
+endmodule
+
+module OnFillRectCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
+    wire [6:0] X1 = CMD[6:0];
+    wire [5:0] Y1 = CMD[12:7];
+    wire [6:0] X2 = CMD[35:29];
+    wire [5:0] Y2 = CMD[41:36];
+    assign COLOR = CMD[28:13];
+    localparam [1:0] IDL = 0;//idle
+    localparam [1:0] STR = 1;//start drawing
+    localparam [1:0] END = 2;//end drawing
+    reg [1:0] STATE;//current state
+    wire loop = (STATE == STR);//if started, then loops
+    reg [6:0] XO;
+    reg [5:0] YO;
+    reg [6:0] xcount;
+    reg [5:0] ycount;
+    wire DONE = (xcount == X2 && ycount == Y2);//reached end point
+    always @ (posedge CLK) begin // count x and y and update variables
+        if (loop) begin
+            if (xcount < X2) xcount <= xcount + 1;
+            else begin
+                xcount <= X1;
+                if (ycount < Y2) ycount <= ycount + 1;
+                else ycount <= Y1;
+            end
+            XO <= xcount;
+            YO <= ycount;
+        end else begin
+            xcount <= X1;
+            ycount <= Y1;
+        end
+    end
+    always @ (posedge CLK) begin//change state
+        case (STATE)
+            IDL: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            STR: begin
+                if (DONE) STATE <= END;//if done then stop
+                else STATE <= STR;//else start
+            end
+            END: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            default: STATE <= IDL;//default idle
+        endcase
+    end
+    assign BUSY = loop;
+    assign X = XO;
+    assign Y = YO;
+endmodule
+
 module FillCirc(input [6:0] X, input [5:0] Y, input [4:0] R, input [15:0] COLOR, output [63:0] CMD);
     reg [63:0] cmd;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
     always @ (X, Y, R, COLOR) begin
@@ -445,73 +532,6 @@ module OnFillCircCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, 
         end else begin
             xcount <= LX;
             ycount <= TY;
-        end
-    end
-    always @ (posedge CLK) begin//change state
-        case (STATE)
-            IDL: begin
-                if (ON) STATE <= STR;//if on then start
-                else STATE <= IDL;//else idle
-            end
-            STR: begin
-                if (DONE) STATE <= END;//if done then stop
-                else STATE <= STR;//else start
-            end
-            END: begin
-                if (ON) STATE <= STR;//if on then start
-                else STATE <= IDL;//else idle
-            end
-            default: STATE <= IDL;//default idle
-        endcase
-    end
-    assign BUSY = loop;
-    assign X = XO;
-    assign Y = YO;
-endmodule
-
-module FillRect(input [6:0] X1, input [5:0] Y1, input [6:0] X2, input [5:0] Y2, input [15:0] COLOR, output [63:0] CMD);
-    reg [63:0] cmd;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
-    always @ (X1, Y1, X2, Y2, COLOR) begin
-        cmd[63] <= 1;//Enable
-        cmd[62:59] <= 4'd7;//FRECT
-        cmd[6:0] <= X1;
-        cmd[12:7] <= Y1;
-        cmd[28:13] <= COLOR;
-        cmd[35:29] <= X2;
-        cmd[41:36] <= Y2;
-    end
-    assign CMD = cmd;
-endmodule
-
-module OnFillRectCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
-    wire [6:0] X1 = CMD[6:0];
-    wire [5:0] Y1 = CMD[12:7];
-    wire [6:0] X2 = CMD[35:29];
-    wire [5:0] Y2 = CMD[41:36];
-    assign COLOR = CMD[28:13];
-    localparam [1:0] IDL = 0;//idle
-    localparam [1:0] STR = 1;//start drawing
-    localparam [1:0] END = 2;//end drawing
-    reg [1:0] STATE;//current state
-    wire loop = (STATE == STR);//if started, then loops
-    reg [6:0] XO;
-    reg [5:0] YO;
-    reg [6:0] xcount;
-    reg [5:0] ycount;
-    wire DONE = (xcount == X2 && ycount == Y2);//reached end point
-    always @ (posedge CLK) begin // count x and y and update variables
-        if (loop) begin
-            if (xcount < X2) xcount <= xcount + 1;
-            else begin
-                xcount <= X1;
-                if (ycount < Y2) ycount <= ycount + 1;
-                else ycount <= Y1;
-            end
-            XO <= xcount;
-            YO <= ycount;
-        end else begin
-            xcount <= X1;
-            ycount <= Y1;
         end
     end
     always @ (posedge CLK) begin//change state
