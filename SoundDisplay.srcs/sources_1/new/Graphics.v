@@ -2,21 +2,19 @@
 //////////////////////////////////////////////////////////////////////////////////
 // Company: EE2026
 // Engineer: Li Bozhao
-// 
 // Create Date: 03/13/2020 09:51:11 AM
 // Design Name: FGPA Project for EE2026
-// Module Name: PixelSetter, DrawPoint, DrawLine, DrawChar, DrawRect, DrawCirc, Graphics
+// Module Name: PixelSetter, DrawPoint, DrawLine, DrawChar, DrawSceneSprite, DrawRect, DrawCirc, FillRect, FillCirc, 
+//              OnPointCommand, OnLineCommand, OnCharCommand, OnSceneSpriteCommand, OnRectCommand, OnCircCommand, OnFillRectCommand, OnFillCircCommand, 
+//              Graphics
 // Project Name: FGPA Project for EE2026
 // Target Devices: Basys 3
 // Tool Versions: Vivado 2018.2
 // Description: This module can be used to draw geometric shapes and texts conveniently.
-// 
 // Dependencies: MemoryBlocks.v
-// 
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
 //////////////////////////////////////////////////////////////////////////////////
 module PixelSetter(input CLK, input ON, input [6:0] X, input [5:0] Y, input [15:0] COLOR, output [6:0] XO, output [5:0] YO, output [15:0] CO, output WR);
     reg write = 0;
@@ -45,7 +43,7 @@ module OnPointCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, out
     assign COLOR = CMD[28:13];
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
-    localparam [1:0] END = 2;//end drawing
+    localparam [1:0] STP = 2;//end drawing
     reg [1:0] STATE;//current state
     reg drawn = 0;
     wire DONE = drawn;
@@ -66,10 +64,10 @@ module OnPointCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, out
                 else STATE <= IDL;//else idle
             end
             STR: begin
-                if (DONE) STATE <= END;//if done then stop
+                if (DONE) STATE <= STP;//if done then stop
                 else STATE <= STR;//else start
             end
-            END: begin
+            STP: begin
                 if (ON) STATE <= STR;//if on then start
                 else STATE <= IDL;//else idle
             end
@@ -103,7 +101,7 @@ module OnLineCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
     assign COLOR = CMD[28:13];
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
-    localparam [1:0] END = 2;//end drawing
+    localparam [1:0] STP = 2;//end drawing
     reg [1:0] STATE;//current state
     reg signed [8:0] e;//error
     reg signed [7:0] x;//x
@@ -146,10 +144,10 @@ module OnLineCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
                 else STATE <= IDL;//else idle
             end
             STR: begin
-                if (DONE) STATE <= END;//if done then stop
+                if (DONE) STATE <= STP;//if done then stop
                 else STATE <= STR;//else start
             end
-            END: begin
+            STP: begin
                 if (ON) STATE <= STR;//if on then start
                 else STATE <= IDL;//else idle
             end
@@ -185,7 +183,7 @@ module OnCharCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
     assign COLOR = CMD[28:13];
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
-    localparam [1:0] END = 2;//end drawing
+    localparam [1:0] STP = 2;//end drawing
     reg [1:0] STATE;//current state
     wire loop = (STATE == STR);//if started, then loops
     reg [6:0] XO;
@@ -219,10 +217,10 @@ module OnCharCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
                 else STATE <= IDL;//else idle
             end
             STR: begin
-                if (DONE) STATE <= END;//if done then stop
+                if (DONE) STATE <= STP;//if done then stop
                 else STATE <= STR;//else start
             end
-            END: begin
+            STP: begin
                 if (ON) STATE <= STR;//if on then start
                 else STATE <= IDL;//else idle
             end
@@ -256,7 +254,7 @@ module OnRectCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
     assign COLOR = CMD[28:13];
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
-    localparam [1:0] END = 2;//end drawing
+    localparam [1:0] STP = 2;//end drawing
     reg [1:0] STATE;//current state
     wire loop = (STATE == STR);//if started, then loops
     reg [6:0] XO;
@@ -287,10 +285,10 @@ module OnRectCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
                 else STATE <= IDL;//else idle
             end
             STR: begin
-                if (DONE) STATE <= END;//if done then stop
+                if (DONE) STATE <= STP;//if done then stop
                 else STATE <= STR;//else start
             end
-            END: begin
+            STP: begin
                 if (ON) STATE <= STR;//if on then start
                 else STATE <= IDL;//else idle
             end
@@ -322,7 +320,7 @@ module OnCircleCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, ou
     assign COLOR = CMD[28:13];
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
-    localparam [1:0] END = 2;//end drawing
+    localparam [1:0] STP = 2;//end drawing
     reg [1:0] STATE;//current state
     wire loop = (STATE == STR);//if started, then loops
     reg signed [9:0] e;//error
@@ -380,10 +378,10 @@ module OnCircleCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, ou
                 else STATE <= IDL;//else idle
             end
             STR: begin
-                if (DONE) STATE <= END;//if done then stop
+                if (DONE) STATE <= STP;//if done then stop
                 else STATE <= STR;//else start
             end
-            END: begin
+            STP: begin
                 if (ON) STATE <= STR;//if on then start
                 else STATE <= IDL;//else idle
             end
@@ -395,24 +393,79 @@ module OnCircleCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, ou
     assign Y = YO[5:0];
 endmodule
 
-module DrawSprite(input [6:0] X, input [5:0] Y, input [1:0] MODE, input [4:0] INDEX, output [63:0] CMD);
-    reg [63:0] cmd;    //cmd[0:6]X,[7:12]Y,[13:14]MODE,[15:19]INDEX
-    always @ (X, Y, MODE, INDEX) begin
+module DrawSceneSprite(input [6:0] X, input [5:0] Y, input [6:0] INDEX, output [63:0] CMD);
+    reg [63:0] cmd;    //cmd[0:6]X,[7:12]Y,[13:19]INDEX
+    always @ (X, Y, INDEX) begin
         cmd[63] <= 1;//Enable
-        cmd[62:59] <= 4'd6;//SPR
+        cmd[62:59] <= 4'd6;//SPRSCN
         cmd[6:0] <= X;
         cmd[12:7] <= Y;
-        cmd[14:13] <= MODE;
-        cmd[19:15] <= INDEX;
+        cmd[19:13] <= INDEX;
     end
     assign CMD = cmd;
 endmodule
 
-module OnSpriteCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
+module OnSceneSpriteCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
     localparam [1:0] SCN = 0;//scene
     localparam [1:0] CHR = 1;//character
     localparam [1:0] EFF = 2;//effect
-
+    wire [6:0] LX = CMD[6:0];
+    wire [5:0] TY = CMD[12:7];
+    wire [6:0] INDEX = CMD[19:13];
+    wire [15:0] MAP[255:0];
+    wire [6:0] RX = LX + 4'd15; // 16x16
+    wire [5:0] BY = TY + 4'd15; // 16x16
+    SceneSpriteBlocks CB(INDEX, MAP);
+    localparam [1:0] IDL = 0;//idle
+    localparam [1:0] STR = 1;//start drawing
+    localparam [1:0] STP = 2;//end drawing
+    reg [1:0] STATE;//current state
+    wire loop = (STATE == STR);//if started, then loops
+    reg [6:0] XO;
+    reg [5:0] YO;
+    reg [15:0] CO;
+    reg [6:0] xcount;
+    reg [5:0] ycount;
+    wire [3:0] chrX = xcount - LX;
+    wire [3:0] chrY = ycount - TY;
+    wire [7:0] index = chrX + chrY * 5'd16;
+    wire DONE = (xcount == RX && ycount == BY);//reached end point
+    always @ (posedge CLK) begin // count x and y and update variables
+        if (loop) begin
+            XO <= xcount;
+            YO <= ycount;
+            CO <= MAP[8'd255 - index];
+            if (xcount == RX) begin
+                xcount <= LX;
+                if (ycount == BY) ycount <= TY;
+                else ycount <= ycount + 1;
+            end else xcount <= xcount + 1;
+        end else begin
+            xcount <= LX;
+            ycount <= TY;
+        end
+    end
+    always @ (posedge CLK) begin//change state
+        case (STATE)
+            IDL: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            STR: begin
+                if (DONE) STATE <= STP;//if done then stop
+                else STATE <= STR;//else start
+            end
+            STP: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            default: STATE <= IDL;//default idle
+        endcase
+    end
+    assign BUSY = loop;
+    assign X = XO;
+    assign Y = YO;
+    assign COLOR = CO;
 endmodule
 
 module FillRect(input [6:0] X1, input [5:0] Y1, input [6:0] X2, input [5:0] Y2, input [15:0] COLOR, output [63:0] CMD);
@@ -437,7 +490,7 @@ module OnFillRectCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, 
     assign COLOR = CMD[28:13];
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
-    localparam [1:0] END = 2;//end drawing
+    localparam [1:0] STP = 2;//end drawing
     reg [1:0] STATE;//current state
     wire loop = (STATE == STR);//if started, then loops
     reg [6:0] XO;
@@ -467,10 +520,10 @@ module OnFillRectCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, 
                 else STATE <= IDL;//else idle
             end
             STR: begin
-                if (DONE) STATE <= END;//if done then stop
+                if (DONE) STATE <= STP;//if done then stop
                 else STATE <= STR;//else start
             end
-            END: begin
+            STP: begin
                 if (ON) STATE <= STR;//if on then start
                 else STATE <= IDL;//else idle
             end
@@ -506,7 +559,7 @@ module OnFillCircCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, 
     assign COLOR = CMD[28:13];
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
-    localparam [1:0] END = 2;//end drawing
+    localparam [1:0] STP = 2;//end drawing
     reg [1:0] STATE;//current state
     wire loop = (STATE == STR);//if started, then loops
     reg [6:0] XO;
@@ -541,10 +594,10 @@ module OnFillCircCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, 
                 else STATE <= IDL;//else idle
             end
             STR: begin
-                if (DONE) STATE <= END;//if done then stop
+                if (DONE) STATE <= STP;//if done then stop
                 else STATE <= STR;//else start
             end
-            END: begin
+            STP: begin
                 if (ON) STATE <= STR;//if on then start
                 else STATE <= IDL;//else idle
             end
@@ -563,6 +616,7 @@ module Graphics(input [3:0] swState, input onRefresh, input WCLK, input [12:0] P
     wire [63:0] CHRcmd;
     wire [63:0] RECTcmd;
     wire [63:0] CIRCcmd;
+    wire [63:0] SPRSCNcmd;
     wire [63:0] FRECTcmd;
     wire [63:0] FCIRCcmd;
     wire [6:0] CmdX;
@@ -584,6 +638,7 @@ module Graphics(input [3:0] swState, input onRefresh, input WCLK, input [12:0] P
     DrawChar DCHR(7'd46, 6'd29, 30'd0, {5'd0, 6'd0, 5'd31}, CHRcmd); // blue char 0,0,B
     DrawRect DRECT(7'd32, 6'd16, 7'd64, 6'd48, {5'd31,6'd0,5'd0}, RECTcmd); // red rect R,0,0
     DrawCirc DCIRC(7'd48, 6'd32, 5'd31, {5'd0, 6'd63, 5'd0}, CIRCcmd); // green circle 0,G,0
+    DrawSceneSprite DSS(7'd0, 6'd48, 7'd0, SPRSCNcmd); // sprite scene[0-brick] 0,48 - 15,63
     FillRect FRECT(7'd40, 6'd24, 7'd56, 6'd40, {5'd31,6'd63,5'd0}, FRECTcmd); // yellow frect R,G,0
     FillCirc FCIRC(7'd48, 6'd32, 5'd16, {5'd31, 6'd0, 5'd31}, FCIRCcmd); // magenta fcircle R,0,B
     always @ (*) begin//redraw onto the DRAM as a new frame
@@ -594,7 +649,7 @@ module Graphics(input [3:0] swState, input onRefresh, input WCLK, input [12:0] P
                 4'd3: begin Cmd = CHRcmd; end // 3 - char
                 4'd4: begin Cmd = RECTcmd; end // 4 - rectangle
                 4'd5: begin Cmd = CIRCcmd; end // 5 - circle
-                4'd6: begin end
+                4'd6: begin Cmd = SPRSCNcmd; end // 6 - scene sprite
                 4'd7: begin Cmd = FRECTcmd; end // 7 - fill rectangle
                 4'd8: begin Cmd = FCIRCcmd; end //8 - fill circle
                 default: begin Cmd = 0; end // 0 - idle

@@ -2,21 +2,18 @@
 //////////////////////////////////////////////////////////////////////////////////
 // Company: EE2026
 // Engineer: Li Bozhao
-// 
 // Create Date: 03/16/2020 08:58:28 AM
 // Design Name: FGPA Project for EE2026
-// Module Name: DisplayRAM, DisplayCommands, CharBlocks
+// Module Name: DisplayRAM, CommandQueue, DisplayCommandCore, CharBlocks, SceneSpriteBlocks
 // Project Name: FGPA Project for EE2026
 // Target Devices: Basys3
 // Tool Versions: Vivado 2018.2
 // Description: This module provides data structures to store relatively large amount of data and interact with them.The screen and the user input are decoupled here.
-// 
 // Dependencies: NULL
-// 
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////
 module DisplayRAM(input [12:0] readPix, input CLK, input Write, input [6:0] X, input [5:0] Y, input [15:0] COLOR, output [15:0] STREAM);
     reg [15:0] DRAM [6143:0];
@@ -32,10 +29,27 @@ module DisplayRAM(input [12:0] readPix, input CLK, input Write, input [6:0] X, i
     end
 endmodule
 
+module CommandQueue(input [63:0] CMD, input READNEXT, input RSTHEAD, input PUSH, input [5:0] WLOC, input CLK, output [63:0] CurrentCommand);
+    reg [63:0] CMDQ [63:0];
+    reg [63:0] cCmd;
+    reg [5:0] RLOC = 0;
+    wire [5:0] NRLOC = RSTHEAD ? 0 : RLOC + 1;
+    always @ (READNEXT) begin
+        cCmd = CMDQ[RLOC];
+        RLOC = NRLOC;
+    end
+    assign CurrentCommand = cCmd;
+    always @ (posedge CLK) begin
+        if (PUSH) begin
+            CMDQ[WLOC] = CMD;
+        end
+    end
+endmodule
+
 module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output PixelSet, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY, output Done);//64-bit command
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
-    localparam [1:0] END = 2;//end drawing
+    localparam [1:0] STP = 2;//end drawing
     reg [1:0] STATE;
     wire busy = STATE == STR;
     wire PTBUSY;
@@ -43,9 +57,10 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
     wire CHRBUSY;
     wire RECTBUSY;
     wire CIRCBUSY;
+    wire SPRSCNBUSY;
     wire FRECTBUSY;
     wire FCIRCBUSY;
-    wire CMDBUSY = PTBUSY || LNBUSY || CHRBUSY || RECTBUSY || CIRCBUSY || FRECTBUSY || FCIRCBUSY;//initially is zero
+    wire CMDBUSY = PTBUSY || LNBUSY || CHRBUSY || RECTBUSY || CIRCBUSY || SPRSCNBUSY || FRECTBUSY || FCIRCBUSY;//initially is zero
     wire [63:0] cmd = CMDBUSY ? cmd : Command;
     wire OnCommand = cmd[63];//enabling signal
     wire DONE = !CMDBUSY;//if everything not busy then done
@@ -56,10 +71,10 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
                 else STATE <= IDL;//else idle
             end
             STR: begin
-                if (DONE) STATE <= END;//if done then stop
+                if (DONE) STATE <= STP;//if done then stop
                 else STATE <= STR;//else start
             end
-            END: begin
+            STP: begin
                 if (ON) STATE <= STR;//if on then start
                 else STATE <= IDL;//else idle
             end
@@ -76,7 +91,7 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
     localparam [3:0] CHR = 3;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:58]CHR//30-bit char set{[29:54]AZ,[55:58]", . [ ]"}
     localparam [3:0] RECT = 4;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
     localparam [3:0] CIRC = 5;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
-    localparam [3:0] SPR = 6;//cmd[0:6]X1,[7:12]Y1,[14:13]MODE,[19:15]INDEX
+    localparam [3:0] SPRSCN = 6;//cmd[0:6]X1,[7:12]Y1,[19:13]INDEX
     localparam [3:0] FRECT = 7;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
     localparam [3:0] FCIRC = 8;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
     wire onPT = busy && OnCommand && (commandHead == PT);
@@ -104,6 +119,11 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
     wire [5:0] CIRCYout;
     wire [15:0] CIRCCout;
     OnCircleCommand OCIRCC(CLK, onCIRC, cmd, CIRCXout, CIRCYout, CIRCCout, CIRCBUSY);
+    wire onSPRSCN = busy && OnCommand && (commandHead == SPRSCN);
+    wire [6:0] SPRSCNXout;
+    wire [5:0] SPRSCNYout;
+    wire [15:0] SPRSCNCout;
+    OnSceneSpriteCommand OSPRSCNC(CLK, onSPRSCN, cmd, SPRSCNXout, SPRSCNYout, SPRSCNCout, SPRSCNBUSY);
     wire onFRECT = busy && OnCommand && (commandHead == FRECT);
     wire [6:0] FRECTXout;
     wire [5:0] FRECTYout;
@@ -147,7 +167,10 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
                     YO = CIRCYout;
                     CO = CIRCCout;
                 end
-                SPR:begin 
+                SPRSCN:begin 
+                    XO = SPRSCNXout;
+                    YO = SPRSCNYout;
+                    CO = SPRSCNCout;
                 end
                 FRECT:begin 
                     XO = FRECTXout;
@@ -215,7 +238,7 @@ module CharBlocks(input [29:0] CHR, output [34:0] MAP);
     assign MAP = map;
 endmodule
 
-module SceneSpriteBlocks(input [29:0] SCN, output reg [15:0] COLOR[255:0]);
+module SceneSpriteBlocks(input [6:0] SCN, output reg [15:0] COLOR[255:0]);
     localparam [1:0] BRICK = 0;
     localparam [1:0] GRASS = 1;    
     localparam [1:0] CACTUS = 2;
