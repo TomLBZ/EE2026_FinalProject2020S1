@@ -42,5 +42,11 @@ module Top_Student (
     B16_MUX led_mux(mic_mapped,{4'b0,mic_in},led_MUX_toggle,led[15:0]);
     Oled_Display oled(clk6p25m,reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
     Graphics g(graphicsState, onRefresh, CLK[3], currentPixel, oled_data);
-    AV_Indicator volind(mic_in,CLK[0],CLK100MHZ,mic_mapped,seg,an);
+    //AV_Indicator volind(mic_in,CLK[0],CLK100MHZ,mic_mapped,seg,an);
+    
+    reg [29:0] volcounter = 30'b000000000000000000000000000000;
+    wire [3:0] volume;
+    AV_counter av1(CLK[3],volcounter);
+    AV_Indicator av2( mic_in,CLK[0],volcounter,volume);
+    SoundLevel (volume,CLK[0],volcounter,led, seg, an);
 endmodule
