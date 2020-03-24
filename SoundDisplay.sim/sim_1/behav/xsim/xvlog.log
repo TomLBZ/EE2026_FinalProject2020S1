@@ -1,42 +1,16 @@
-INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/AV_Indicator.v" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module AV_Indicator
-INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Audio_Capture.v" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module Audio_Capture
-INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Graphics.v" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module PixelSetter
-INFO: [VRFC 10-311] analyzing module DrawPoint
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Graphics.v" into library xil_defaultlib
 INFO: [VRFC 10-311] analyzing module OnPointCommand
-INFO: [VRFC 10-311] analyzing module DrawLine
 INFO: [VRFC 10-311] analyzing module OnLineCommand
-INFO: [VRFC 10-311] analyzing module DrawChar
-INFO: [VRFC 10-311] analyzing module DrawRect
-INFO: [VRFC 10-311] analyzing module DrawCirc
+INFO: [VRFC 10-311] analyzing module OnCharCommand
+INFO: [VRFC 10-311] analyzing module OnRectCommand
 INFO: [VRFC 10-311] analyzing module OnCircleCommand
+INFO: [VRFC 10-311] analyzing module OnSceneSpriteCommand
+INFO: [VRFC 10-311] analyzing module OnFillRectCommand
+INFO: [VRFC 10-311] analyzing module OnFillCircCommand
 INFO: [VRFC 10-311] analyzing module Graphics
-INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/MemoryBlocks.v" into library xil_defaultlib
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/MemoryBlocks.v" into library xil_defaultlib
 INFO: [VRFC 10-311] analyzing module DisplayRAM
+INFO: [VRFC 10-311] analyzing module CommandQueue
 INFO: [VRFC 10-311] analyzing module DisplayCommandCore
 INFO: [VRFC 10-311] analyzing module CharBlocks
-INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Oled_Display.v" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module Oled_Display
-WARNING: [VRFC 10-756] identifier state is used before its declaration [C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Oled_Display.v:106]
-WARNING: [VRFC 10-756] identifier state is used before its declaration [C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Oled_Display.v:108]
-WARNING: [VRFC 10-756] identifier state is used before its declaration [C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Oled_Display.v:110]
-WARNING: [VRFC 10-756] identifier state is used before its declaration [C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Oled_Display.v:111]
-WARNING: [VRFC 10-756] identifier state is used before its declaration [C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Oled_Display.v:112]
-INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Peripherals.v" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module TripleChannelClock
-INFO: [VRFC 10-311] analyzing module dff
-INFO: [VRFC 10-311] analyzing module pulser
-INFO: [VRFC 10-311] analyzing module btnDebouncer
-INFO: [VRFC 10-311] analyzing module M21
-INFO: [VRFC 10-311] analyzing module B12_MUX
-INFO: [VRFC 10-311] analyzing module B16_MUX
-INFO: [VRFC 10-311] analyzing module swState
-INFO: [VRFC 10-311] analyzing module swBitsToState
-INFO: [VRFC 10-311] analyzing module srLatch
-INFO: [VRFC 10-311] analyzing module Peripherals
-INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Top_Student.v" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module Top_Student
-INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sim_1/new/simclock.v" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module simClk
+INFO: [VRFC 10-311] analyzing module SceneSpriteBlocks
