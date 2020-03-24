@@ -294,7 +294,7 @@ module SceneSpriteBlocks(input [6:0] SCN, output reg [15:0] COLOR[255:0]);
                             Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
                             Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],
                             Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0],Br[0]};
-            default: begin COLOR = {0}; end
+            default:  begin COLOR = {0}; end
         endcase
     end
 endmodule
