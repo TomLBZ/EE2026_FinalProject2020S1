@@ -44,9 +44,9 @@ module Top_Student (
     Graphics g(graphicsState, onRefresh, CLK[3], currentPixel, oled_data);
     //AV_Indicator volind(mic_in,CLK[0],CLK100MHZ,mic_mapped,seg,an);
     
-    wire [29:0] volcounter = 30'b000000000000000000000000000000;
+    //wire [29:0] volcounter = 30'b000000000000000000000000000000;
     wire [3:0] volume;
-    AV_counter av1(CLK[3],volcounter);
-    AV_Indicator av2( mic_in,CLK[0],volcounter,volume);
-    SoundLevel (volume,CLK[0],volcounter,led, seg, an);
+    //AV_counter av1(CLK[3],volcounter);
+    AV_Indicator av1(CLK100MHZ, mic_in,clkrst,volume);
+    SoundLevel av2(volume,CLK100MHZ,clkrst,mic_mapped, seg, an);
 endmodule
