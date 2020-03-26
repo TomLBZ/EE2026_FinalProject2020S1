@@ -21,10 +21,7 @@
 
 
 module maze_pixel_map (input CLK, input [12:0] Pix, output reg [12:0] xvalue,reg [12:0] yvalue);
-    //reg [29:0] counter = 30'b000000000000000000000000000000;
     always @ (posedge CLK) begin
-        //map Pix value to x and y
-        //counter <= counter + 1'b1;
         yvalue = Pix / 8'd96;   //0~64
         xvalue = Pix - yvalue * 8'd96;  //0~96
     end      
@@ -32,7 +29,8 @@ endmodule
 
 module maze_map(input CLK, [12:0] xvalue, [12:0] yvalue,[12:0] xdot, [12:0] ydot, output reg [1:0]OnRoad);
     always @ (posedge CLK) begin
-        if ((xvalue != xdot) && (yvalue != ydot)) begin
+        if ((xvalue <=  xdot + 1) && (xvalue >= xdot - 1) && (yvalue <=  ydot + 1) && (yvalue >= ydot - 1)) OnRoad = 2'b11;
+        else begin 
             if ((xvalue >= 7'd0) && (xvalue<=7'd18) && (yvalue >= 7'd56) && (yvalue <= 7'd64)) OnRoad = 0;
             else if ((xvalue >= 7'd12) && (xvalue<=7'd18) && (yvalue >= 7'd32) && (yvalue <= 7'd56)) OnRoad = 0;
             else if ((xvalue >= 7'd6) && (xvalue<=7'd12) && (yvalue >= 7'd8) && (yvalue <= 7'd40)) OnRoad = 0;
@@ -54,15 +52,15 @@ module maze_map(input CLK, [12:0] xvalue, [12:0] yvalue,[12:0] xdot, [12:0] ydot
             else if ((xvalue >= 7'd84) && (xvalue<=7'd90) && (yvalue >= 7'd0) && (yvalue <= 7'd16)) OnRoad = 0;
             else OnRoad = 2'b01;
         end
-        else OnRoad = 2'b10;
+        
     end
 endmodule
 
-module maze_map_color(input CLK, OnRoad, output reg [15:0] STREAM);
+module maze_map_color(input CLK, [2:0] OnRoad, output reg [15:0] STREAM);
     always @ (posedge CLK) begin
-        if (OnRoad == 0) STREAM = 16'b1101100000000000;
-        else if (OnRoad == 2'b1) STREAM = 16'b0000000011100000;
-        else STREAM = 16'b0000000000000111;
+        if (OnRoad == 2'b00) STREAM = 16'b1101100000000000;     //red
+        else if (OnRoad == 2'b01) STREAM = 16'b0000000111100000;   //green 
+        else if (OnRoad == 2'b11) STREAM = 16'b0000000000001111;   //blue
     end
 endmodule
 
@@ -107,7 +105,7 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     wire [12:0] yvalue;
     wire [12:0] xdot;
     wire [12:0] ydot;
-    wire OnRoad;
+    wire [1:0] OnRoad;
     maze_pixel_map fo(CLK, Pix, xvalue,yvalue);
     maze_map f1(CLK,xvalue,yvalue,xdot, ydot, OnRoad);
     maze_map_color f2(CLK, OnRoad, STREAM);
