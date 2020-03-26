@@ -19,69 +19,52 @@
 // Additional Comments: 
 // 
 //////////////////////////////////////////////////////////////////////////////////
-/*
-module AV_counter(input CLK100MHZ,output reg [29:0] volcounter);
-    always @ (posedge CLK100MHZ) begin
-            volcounter <= volcounter + 1;
-    end
-endmodule
-*/ 
-    
     
 module AV_Indicator(
     input CLK100MHZ,
     input [11:0] mic_in,
-    //input CLK,      //use 20kHz
-    //input [29:0] volcounter,
     input [2:0] clkReset,
     output reg [3:0] volume
     );
     reg [29:0] tmp = 30'd0;
     reg [11:0] mic_max;
-    reg [7:0] counter = 8'b00000000;
+    reg [8:0] counter = 9'b000000000;
     wire [2:0] Clock; //6.25M, 20k, 6
     
-    TripleChannelClock cl1(CLK100MHZ,clkReset,5'b10111,Clock[2],Clock[1],Clock[0]);
+    TripleChannelClock cl1(CLK100MHZ,clkReset,5'b11000,Clock[2],Clock[1],Clock[0]);
     
-    always @ (Clock[0]) begin   //6Hz
-        //tmp = mic_in >> 7'b1111111;
-        tmp = (mic_in *5'd15 / 12'b111111111111 - 5'd7) * 2'd2;   
+    always @ (Clock[0]) begin   //6Hz    //if (volcounter[20]==1'b0) begin
+        tmp = (mic_in >> 7) - 5'd14;
+        //tmp = (mic_in *5'd15 / 12'b111111111111 - 5'd7) * 2'd2;   
         counter <= counter + 1;
     end
     
     always @ (Clock[2]) begin
-        //if (volcounter[20]==1'b0) begin
-            //tmp = (mic_in *5'd15 / 12'b111111111111 - 5'd7) * 2'd2;   
-            //tmp = mic_in >> 7'b1111111;
-        //end
         volume <= tmp;
-   
-        if(counter[4]==1'b1) begin
+        if(counter[5]==1'b1) begin
                 if (mic_max<mic_in) mic_max <= mic_in;   
         end
-        if(counter[7]==1'b0) mic_max <= mic_max - 1'b1;
+        if(counter[9]==1'b0) mic_max <= mic_max - 1'b1;
 end    
 endmodule
 
 
 
-
-
-//No need to change
+//Need to change frequency
 //This module takes in 0~15 input value and controls the led and 7-segment
 module SoundLevel (
-    input [3:0]volume, 
+    input [3:0] volume, 
     input CLK100MHZ,   
-    //input [29:0] volcounter,
     input [2:0] clkReset,
     output [15:0] led,
     output reg [6:0] seg,
     output reg [3:0] an);
     
-    wire [2:0] Clock; //6.25M, 20k, 381
-    wire [2:0] Clock_; //6.25M, 20k, 23.8
-    TripleChannelClock cl2(CLK100MHZ,clkReset,5'b10001,Clock[2],Clock[1],Clock[0]);
-    TripleChannelClock cl3(CLK100MHZ,clkReset,5'b10101,Clock_[2],Clock_[1],Clock_[0]);
+    wire [2:0] Clock; //6.25M, 20k, 
+    wire [2:0] Clock_; //6.25M, 20k, 
+    TripleChannelClock cl2(CLK100MHZ,clkReset,5'b10010,Clock[2],Clock[1],Clock[0]);
+    TripleChannelClock cl3(CLK100MHZ,clkReset,5'b10100,Clock_[2],Clock_[1],Clock_[0]);
+    
     assign led = (16'b1111111111111111 >> (5'd15 - volume));
     
     always @ (Clock[2]) begin
