@@ -23,7 +23,7 @@ module Top_Student (
     reg taskMode = 1;//for lab tasks use 1, for project use 0.
     reg [2:0] clkrst = 0;//reset clock
     wire [15:0] oled_data;// = 16'h07E0;//pixel data to be sent
-    reg [4:0] sbit = 0;//slow clock's reading bit. Freq(sclk) = Freq(CLK) / 2^(sbit + 1).
+    reg [4:0] sbit = 5'd23;//slow clock's reading bit. Freq(sclk) = Freq(CLK) / 2^(sbit + 1).
     wire [3:0] volume;//current sound level from 0 to 15
     wire [3:0] graphicsState;//determines state of graphics
     wire [11:0] mic_in;//mic sample input from the mic
@@ -43,6 +43,6 @@ module Top_Student (
     B16_MUX led_mux(mic_mapped,{4'b0,mic_in},led_MUX_toggle,led[15:0]);
     Oled_Display oled(clk6p25m,reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
     Graphics g(sw, volume, graphicsState, onRefresh, CLK[3], currentPixel, oled_data);    
-    AV_Indicator av1(CLK100MHZ, mic_in,clkrst,volume);
-    SoundLevel av2(volume,CLK100MHZ,clkrst,mic_mapped, seg, an);
+    FU_Indicator av1(CLK[3],CLK[1],CLK[0], mic_in,an,seg,mic_mapped,volume);
+    //game_maze(CLK100MHZ,btn[0], btn[1], btn[2], btn[3], btn[4],currentPixel, oled_data);
 endmodule
