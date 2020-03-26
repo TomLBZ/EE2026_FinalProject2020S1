@@ -24,6 +24,7 @@ module Top_Student (
     reg [2:0] clkrst = 0;//reset clock
     wire [15:0] oled_data;// = 16'h07E0;//pixel data to be sent
     reg [4:0] sbit = 0;//slow clock's reading bit. Freq(sclk) = Freq(CLK) / 2^(sbit + 1).
+    wire [3:0] volume;//current sound level from 0 to 15
     wire [3:0] graphicsState;//determines state of graphics
     wire [11:0] mic_in;//mic sample input from the mic
     wire [4:0] btnPulses;
@@ -41,12 +42,7 @@ module Top_Student (
     Audio_Capture ac(CLK[3],CLK[1],JAI, JAO[0], JAO[1], mic_in);
     B16_MUX led_mux(mic_mapped,{4'b0,mic_in},led_MUX_toggle,led[15:0]);
     Oled_Display oled(clk6p25m,reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
-    Graphics g(graphicsState, onRefresh, CLK[3], currentPixel, oled_data);
-    //AV_Indicator volind(mic_in,CLK[0],CLK100MHZ,mic_mapped,seg,an);
-    
-    //wire [29:0] volcounter = 30'b000000000000000000000000000000;
-    wire [3:0] volume;
-    //AV_counter av1(CLK[3],volcounter);
+    Graphics g(sw, volume, graphicsState, onRefresh, CLK[3], currentPixel, oled_data);    
     AV_Indicator av1(CLK100MHZ, mic_in,clkrst,volume);
     SoundLevel av2(volume,CLK100MHZ,clkrst,mic_mapped, seg, an);
 endmodule

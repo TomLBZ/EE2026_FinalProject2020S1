@@ -144,7 +144,7 @@ module OnCharCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
     reg [5:0] ycount;
     wire [2:0] chrX = (xcount - LX) >> POWER;
     wire [2:0] chrY = (ycount - TY) >> POWER;
-    wire [5:0] index = 6'd35 - chrX - chrY * 3'd5;
+    wire [5:0] index = 6'd34 - chrX - chrY * 3'd5;
     wire DONE = (xcount == RX && ycount == BY);//reached end point
     always @ (posedge CLK) begin // count x and y and update variables
         if (loop) begin
@@ -498,7 +498,7 @@ module OnFillCircCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, 
     assign Y = YO;
 endmodule
 
-module Graphics(input [3:0] swState, input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM);
+module Graphics(input [15:0] sw, input [3:0] Volume, input [3:0] swState, input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM);
     reg [63:0] Cmd;
     reg cmdPush;
     reg [6:0] CmdPushLoc = 0;
@@ -508,13 +508,17 @@ module Graphics(input [3:0] swState, input onRefresh, input WCLK, input [12:0] P
     wire [15:0] CmdCol;
     wire pixSet;
     wire CmdBusy;
+    wire NextCmd;
     wire SW_ON = swState > 0;
     wire validNextCmd = CmdQout[63] == 1;
     wire ReadNext = ~CmdBusy ? WCLK : 0;
     pulser Psw(SW_ON, WCLK, cmdPush);
-    //CommandQueue CMDQ(Cmd, ReadNext, onRefresh, cmdPush, CmdPushLoc, WCLK, CmdQout);
+    pulser Pbz(~CmdBusy, WCLK, NextCmd);
+    //CommandQueue CMDQ(Cmd, ReadNext, onRefresh, cmdPush, CmdPushLoc, CmdQout);
+    AudioVisualizationSceneBuilder AVSB(NextCmd, sw[1:0], sw[2], Volume, Cmd);
     DisplayCommandCore DCMD(Cmd, SW_ON, WCLK, pixSet, CmdX, CmdY, CmdCol, CmdBusy);
     DisplayRAM DRAM(Pix, ~WCLK, WCLK, pixSet, CmdX, CmdY, CmdCol, STREAM); //using negedge of WCLK to read, posedge to write
+    /*
     `include "CommandFunctions.v"
     always @ (*) begin//redraw onto the DRAM as a new frame
         if (~CmdBusy) begin
@@ -532,4 +536,5 @@ module Graphics(input [3:0] swState, input onRefresh, input WCLK, input [12:0] P
             endcase
         end
     end
+    */
 endmodule
