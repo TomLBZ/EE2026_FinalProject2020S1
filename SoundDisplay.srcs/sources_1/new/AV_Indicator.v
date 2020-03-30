@@ -35,25 +35,45 @@ module AV_Indicator(
     reg [3:0] mask = 4'b0001;
     reg digit = 1'b0;
     reg [6:0] SEG;
-    reg next_ = 1'b0;
+    reg state = 1'b0;
     wire [3:0] vol_mod_10 = volume > 4'd9 ? volume - 4'd10 : volume;
-    wire [11:0] next_mic_max = mic_max - 1'b1;
+    //wire [11:0] next_mic_max = mic_max - 1'b1;
+    wire maxstin = mic_max < mic_in;
     
     assign an = ~(mask << digit);     //shift 1/0 bit
     assign led = (16'b1111111111111111 >> (5'd15 - volume));  
+    wire turnon = ~state & seg == SEG;
+    wire turnoff = mic_max == mic_in;
     always @ (posedge DCLK) begin
-        volume = (mic_max >> 7) - 5'd14;
-        if (mic_max<mic_in) mic_max <= mic_in;
-        if(next_) mic_max <= next_mic_max;
+        if (state) begin
+            if (turnoff) begin
+                state <= 0;
+            end
+        end else begin
+            if (turnon) begin
+                state <= 1;
+            end
+        end
+    end
+    //reg [11:0] baseline = 12'b000001111111;
+    reg [11:0] baseline = 12'b011111111111;
+    wire [11:0] mic_minus = mic_max > baseline ? mic_max - baseline : 12'b0;
+    always @ (posedge RefSCLK) begin
+        volume <= (mic_minus >> 7);
+        //volume <= ((mic_max - 12'b11100000000) >> 7);
+        //if (mic_max<mic_in) mic_max <= mic_in;
+        mic_max <= maxstin ? mic_in : state ? mic_max - 1 : mic_max;
+        //if (next_) mic_max <= next_mic_max;
     end
     always @ (posedge SCLK) begin
-        next_ = ~next_;
-        seg = SEG;
+        //mic_max <= next_mic_max;
+        //next_ = ~next_;
+        seg = SEG; 
     end 
     always@(*)begin
         if (digit) begin//10th
             if(volume < 4'd10) SEG = 7'b1111111;
-            else SEG = 7'b1111001;
+            else SEG = 7'b0100100;//1111001;
         end else begin//1st
             case (vol_mod_10)
                 4'd0: SEG = 7'b1000000;
