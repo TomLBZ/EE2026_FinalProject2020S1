@@ -349,7 +349,7 @@ module StartScreenSceneBuilder(input CLK, input [1:0] CURSORINDEX, output CMD);
     assign StartScreen[0] = QuickDrawSceneSprite(4'd0, 3'd0, WHITE,3'd1,2'b0 );
     always @(posedge CLK) begin
         cmd = StartScreen[count];
-        //count = count + 6'd1;
+        count = count + 6'd1;
     end
     assign CMD = cmd;
 endmodule

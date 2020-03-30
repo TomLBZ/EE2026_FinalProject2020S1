@@ -513,8 +513,8 @@ module Graphics(input [15:0] sw, input [3:0] Volume, input [3:0] swState, input 
     wire SW_ON = swState > 0;
     wire validNextCmd = CmdQout[63] == 1;
     wire ReadNext = ~CmdBusy ? WCLK : 0;
-    wire [63:0] StartScreenCmd;
-    wire [63:0] AudioVisualizationCmd;
+    reg [63:0] StartScreenCmd;
+    reg [63:0] AudioVisualizationCmd;
     pulser Psw(SW_ON, WCLK, cmdPush);
     pulser Pbz(~CmdBusy, WCLK, NextCmd);
     //CommandQueue CMDQ(Cmd, ReadNext, onRefresh, cmdPush, CmdPushLoc, CmdQout);
