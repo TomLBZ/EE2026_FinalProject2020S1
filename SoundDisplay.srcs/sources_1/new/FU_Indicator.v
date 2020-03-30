@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
-// Engineer: liaozinmdxintaibengle
+// Engineer: laozinmdxintaibengle
 // 
 // Create Date: 2020/03/27 00:33:54
 // Design Name: 
@@ -18,9 +18,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
-
-module FU_Indicator(
+module AVL_Indicator(
     input DCLK,   //100Mhz
     input RefSCLK,  //20k
     input SCLK,   //381Hz
@@ -31,16 +29,16 @@ module FU_Indicator(
     output reg [3:0] volume
     );
     reg [11:0] mic_max;
-    reg [29:0] counter = 30'b000000000000000000000000000000;
+    reg [32:0] counter = 33'b000000000000000000000000000000000;
     wire [3:0] vol_mod_10 = (volume > 4'd9) ? volume - 4'd10 : volume;
-    assign led = (16'b1111111111111111 >> (5'd15 - volume)); 
+    assign led = (16'b1111111111111111 >> (5'd16 - volume)); 
 
     //always@(posedge RefSCLK) 
     always @ (posedge DCLK) begin 
         counter <= counter + 1;
-        if (counter[20]==1'b0) volume = (mic_max >> 7) - 5'd14;
+        if (counter[28]==1'b0) volume = (mic_max >> 7) - 5'd14;  //
         if (mic_max<mic_in) mic_max <= mic_in;  
-        else if(counter[27]==1'b0) mic_max <= mic_max - 1'b1;   //mic_max decreases constantly at 0.74Hz
+        else if(counter[28]==1'b1) mic_max <= mic_max - 1'b1;   //mic_max decreases constantly at 
         if (counter[18]==1'b1) begin
             an = 4'b1101;
             if (volume <4'd10) seg = 7'b1111111;
