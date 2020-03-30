@@ -18,6 +18,11 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
+
+module mux_4to1_assign ( input [15:0] a, [15:0] b, [15:0] c, [15:0] d, [1:0] sel, [15:0] out);  
+   assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a); 
+endmodule
+
 module maze_pixel_map (input CLK, input [12:0] Pix, output reg [12:0] xvalue,reg [12:0] yvalue);
     always @ (posedge CLK) begin
         yvalue = Pix / 8'd96;   //0~64
@@ -71,17 +76,19 @@ module task1(input CLOCK, BTN, output Q);
     assign Q = (Q1 & ~Q2);
 endmodule
 
-module maze_dot_movement (input CLK, BTNC,BTNU, BTND, BTNR, BTNL, validmove, output reg [12:0] xdot,reg [12:0] ydot);
+module maze_dot_movement (input CLK, BTNC,BTNU, BTND, BTNR, BTNL, validmove, output reg [12:0] xdot,reg [12:0] ydot, reg [1:0] gamestart = 2'b00);
     wire QC; wire QU; wire QD; wire QR; wire QL;
     task1 ef0(CLK, BTNC, QC);
     task1 ef1(CLK, BTNU, QU);
     task1 ef2(CLK, BTND, QD);
     task1 ef3(CLK, BTNR, QR);
     task1 ef4(CLK, BTNL, QL);
-    reg gamestart = 1'b0;
+    
     
     always@(posedge CLK) begin
-        if(QC == 1) gamestart = 1'b1;
+        if(QC == 1) begin 
+            gamestart = 2'b01;   //display gamestart
+        end
         if(gamestart == 0) begin  
             xdot = 12'd6;
             ydot = 12'd60;
@@ -122,11 +129,24 @@ module maze_checkwall(input CLK, [12:0] xvalue, [12:0] yvalue, output reg onwall
      end
 endmodule
 
-module maze_valid_move (input CLK, [12:0] xdot, [12:0] ydot, onwall, output reg validmove);
+module maze_valid_move (input CLK, [12:0] xdot, [12:0] ydot, onwall, output reg validmove=1);
     maze_checkwall mvm0(CLK, xdot, ydot, onwall);
     always @ (posedge CLK) begin
         if(onwall==1) validmove = 0;
         else validmove = 1;
+    end
+endmodule
+
+module maze_win (input CLK, [12:0] xvalue, [12:0] yvalue, output reg win);
+    always @ (posedge CLK) begin
+        if ((xvalue >= 7'd84) && (xvalue<=7'd90) && (yvalue >= 7'd0) && (yvalue <= 7'd8)) win=1;
+        else win = 0;
+    end
+endmodule
+
+module maze_display_win(input CLK, xvalue, yvalue, output reg [15:0] STREAM);
+    always @ (posedge CLK) begin
+        STREAM = 16'b0001111000000000;
     end
 endmodule
 
@@ -155,6 +175,8 @@ module maze_draw_char(input CLK, [12:0] xvalue,[12:0] yvalue,[12:0] topleftx,[12
 endmodule
 */
 
+
+
 module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     wire [12:0] xvalue;
     wire [12:0] yvalue;
@@ -162,10 +184,40 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     wire [12:0] ydot;
     wire [1:0] OnRoad;
     wire validmove;
-
+    reg [2:0] gamestate=3'd0;
+    wire [1:0] gamestart;
+    reg [40:0] counter = 41'd0;
+    wire win;
+    wire [15:0] stream1;
+    wire [15:0] stream2;
+    wire [1:0] sel;
     maze_pixel_map f0(CLK, Pix, xvalue,yvalue);
     maze_map f1(CLK,xvalue,yvalue,xdot, ydot, OnRoad);
-    maze_map_color f2(CLK, OnRoad, STREAM);
+    maze_map_color f2(CLK, OnRoad, stream1);
     maze_valid_move f3(CLK, xdot, ydot, validmove);
-    maze_dot_movement f4(CLK, BTNC,BTNU, BTND, BTNR, BTNL,validmove, xdot, ydot);
+    maze_dot_movement f4(CLK, BTNC,BTNU, BTND, BTNR, BTNL,validmove, xdot, ydot, gamestart);
+    maze_win f5(CLK, xdot, ydot, sel[0]);
+    maze_display_win f6(CLK, xvalue, yvalue, stream2);
+    B16_MUX f7(stream2,stream1,sel[0],STREAM); 
+    
+    /*
+    always @ (posedge CLK) begin
+        if(gamestart==1) begin
+            gamestate = 3'd1;
+            counter <= counter + 1;
+            //
+        end
+        if(counter[40]==1) begin 
+            if(validmove==0) gamestate=3'd3;
+            if (win==1) gamestate = 3'd4;
+            else gamestate = 3'd2;
+        end
+        
+        case (gamestate) 
+            3'd01: STREAM=16'b1111100000000000;
+            3'd03: STREAM=16'b0000011110000000;
+            3'd04: STREAM=16'b0000000001111111;
+        endcase
+    end
+    */
 endmodule

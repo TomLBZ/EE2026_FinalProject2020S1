@@ -36,7 +36,7 @@ module AVL_Indicator(
     //always@(posedge RefSCLK) 
     always @ (posedge DCLK) begin 
         counter <= counter + 1;
-        if (counter[28]==1'b0) volume = (mic_max >> 7) - 5'd14;  //
+        if (counter[26]==1'b0) volume = (mic_max >> 7) - 5'd14;  //
         if (mic_max<mic_in) mic_max <= mic_in;  
         else if(counter[28]==1'b1) mic_max <= mic_max - 1'b1;   //mic_max decreases constantly at 
         if (counter[18]==1'b1) begin
