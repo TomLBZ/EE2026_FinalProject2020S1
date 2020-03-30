@@ -129,8 +129,8 @@ module OnCharCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
     wire [19:0] CHR = CMD[48:29];
     wire [1:0] POWER = CMD[50:49];
     wire [34:0] MAP;
-    wire [6:0] RX = LX + (4'd4 << POWER);
-    wire [5:0] BY = TY + (4'd6 << POWER);
+    wire [6:0] RX = LX + (7'd4 << POWER);
+    wire [5:0] BY = TY + (6'd6 << POWER);
     CharBlocks CB(CHR, MAP);
     assign COLOR = CMD[28:13];
     localparam [1:0] IDL = 0;//idle
@@ -328,8 +328,8 @@ module OnSceneSpriteCommand(input CLK, input ON, input [63:0] CMD, output [6:0] 
     wire [6:0] INDEX = CMD[35:29];
     wire [1:0] POWER = CMD[37:36];
     wire [15:0] MAP[63:0];
-    wire [6:0] RX = LX + (3'd7 << POWER); // 8x8
-    wire [5:0] BY = TY + (3'd7 << POWER); // 8x8
+    wire [6:0] RX = LX + (7'd7 << POWER); // 8x8
+    wire [5:0] BY = TY + (6'd7 << POWER); // 8x8
     SceneSpriteBlocks CB(INDEX, MAP);
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
@@ -500,7 +500,6 @@ module OnFillCircCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, 
 endmodule
 
 module Graphics(input [15:0] sw, input [3:0] Volume, input [3:0] swState, input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM);
-    reg [63:0] Cmd;
     reg cmdPush;
     reg [6:0] CmdPushLoc = 0;
     wire [63:0] CmdQout;
@@ -513,33 +512,14 @@ module Graphics(input [15:0] sw, input [3:0] Volume, input [3:0] swState, input 
     wire SW_ON = swState > 0;
     wire validNextCmd = CmdQout[63] == 1;
     wire ReadNext = ~CmdBusy ? WCLK : 0;
-    reg [63:0] StartScreenCmd;
-    reg [63:0] AudioVisualizationCmd;
+    wire [63:0] StartScreenCmd;
+    wire [63:0] AudioVisualizationCmd;
+    reg [63:0] Cmd = sw[13] ? AudioVisualizationCmd : StartScreenCmd;
     pulser Psw(SW_ON, WCLK, cmdPush);
     pulser Pbz(~CmdBusy, WCLK, NextCmd);
-    //CommandQueue CMDQ(Cmd, ReadNext, onRefresh, cmdPush, CmdPushLoc, CmdQout);
-    assign Cmd = sw[13] ? AudioVisualizationCmd : StartScreenCmd;
+    CommandQueue CMDQ(Cmd, ReadNext, onRefresh, cmdPush, CmdPushLoc, CmdQout);
     StartScreenSceneBuilder SSSB(NextCmd, 2'b0, StartScreenCmd);
     AudioVisualizationSceneBuilder AVSB(NextCmd, sw[6:5], sw[4], sw[3], sw[2], sw[1], sw[0], Volume, AudioVisualizationCmd);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
     DisplayCommandCore DCMD(Cmd, SW_ON, WCLK, pixSet, CmdX, CmdY, CmdCol, CmdBusy);
     DisplayRAM DRAM(Pix, ~WCLK, WCLK, pixSet, CmdX, CmdY, CmdCol, STREAM); //using negedge of WCLK to read, posedge to write
-    /*
-    `include "CommandFunctions.v"
-    always @ (*) begin//redraw onto the DRAM as a new frame
-        if (~CmdBusy) begin
-            CmdPushLoc = CmdPushLoc + 1;
-            case (swState)
-                4'd1: begin Cmd = DrawPoint(7'd48, 6'd32, {5'd31, 6'd63, 5'd31}); end // 1 - point // white point R,G,B
-                4'd2: begin Cmd = DrawLine(7'd16, 6'd48, 7'd80, 6'd48, {5'd31,6'd32,5'd0}); end // 2 - line // orange line R,0.5G,0
-                4'd3: begin Cmd = DrawChar(7'd46, 6'd29, 20'd5, {5'd0, 6'd0, 5'd31},1'd1); end // 3 - char // blue char 0,0,B
-                4'd4: begin Cmd = DrawRect(7'd32, 6'd16, 7'd64, 6'd48, {5'd31,6'd0,5'd0}); end // 4 - rectangle // red rect R,0,0
-                4'd5: begin Cmd = DrawCirc(7'd48, 6'd32, 5'd31, {5'd0, 6'd63, 5'd0}); end // 5 - circle // green circle 0,G,0
-                4'd6: begin Cmd = DrawSceneSprite(7'd0, 6'd48, {5'd31, 6'd63, 5'd31}, 7'd0); end // 6 - scene sprite // sprite scene[0-grass] 0,48 - 7,55
-                4'd7: begin Cmd = FillRect(7'd40, 6'd24, 7'd56, 6'd40, {5'd31,6'd63,5'd0}); end // 7 - fill rectangle // yellow frect R,G,0
-                4'd8: begin Cmd = FillCirc(7'd48, 6'd32, 5'd16, {5'd31, 6'd0, 5'd31}); end //8 - fill circle // magenta fcircle R,0,B
-                default: begin Cmd = 0; end // 0 - idle
-            endcase
-        end
-    end
-    */
 endmodule

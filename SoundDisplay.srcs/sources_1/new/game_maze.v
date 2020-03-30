@@ -197,9 +197,11 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     maze_valid_move f3(CLK, xdot, ydot, validmove);
     maze_dot_movement f4(CLK, BTNC,BTNU, BTND, BTNR, BTNL,validmove, xdot, ydot, gamestart);
     maze_win f5(CLK, xdot, ydot, sel[0]);
-    maze_display_win f6(CLK, xvalue, yvalue, stream2);
-    B16_MUX f7(stream2,stream1,sel[0],STREAM); 
-    
+    maze_display_win f6(CLK, xvalue, yvalue, streamWIN);
+    maze_display_lose f7(CLK, xvalue, yvalue, streamLOSE);
+    //B16_MUX f7(streamWIN,stream1,sel[0],STREAM); 
+    //mux_4to1_assign f8(streamWIN, stream1, streamLOSE, 0, sel, STREAM);  
+    //00-stream1 01-win 10-lose
     /*
     always @ (posedge CLK) begin
         if(gamestart==1) begin

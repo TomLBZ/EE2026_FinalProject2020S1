@@ -44,5 +44,5 @@ module Top_Student (
     Oled_Display oled(clk6p25m,reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
     //Graphics g(sw, volume, graphicsState, onRefresh, CLK[3], currentPixel, oled_data);    
     AVL_Indicator av1(CLK[3],CLK[1],CLK[0], mic_in,an,seg,mic_mapped,volume);
-    game_maze(CLK100MHZ,btn[0], btn[1], btn[4], btn[3], btn[2],currentPixel, oled_data);
+    //game_maze(CLK100MHZ,btn[0], btn[1], btn[4], btn[3], btn[2],currentPixel, oled_data);
 endmodule
