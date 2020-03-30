@@ -26,23 +26,23 @@ module AV_Indicator(
     input RefSCLK,  //20k
     input SCLK,   //
     input [11:0] mic_in,
-    output [3:0] an,
-    output reg [6:0] seg,
+    output reg [3:0] an,
+    output reg [6:0] SEG,
     output [15:0] led,
     output reg [3:0] volume
     );
     reg [11:0] mic_max;
-    reg [3:0] mask = 4'b0001;
+    //reg [3:0] mask = 4'b0001;
     reg digit = 1'b0;
-    reg [6:0] SEG;
+    reg [6:0] seg;
     reg state = 1'b0;
     wire [3:0] vol_mod_10 = volume > 4'd9 ? volume - 4'd10 : volume;
     //wire [11:0] next_mic_max = mic_max - 1'b1;
     wire maxstin = mic_max < mic_in;
     
-    assign an = ~(mask << digit);     //shift 1/0 bit
+    //assign an = ~(mask << digit);     //shift 1/0 bit
     assign led = (16'b1111111111111111 >> (5'd15 - volume));  
-    wire turnon = ~state & seg == SEG;
+    wire turnon = ~state & (seg == SEG);
     wire turnoff = mic_max == mic_in;
     always @ (posedge DCLK) begin
         if (state) begin
@@ -55,26 +55,23 @@ module AV_Indicator(
             end
         end
     end
-    //reg [11:0] baseline = 12'b000001111111;
     reg [11:0] baseline = 12'b011111111111;
     wire [11:0] mic_minus = mic_max > baseline ? mic_max - baseline : 12'b0;
     always @ (posedge RefSCLK) begin
         volume <= (mic_minus >> 7);
-        //volume <= ((mic_max - 12'b11100000000) >> 7);
-        //if (mic_max<mic_in) mic_max <= mic_in;
         mic_max <= maxstin ? mic_in : state ? mic_max - 1 : mic_max;
-        //if (next_) mic_max <= next_mic_max;
+        digit = ~digit;
     end
     always @ (posedge SCLK) begin
-        //mic_max <= next_mic_max;
-        //next_ = ~next_;
         seg = SEG; 
     end 
     always@(*)begin
         if (digit) begin//10th
+            an = 4'b1101;
             if(volume < 4'd10) SEG = 7'b1111111;
-            else SEG = 7'b0100100;//1111001;
+            else SEG = 7'b1111001;
         end else begin//1st
+            an = 4'b1110;
             case (vol_mod_10)
                 4'd0: SEG = 7'b1000000;
                 4'd1: SEG = 7'b1111001;
@@ -89,5 +86,5 @@ module AV_Indicator(
             endcase
         end
     end
-    always@(posedge RefSCLK) digit = ~digit;
+
 endmodule
