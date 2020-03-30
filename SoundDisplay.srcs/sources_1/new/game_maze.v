@@ -19,7 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module M41 ( input a, b, c, d, [1:0] sel, out);  
+module mux_4to1_assign ( input [15:0] a, [15:0] b, [15:0] c, [15:0] d, [1:0] sel, [15:0] out);  
    assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a); 
 endmodule
 
@@ -144,18 +144,12 @@ module maze_win (input CLK, [12:0] xvalue, [12:0] yvalue, output reg win);
     end
 endmodule
 
-module maze_display_win(input CLK, xvalue, yvalue, output reg [15:0] STREAM); 
+module maze_display_win(input CLK, xvalue, yvalue, output reg [15:0] STREAM);
     always @ (posedge CLK) begin
         STREAM = 16'b0001111000000000;
     end
 endmodule
 
-module maze_display_lose(input CLK, xvalue, yvalue, output reg [15:0] STREAM); 
-    always @ (posedge CLK) begin
-        STREAM = 16'b0001000000001110;
-    end
-endmodule
-/*
 module maze_display(input CLK, state,[12:0] Pix, output reg [15:0] STREAM);
     reg MAPG; 
     reg MAPA; 
@@ -172,7 +166,7 @@ module maze_display(input CLK, state,[12:0] Pix, output reg [15:0] STREAM);
     CharBlocks charV(20'd21, MAPV);
     CharBlocks charR(20'd17, MAPR);
 endmodule
-
+/* 
 module maze_draw_char(input CLK, [12:0] xvalue,[12:0] yvalue,[12:0] topleftx,[12:0] toplefty, [34:0] MAP, output reg [15:0] STREAM);
     if((xvalue>=topleftx)&&(xvalue<=topleftx+3'd4)&&(yvalue>=toplefty)&&(yvalue<=toplefty+4'd6)) begin
         STREAM = (xvalue && MAP[1])? 16'b1111100000000000:0;
@@ -180,6 +174,7 @@ module maze_draw_char(input CLK, [12:0] xvalue,[12:0] yvalue,[12:0] topleftx,[12
     end
 endmodule
 */
+
 
 
 module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
@@ -193,21 +188,18 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     wire [1:0] gamestart;
     reg [40:0] counter = 41'd0;
     wire win;
-    wire [15:0] stream1;  
-    wire [15:0] streamWIN;  //display win
-    wire [15:0] streamLOSE; 
+    wire [15:0] stream1;
+    wire [15:0] stream2;
     wire [1:0] sel;
     maze_pixel_map f0(CLK, Pix, xvalue,yvalue);
     maze_map f1(CLK,xvalue,yvalue,xdot, ydot, OnRoad);
     maze_map_color f2(CLK, OnRoad, stream1);
-    maze_valid_move f3(CLK, xdot, ydot, sel[1]);
+    maze_valid_move f3(CLK, xdot, ydot, validmove);
     maze_dot_movement f4(CLK, BTNC,BTNU, BTND, BTNR, BTNL,validmove, xdot, ydot, gamestart);
     maze_win f5(CLK, xdot, ydot, sel[0]);
-    maze_display_win f6(CLK, xvalue, yvalue, streamWIN);
-    maze_display_lose f7(CLK, xvalue, yvalue, streamLOSE);
-    //B16_MUX f7(streamWIN,stream1,sel[0],STREAM); 
-    mux_4to1_assign f8(streamWIN, stream1, streamLOSE, 0, sel, STREAM);  
-    //00-stream1 01-win 10-lose
+    maze_display_win f6(CLK, xvalue, yvalue, stream2);
+    B16_MUX f7(stream2,stream1,sel[0],STREAM); 
+    
     /*
     always @ (posedge CLK) begin
         if(gamestart==1) begin
