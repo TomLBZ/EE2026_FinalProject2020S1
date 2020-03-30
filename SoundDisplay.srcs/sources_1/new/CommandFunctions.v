@@ -48,7 +48,7 @@ function [63:0] DrawChar;
     input [5:0] Y;
     input [19:0] CHR;
     input [15:0] COLOR;
-    input POWER;
+    input [1:0] POWER;
     begin
         DrawChar[63] = 1;//Enable
         DrawChar[62:59] = 4'd3;//CHR
@@ -56,7 +56,7 @@ function [63:0] DrawChar;
         DrawChar[12:7] = Y;
         DrawChar[28:13] = COLOR;
         DrawChar[48:29] = CHR;
-        DrawChar[49] = POWER;
+        DrawChar[50:49] = POWER;
     end
 endfunction
 
@@ -97,6 +97,7 @@ function [63:0] DrawSceneSprite;
     input [5:0] Y;
     input [15:0] MCOLOR;
     input [6:0] INDEX;
+    input [1:0] POWER;
     begin
         DrawSceneSprite[63] = 1;//Enable
         DrawSceneSprite[62:59] = 4'd6;//SPRSCN
@@ -104,6 +105,7 @@ function [63:0] DrawSceneSprite;
         DrawSceneSprite[12:7] = Y;
         DrawSceneSprite[28:13] = MCOLOR;
         DrawSceneSprite[35:29] = INDEX;
+        DrawSceneSprite[37:36] = POWER;
     end
 endfunction
 
@@ -136,5 +138,22 @@ function [63:0] FillCirc;
         FillCirc[12:7] = Y;
         FillCirc[28:13] = COLOR;
         FillCirc[33:29] = R;
+    end
+endfunction
+
+function [63:0] QuickDrawSceneSprite;//using SPRSCN command
+    input [3:0] LOCX;
+    input [2:0] LOCY;
+    input [15:0] MCOLOR;
+    input [6:0] INDEX;
+    input [1:0] POWER;
+    begin
+        QuickDrawSceneSprite[63] = 1;//Enable
+        QuickDrawSceneSprite[62:59] = 4'd6;//SPRSCN
+        QuickDrawSceneSprite[6:0] = LOCX << 3;
+        QuickDrawSceneSprite[12:7] = LOCY << 3;
+        QuickDrawSceneSprite[28:13] = MCOLOR;
+        QuickDrawSceneSprite[35:29] = INDEX;
+        QuickDrawSceneSprite[37:36] = POWER;
     end
 endfunction

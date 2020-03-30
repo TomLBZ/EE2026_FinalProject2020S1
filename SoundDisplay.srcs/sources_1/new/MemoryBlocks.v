@@ -89,7 +89,7 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
     localparam [3:0] CHR = 3;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:58]CHR//30-bit char set{[29:54]AZ,[55:58]", . [ ]"}
     localparam [3:0] RECT = 4;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
     localparam [3:0] CIRC = 5;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
-    localparam [3:0] SPRSCN = 6;//cmd[0:6]X1,[7:12]Y1,[19:13]INDEX
+    localparam [3:0] SPRSCN = 6;//cmd[0:6]X1,[7:12]Y1,[13:28]MCOLOR,[29:35]INDEX,[36:37]POWER
     localparam [3:0] FRECT = 7;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
     localparam [3:0] FCIRC = 8;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
     wire onPT = busy && OnCommand && (commandHead == PT);
@@ -131,7 +131,7 @@ module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output Pixel
     wire [6:0] FCIRCXout;
     wire [5:0] FCIRCYout;
     wire [15:0] FCIRCCout;
-    OnFillCircCommand OFCIRCC(CLK, onFCIRC, cmd, FCIRCXout, FCIRCYout, FCIRCCout, FCIRCBUSY);
+    OnFillCircCommand OFCIRCC(CLK, onFCIRC, cmd, FCIRCXout, FCIRCYout, FCIRCCout, FCIRCBUSY);  
     always @ (*) begin
         if (busy && OnCommand) begin
             case (commandHead)
@@ -286,7 +286,7 @@ module SceneSpriteBlocks(input [6:0] SCN, output reg [15:0] COLOR[63:0]);
     end
 endmodule
 
-module AudioVisualizationSceneBuilder(input CLK, input [1:0] THEME, input THK, input [3:0] LEVEL, output [63:0] CMD);
+module AudioVisualizationSceneBuilder(input CLK, input [1:0] THEME, input THK, input BD, input BG, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD);
     reg [63:0] AudioBar [31:0];//32 commands
     reg [5:0] count = 0;
     reg [63:0] cmd;
@@ -295,42 +295,61 @@ module AudioVisualizationSceneBuilder(input CLK, input [1:0] THEME, input THK, i
     reg [15:0] HT [2:0] = {{5'd31,6'd0,5'd0},{5'd0,6'd0,5'd31},{5'd31,6'd63,5'd0}};// red, blue, yellow
     reg [15:0] MT [2:0] = {{5'd31,6'd63,5'd0},{5'd0,6'd0,5'd15},{5'd0,6'd63,5'd0}};// yellow, dark blue, green
     reg [15:0] LT [2:0] = {{5'd0,6'd63,5'd0},{5'd0,6'd0,5'd0},{5'd31,6'd0,5'd31}};// green, black, magenta
+    reg [15:0] BLACK = {5'd0, 6'd0, 5'd0};
     `include "CommandFunctions.v"
-    assign AudioBar[0] = DrawRect(7'd0, 6'd0, 7'd95, 6'd63, BT[THEME]);// drawboarder outermost 1 pix at THK 1
-    assign AudioBar[1] = DrawRect(7'd1, 6'd1, 7'd94, 6'd62, THK ? BT[THEME] : BGT[THEME]);// drawboarder outermost 2 pix at THK 1
-    assign AudioBar[2] = DrawRect(7'd2, 6'd2, 7'd93, 6'd61, THK ? BT[THEME] : BGT[THEME]);// drawboarder outermost 3 pix at THK 1
-    assign AudioBar[3] = FillRect(7'd3, 6'd3, 7'd92, 6'd60, BGT[THEME]);//Fill Background
-    assign AudioBar[4] = FillRect(7'd42, 6'd58, 7'd53, 6'd59, LEVEL > 4'd0 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel1
-    assign AudioBar[5] = FillRect(7'd42, 6'd55, 7'd53, 6'd56, LEVEL > 4'd1 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel2
-    assign AudioBar[6] = FillRect(7'd42, 6'd52, 7'd53, 6'd53, LEVEL > 4'd2 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel3
-    assign AudioBar[7] = FillRect(7'd42, 6'd49, 7'd53, 6'd50, LEVEL > 4'd3 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel4
-    assign AudioBar[8] = FillRect(7'd42, 6'd46, 7'd53, 6'd47, LEVEL > 4'd4 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel5
-    assign AudioBar[9] = FillRect(7'd42, 6'd43, 7'd53, 6'd44, LEVEL > 4'd5 ? MT[THEME] : BGT[THEME]);//Fill MidLevel1
-    assign AudioBar[10] = FillRect(7'd42, 6'd40, 7'd53, 6'd41, LEVEL > 4'd6 ? MT[THEME] : BGT[THEME]);//Fill MidLevel2
-    assign AudioBar[11] = FillRect(7'd42, 6'd37, 7'd53, 6'd38, LEVEL > 4'd7 ? MT[THEME] : BGT[THEME]);//Fill MidLevel3
-    assign AudioBar[12] = FillRect(7'd42, 6'd34, 7'd53, 6'd35, LEVEL > 4'd8 ? MT[THEME] : BGT[THEME]);//Fill MidLevel4
-    assign AudioBar[13] = FillRect(7'd42, 6'd31, 7'd53, 6'd32, LEVEL > 4'd9 ? MT[THEME] : BGT[THEME]);//Fill MidLevel5
-    assign AudioBar[14] = FillRect(7'd42, 6'd28, 7'd53, 6'd29, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME]);//Fill TopLevel1
-    assign AudioBar[15] = FillRect(7'd42, 6'd25, 7'd53, 6'd26, LEVEL > 4'd11 ? HT[THEME] : BGT[THEME]);//Fill TopLevel1
-    assign AudioBar[16] = FillRect(7'd42, 6'd22, 7'd53, 6'd23, LEVEL > 4'd12 ? HT[THEME] : BGT[THEME]);//Fill TopLevel1
-    assign AudioBar[17] = FillRect(7'd42, 6'd19, 7'd53, 6'd20, LEVEL > 4'd13 ? HT[THEME] : BGT[THEME]);//Fill TopLevel1
-    assign AudioBar[18] = FillRect(7'd42, 6'd16, 7'd53, 6'd17, LEVEL > 4'd14 ? HT[THEME] : BGT[THEME]);//Fill TopLevel1
-    assign AudioBar[19] = DrawChar(7'd55, 6'd53, 20'd11, LEVEL > 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //L, original size
-    assign AudioBar[20] = DrawChar(7'd60, 6'd53, 20'd14, LEVEL > 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //O, original size
-    assign AudioBar[21] = DrawChar(7'd65, 6'd53, 20'd22, LEVEL > 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //W, original size
-    assign AudioBar[22] = DrawChar(7'd75, 6'd53, 20'd21, LEVEL > 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //V, original size
-    assign AudioBar[23] = DrawChar(7'd80, 6'd53, 20'd14, LEVEL > 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //O, original size
-    assign AudioBar[24] = DrawChar(7'd85, 6'd53, 20'd11, LEVEL > 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //L, original size
-    assign AudioBar[25] = DrawChar(7'd55, 6'd16, 20'd7, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //H, original size
-    assign AudioBar[26] = DrawChar(7'd60, 6'd16, 20'd8, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //I, original size
-    assign AudioBar[27] = DrawChar(7'd65, 6'd16, 20'd6, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //G, original size
-    assign AudioBar[28] = DrawChar(7'd70, 6'd16, 20'd7, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //H, original size
-    assign AudioBar[29] = DrawChar(7'd75, 6'd16, 20'd21, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //V, original size
-    assign AudioBar[30] = DrawChar(7'd80, 6'd16, 20'd14, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //O, original size
-    assign AudioBar[31] = DrawChar(7'd85, 6'd16, 20'd11, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //L, original size
+    assign AudioBar[0] = FillRect(7'd0, 6'd0, 7'd95, 6'd63, BG ? BGT[THEME] : BLACK);//Fill Background
+    assign AudioBar[1] = DrawRect(7'd0, 6'd0, 7'd95, 6'd63, BT[THEME]);// drawboarder outermost 1 pix at THK 1
+    assign AudioBar[2] = DrawRect(7'd1, 6'd1, 7'd94, 6'd62, THK ? BT[THEME] : BGT[THEME]);// drawboarder outermost 2 pix at THK 1
+    assign AudioBar[3] = DrawRect(7'd2, 6'd2, 7'd93, 6'd61, THK ? BT[THEME] : BGT[THEME]);// drawboarder outermost 3 pix at THK 1
+    assign AudioBar[4] = FillRect(7'd42, 6'd58, 7'd53, 6'd59, LEVEL == 4'd0 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel1
+    assign AudioBar[5] = FillRect(7'd42, 6'd55, 7'd53, 6'd56, LEVEL > 4'd0 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel2
+    assign AudioBar[6] = FillRect(7'd42, 6'd52, 7'd53, 6'd53, LEVEL > 4'd1 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel3
+    assign AudioBar[7] = FillRect(7'd42, 6'd49, 7'd53, 6'd50, LEVEL > 4'd2 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel4
+    assign AudioBar[8] = FillRect(7'd42, 6'd46, 7'd53, 6'd47, LEVEL > 4'd3 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel5
+    assign AudioBar[9] = FillRect(7'd42, 6'd43, 7'd53, 6'd44, LEVEL > 4'd4 ? LT[THEME] : BGT[THEME]);//Fill MidLevel6
+    assign AudioBar[10] = FillRect(7'd42, 6'd40, 7'd53, 6'd41, LEVEL > 4'd5 ? MT[THEME] : BGT[THEME]);//Fill MidLevel1
+    assign AudioBar[11] = FillRect(7'd42, 6'd37, 7'd53, 6'd38, LEVEL > 4'd6 ? MT[THEME] : BGT[THEME]);//Fill MidLevel2
+    assign AudioBar[12] = FillRect(7'd42, 6'd34, 7'd53, 6'd35, LEVEL > 4'd7 ? MT[THEME] : BGT[THEME]);//Fill MidLevel3
+    assign AudioBar[13] = FillRect(7'd42, 6'd31, 7'd53, 6'd32, LEVEL > 4'd8 ? MT[THEME] : BGT[THEME]);//Fill MidLevel4
+    assign AudioBar[14] = FillRect(7'd42, 6'd28, 7'd53, 6'd29, LEVEL > 4'd9 ? MT[THEME] : BGT[THEME]);//Fill TopLevel5
+    assign AudioBar[15] = FillRect(7'd42, 6'd25, 7'd53, 6'd26, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME]);//Fill TopLevel1
+    assign AudioBar[16] = FillRect(7'd42, 6'd22, 7'd53, 6'd23, LEVEL > 4'd11 ? HT[THEME] : BGT[THEME]);//Fill TopLevel2
+    assign AudioBar[17] = FillRect(7'd42, 6'd19, 7'd53, 6'd20, LEVEL > 4'd12 ? HT[THEME] : BGT[THEME]);//Fill TopLevel3
+    assign AudioBar[18] = FillRect(7'd42, 6'd16, 7'd53, 6'd17, LEVEL > 4'd13 ? HT[THEME] : BGT[THEME]);//Fill TopLevel4
+    assign AudioBar[18] = FillRect(7'd42, 6'd13, 7'd53, 6'd14, LEVEL > 4'd14 ? HT[THEME] : BGT[THEME]);//Fill TopLevel5    
+    assign AudioBar[19] = DrawChar(7'd55, 6'd53, 20'd11, LEVEL >= 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //L, original size
+    assign AudioBar[20] = DrawChar(7'd60, 6'd53, 20'd14, LEVEL >= 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //O, original size
+    assign AudioBar[21] = DrawChar(7'd65, 6'd53, 20'd22, LEVEL >= 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //W, original size
+    assign AudioBar[22] = DrawChar(7'd75, 6'd53, 20'd21, LEVEL >= 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //V, original size
+    assign AudioBar[23] = DrawChar(7'd80, 6'd53, 20'd14, LEVEL >= 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //O, original size
+    assign AudioBar[24] = DrawChar(7'd85, 6'd53, 20'd11, LEVEL >= 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //L, original size
+    assign AudioBar[25] = DrawChar(7'd55, 6'd13, 20'd7, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //H, original size
+    assign AudioBar[26] = DrawChar(7'd60, 6'd13, 20'd8, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //I, original size
+    assign AudioBar[27] = DrawChar(7'd65, 6'd13, 20'd6, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //G, original size
+    assign AudioBar[28] = DrawChar(7'd70, 6'd13, 20'd7, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //H, original size
+    assign AudioBar[29] = DrawChar(7'd75, 6'd13, 20'd21, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //V, original size
+    assign AudioBar[30] = DrawChar(7'd80, 6'd13, 20'd14, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //O, original size
+    assign AudioBar[31] = DrawChar(7'd85, 6'd13, 20'd11, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //L, original size
     always @(posedge CLK) begin
-        cmd <= AudioBar[count];
-        count <= count + 1;
+        cmd = AudioBar[count];
+        if((count == 6'd0) && (!BD)) count = 6'd3;
+        if((count == 6'd3) && (!BAR)) count = 6'd18;
+        if((count == 6'd18) && (!TXT)) count = 6'd31;
+        count = count + 6'd1;
+    end
+    assign CMD = cmd;
+endmodule
+
+module StartScreenSceneBuilder(input CLK, input [1:0] CURSORINDEX, output CMD);
+    reg [63:0] StartScreen [31:0];//32 commands
+    reg [5:0] count = 0;
+    reg [63:0] cmd;
+    reg [15:0] WHITE = {5'd31,6'd63,5'd31};
+    `include "CommandFunctions.v"
+    assign StartScreen[0] = QuickDrawSceneSprite(4'd0, 3'd0, WHITE,3'd1,2'b0 );
+    always @(posedge CLK) begin
+        cmd = StartScreen[count];
+        //count = count + 6'd1;
     end
     assign CMD = cmd;
 endmodule

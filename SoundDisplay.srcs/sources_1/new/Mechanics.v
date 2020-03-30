@@ -21,6 +21,8 @@
 
 
 module Mechanics(
-
+    input CLK, input RATE, input [6:0] X, input [5:0] Y,
+    output [6:0] NX, output [5:0] NY
     );
+    
 endmodule
