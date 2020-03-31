@@ -23,7 +23,7 @@ module mux_4to1_assign ( input [15:0] a, [15:0] b, [15:0] c, [15:0] d, [1:0] sel
    assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a); 
 endmodule
 
-module maze_pixel_map (input CLK, input [12:0] Pix, output reg [12:0] xvalue,reg [12:0] yvalue);
+module maze_pixel_mapping (input CLK, input [12:0] Pix, output reg [12:0] xvalue,reg [12:0] yvalue);
     always @ (posedge CLK) begin
         yvalue = Pix / 8'd96;   //0~64
         xvalue = Pix - yvalue * 8'd96;  //0~96
@@ -83,7 +83,6 @@ module maze_dot_movement (input CLK, BTNC,BTNU, BTND, BTNR, BTNL, validmove, out
     task1 ef2(CLK, BTND, QD);
     task1 ef3(CLK, BTNR, QR);
     task1 ef4(CLK, BTNL, QL);
-    
     
     always@(posedge CLK) begin
         if(QC == 1) begin 
@@ -150,34 +149,9 @@ module maze_display_win(input CLK, xvalue, yvalue, output reg [15:0] STREAM);
     end
 endmodule
 
-/*
-module maze_display(input CLK, state,[12:0] Pix, output reg [15:0] STREAM);
-    reg MAPG; 
-    reg MAPA; 
-    reg MAPM;
-    reg MAPE;
-    reg MAPO;
-    reg MAPV;
-    reg MAPR;
-    CharBlocks charG(20'd6, MAPG);   //[34:0] MAP
-    CharBlocks charA(20'd0, MAPA);
-    CharBlocks charM(20'd12, MAPM);
-    CharBlocks charE(20'd4, MAPE);
-    CharBlocks charO(20'd14, MAPO);
-    CharBlocks charV(20'd21, MAPV);
-    CharBlocks charR(20'd17, MAPR);
-endmodule
-
-module maze_draw_char(input CLK, [12:0] xvalue,[12:0] yvalue,[12:0] topleftx,[12:0] toplefty, [34:0] MAP, output reg [15:0] STREAM);
-    if((xvalue>=topleftx)&&(xvalue<=topleftx+3'd4)&&(yvalue>=toplefty)&&(yvalue<=toplefty+4'd6)) begin
-        STREAM = (xvalue && MAP[1])? 16'b1111100000000000:0;
-        
-    end
-endmodule
-*/
 
 
-
+//The main module
 module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     wire [12:0] xvalue;
     wire [12:0] yvalue;
@@ -196,16 +170,51 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     wire [1:0] sel;
     reg [1:0] MazeState;
     
-    
-    maze_pixel_map f0(CLK, Pix, xvalue,yvalue);
+    maze_pixel_mapping f0(CLK, Pix, xvalue,yvalue);
     maze_map f1(CLK,xvalue,yvalue,xdot, ydot, OnRoad);
     maze_map_color f2(CLK, OnRoad, stream1);
     maze_valid_move f3(CLK, xdot, ydot, validmove);
     maze_dot_movement f4(CLK, BTNC,BTNU, BTND, BTNR, BTNL,validmove, xdot, ydot, gamestart);
     maze_win f5(CLK, xdot, ydot, sel[0]);   ///this one will change
-    maze_display_win f6(CLK, xvalue, yvalue, stream2);
+    //maze_display_win f6(CLK, xvalue, yvalue, stream2);
+    
     assign STREAM = MazeState? oled_display : oled_playmode;
-    B16_MUX f7(stream2,stream1,sel[0],oled_playmode); 
+    //B16_MUX f7(stream2,stream1,sel[0],oled_playmode); 
     MazeSceneBuilder MSB(CLK, MazeState, oled_display);
-
+    
+    //Finite State Machine for maze game
+    localparam [1:0] IDL = 0;//idle
+    localparam [1:0] STR = 1;//gamestart 
+    localparam [1:0] STP = 2;//display WIN/LOSE
+    reg [1:0] STATE;
+    wire ON = gamestart;  //once gamestart=1, will change from IDL to STR
+    wire DONE;
+    always @ (posedge CLK) begin//change state
+        case (STATE)
+            IDL: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            STR: begin
+                if (DONE) STATE <= STP;//if done then stop
+                else STATE <= STR;//else start
+            end
+            STP: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            default: STATE <= IDL;//default idle
+        endcase
+    end
+    
+    always@(*)begin
+        case (STATE)
+            IDL: begin  //gamestart = 2'b00;
+            end
+            STR: begin
+            end
+            STP: begin
+            end
+        endcase
+    end
 endmodule
