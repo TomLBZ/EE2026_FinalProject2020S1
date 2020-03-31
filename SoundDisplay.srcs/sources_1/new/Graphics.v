@@ -500,10 +500,7 @@ module OnFillCircCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, 
 endmodule
 
 module Graphics(input [15:0] sw, input [3:0] Volume, input [3:0] swState, input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM);
-    reg [63:0] Cmd;
-    reg cmdPush;
     reg [6:0] CmdPushLoc = 0;
-    wire [63:0] CmdQout;
     wire [6:0] CmdX;
     wire [5:0] CmdY;
     wire [15:0] CmdCol;
@@ -511,17 +508,29 @@ module Graphics(input [15:0] sw, input [3:0] Volume, input [3:0] swState, input 
     wire CmdBusy;
     wire NextCmd;
     wire SW_ON = swState > 0;
-    wire validNextCmd = CmdQout[63] == 1;
+    //wire validNextCmd = CmdQout[63] == 1;
     wire ReadNext = ~CmdBusy ? WCLK : 0;
     reg [63:0] StartScreenCmd;
     reg [63:0] AudioVisualizationCmd;
+    reg cmdPush;
     pulser Psw(SW_ON, WCLK, cmdPush);
     pulser Pbz(~CmdBusy, WCLK, NextCmd);
-    //CommandQueue CMDQ(Cmd, ReadNext, onRefresh, cmdPush, CmdPushLoc, CmdQout);
+    wire [63:0] CmdQin;
+    wire Builder_WRITE;
+    wire [6:0] Builder_WADDR;
+    wire [63:0] CmdQout;
+    reg [63:0] Cmd;
+    reg [6:0] X;
+    reg [5:0] Y;
+    reg [15:0] C;
+    wire GPU_ON;
+    wire GPU_BUSY;
+    wire [6:0] GPU_RADDR;
+    CommandQueue #(128) CMDQ(CmdQin, ~GPU_BUSY, GPU_RADDR, Builder_WRITE, Builder_WADDR, CmdQout);
+    GraphicsProcessingUnit GPU(CmdQout, GPU_ON, WCLK, GPU_RADDR, X, Y, C, GPU_BUSY);
     assign Cmd = sw[13] ? AudioVisualizationCmd : StartScreenCmd;
-    StartScreenSceneBuilder SSSB(NextCmd, 2'b0, StartScreenCmd);
-    AudioVisualizationSceneBuilder AVSB(NextCmd, sw[6:5], sw[4], sw[3], sw[2], sw[1], sw[0], Volume, AudioVisualizationCmd);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
-    DisplayCommandCore DCMD(Cmd, SW_ON, WCLK, pixSet, CmdX, CmdY, CmdCol, CmdBusy);
+    StartScreenSceneBuilder #(15) SSSB(NextCmd, 2'b0, StartScreenCmd);
+    AudioVisualizationSceneBuilder #(34) AVSB(NextCmd, sw[6:5], sw[4], sw[3], sw[2], sw[1], sw[0], Volume, AudioVisualizationCmd);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
     DisplayRAM DRAM(Pix, ~WCLK, WCLK, pixSet, CmdX, CmdY, CmdCol, STREAM); //using negedge of WCLK to read, posedge to write
     /*
     `include "CommandFunctions.v"

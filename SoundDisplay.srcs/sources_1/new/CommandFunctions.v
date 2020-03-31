@@ -142,8 +142,8 @@ function [63:0] FillCirc;
 endfunction
 
 function [63:0] QuickDrawSceneSprite;//using SPRSCN command
-    input [3:0] LOCX;
-    input [2:0] LOCY;
+    input [6:0] LOCX;//actually 0 to 11
+    input [5:0] LOCY;//actually 0 to 7
     input [15:0] MCOLOR;
     input [6:0] INDEX;
     input [1:0] POWER;
@@ -155,5 +155,14 @@ function [63:0] QuickDrawSceneSprite;//using SPRSCN command
         QuickDrawSceneSprite[28:13] = MCOLOR;
         QuickDrawSceneSprite[35:29] = INDEX;
         QuickDrawSceneSprite[37:36] = POWER;
+    end
+endfunction
+
+function [63:0] JMP;
+    input [6:0] ADDR;
+    begin
+        JMP[63] = 1;//Enable
+        JMP[62:59] = 4'd15;//JMP
+        JMP[6:0] = ADDR;
     end
 endfunction

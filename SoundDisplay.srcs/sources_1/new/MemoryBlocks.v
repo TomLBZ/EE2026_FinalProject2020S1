@@ -29,170 +29,16 @@ module DisplayRAM(input [12:0] readPix, input AsyncReadCLK, input WCLK, input Wr
     end
 endmodule
 
-module CommandQueue(input [63:0] CMD, input RSIG, input RSTHEAD, input WSIG, input [6:0] WLOC, output [63:0] CurrentCommand);
-    reg [63:0] CMDQ [127:0];
+module CommandQueue #(parameter size = 128) (input [63:0] CMD, input RCLK, input [6:0] RADDR, input WCLK, input [6:0] WADDR, output [63:0] CurrentCommand);
+    reg [63:0] CMDQ [size - 1:0];
     reg [63:0] cCmd;
-    reg [6:0] RLOC = 7'd127;
-    wire [6:0] NRLOC = RSTHEAD == 1 ? 0 : RLOC + 1;
-    always @ (posedge RSIG) begin
-        cCmd = CMDQ[RLOC];
-        RLOC = NRLOC;
+    always @ (posedge RCLK) begin
+        cCmd = CMDQ[RADDR];
     end
     assign CurrentCommand = cCmd;
-    always @ (posedge WSIG) begin
-        if (WLOC != RLOC) CMDQ[WLOC] = CMD;
+    always @ (posedge WCLK) begin
+        if (WADDR != RADDR) CMDQ[WADDR] = CMD;
     end
-endmodule
-
-module DisplayCommandCore(input [63:0] Command,input ON, input CLK, output PixelSet, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);//64-bit command
-    localparam [1:0] IDL = 0;//idle
-    localparam [1:0] STR = 1;//start drawing
-    localparam [1:0] STP = 2;//end drawing
-    reg [1:0] STATE;
-    wire busy = STATE == STR;
-    wire PTBUSY;
-    wire LNBUSY;
-    wire CHRBUSY;
-    wire RECTBUSY;
-    wire CIRCBUSY;
-    wire SPRSCNBUSY;
-    wire FRECTBUSY;
-    wire FCIRCBUSY;
-    wire CMDBUSY = PTBUSY || LNBUSY || CHRBUSY || RECTBUSY || CIRCBUSY || SPRSCNBUSY || FRECTBUSY || FCIRCBUSY;//initially is zero
-    wire [63:0] cmd = CMDBUSY ? cmd : Command;
-    wire OnCommand = cmd[63];//enabling signal
-    wire DONE = !CMDBUSY;//if everything not busy then done
-    always @ (posedge CLK) begin//change state
-        case (STATE)
-            IDL: begin
-                if (ON) STATE <= STR;//if on then start
-                else STATE <= IDL;//else idle
-            end
-            STR: begin
-                if (DONE) STATE <= STP;//if done then stop
-                else STATE <= STR;//else start
-            end
-            STP: begin
-                if (ON) STATE <= STR;//if on then start
-                else STATE <= IDL;//else idle
-            end
-            default: STATE <= IDL;//default idle
-        endcase
-    end
-    wire [3:0] commandHead = cmd[62:59];//4 bit head
-    reg [6:0] XO;
-    reg [5:0] YO;
-    reg [15:0] CO;
-    localparam [3:0] IDLE = 0;//cmd[63]=1, rest empty
-    localparam [3:0] PT = 1;//cmd[0:6]X,[7:12]Y,[13:28]C
-    localparam [3:0] LN = 2;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
-    localparam [3:0] CHR = 3;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:58]CHR//30-bit char set{[29:54]AZ,[55:58]", . [ ]"}
-    localparam [3:0] RECT = 4;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
-    localparam [3:0] CIRC = 5;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
-    localparam [3:0] SPRSCN = 6;//cmd[0:6]X1,[7:12]Y1,[13:28]MCOLOR,[29:35]INDEX,[36:37]POWER
-    localparam [3:0] FRECT = 7;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
-    localparam [3:0] FCIRC = 8;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
-    wire onPT = busy && OnCommand && (commandHead == PT);
-    wire [6:0] PTXout;
-    wire [5:0] PTYout;
-    wire [15:0] PTCout;
-    OnPointCommand OPC(CLK, onPT, cmd, PTXout, PTYout, PTCout, PTBUSY);
-    wire onLN = busy && OnCommand && (commandHead == LN);
-    wire [6:0] LNXout;
-    wire [5:0] LNYout;
-    wire [15:0] LNCout;
-    OnLineCommand OLNC(CLK, onLN, cmd, LNXout, LNYout, LNCout, LNBUSY);
-    wire onCHR = busy && OnCommand && (commandHead == CHR);
-    wire [6:0] CHRXout;
-    wire [5:0] CHRYout;
-    wire [15:0] CHRCout;
-    OnCharCommand OCHRC(CLK, onCHR, cmd, CHRXout, CHRYout, CHRCout, CHRBUSY);
-    wire onRECT = busy && OnCommand && (commandHead == RECT);
-    wire [6:0] RECTXout;
-    wire [5:0] RECTYout;
-    wire [15:0] RECTCout;
-    OnRectCommand ORECTC(CLK, onRECT, cmd, RECTXout, RECTYout, RECTCout, RECTBUSY);
-    wire onCIRC = busy && OnCommand && (commandHead == CIRC);
-    wire [6:0] CIRCXout;
-    wire [5:0] CIRCYout;
-    wire [15:0] CIRCCout;
-    OnCircleCommand OCIRCC(CLK, onCIRC, cmd, CIRCXout, CIRCYout, CIRCCout, CIRCBUSY);
-    wire onSPRSCN = busy && OnCommand && (commandHead == SPRSCN);
-    wire [6:0] SPRSCNXout;
-    wire [5:0] SPRSCNYout;
-    wire [15:0] SPRSCNCout;
-    OnSceneSpriteCommand OSPRSCNC(CLK, onSPRSCN, cmd, SPRSCNXout, SPRSCNYout, SPRSCNCout, SPRSCNBUSY);
-    wire onFRECT = busy && OnCommand && (commandHead == FRECT);
-    wire [6:0] FRECTXout;
-    wire [5:0] FRECTYout;
-    wire [15:0] FRECTCout;
-    OnFillRectCommand OFRECTC(CLK, onFRECT, cmd, FRECTXout, FRECTYout, FRECTCout, FRECTBUSY);
-    wire onFCIRC = busy && OnCommand && (commandHead == FCIRC);
-    wire [6:0] FCIRCXout;
-    wire [5:0] FCIRCYout;
-    wire [15:0] FCIRCCout;
-    OnFillCircCommand OFCIRCC(CLK, onFCIRC, cmd, FCIRCXout, FCIRCYout, FCIRCCout, FCIRCBUSY);  
-    always @ (*) begin
-        if (busy && OnCommand) begin
-            case (commandHead)
-                IDLE:begin //move to bad point
-                    XO = 0;
-                    YO = 0;
-                    CO = {5'd0,6'd0,5'd0};
-                end
-                PT:begin 
-                    XO = PTXout;
-                    YO = PTYout;
-                    CO = PTCout;
-                end
-                LN:begin 
-                    XO = LNXout;
-                    YO = LNYout;
-                    CO = LNCout;
-                end
-                CHR:begin 
-                    XO = CHRXout;
-                    YO = CHRYout;
-                    CO = CHRCout;
-                end
-                RECT:begin 
-                    XO = RECTXout;
-                    YO = RECTYout;
-                    CO = RECTCout;
-                end
-                CIRC:begin 
-                    XO = CIRCXout;
-                    YO = CIRCYout;
-                    CO = CIRCCout;
-                end
-                SPRSCN:begin 
-                    XO = SPRSCNXout;
-                    YO = SPRSCNYout;
-                    CO = SPRSCNCout;
-                end
-                FRECT:begin 
-                    XO = FRECTXout;
-                    YO = FRECTYout;
-                    CO = FRECTCout;
-                end
-                FCIRC:begin
-                    XO = FCIRCXout;
-                    YO = FCIRCYout;
-                    CO = FCIRCCout;
-                end
-                default:begin //assume idle, move to bad point
-                    XO = 0;
-                    YO = 0;
-                    CO = {5'd0,6'd0,5'd0};
-                end
-            endcase
-        end
-    end
-    assign BUSY = busy;
-    assign PixelSet = CMDBUSY;
-    assign X = XO;
-    assign Y = YO;
-    assign COLOR = CO;
 endmodule
 
 module CharBlocks(input [19:0] CHR, output [34:0] MAP);
@@ -286,9 +132,9 @@ module SceneSpriteBlocks(input [6:0] SCN, output reg [15:0] COLOR[63:0]);
     end
 endmodule
 
-module AudioVisualizationSceneBuilder(input CLK, input [1:0] THEME, input THK, input BD, input BG, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD);
-    reg [63:0] AudioBar [31:0];//32 commands
-    reg [5:0] count = 0;
+module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, input [1:0] THEME, input THK, input BD, input BG, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD);
+    reg [63:0] AudioBar [scenesize - 1:0];//34 commands
+    reg [6:0] count = 0;
     reg [63:0] cmd;
     reg [15:0] BGT [2:0] = {{5'd0,6'd0,5'd0},{5'd31,6'd63,5'd31},{5'd0,6'd0,5'd31}};// black, white, blue
     reg [15:0] BT [2:0] = {{5'd31,6'd63,5'd31},{5'd0,6'd31,5'd0},{5'd31,6'd32,5'd0}};// white, dark green, orange
@@ -296,60 +142,92 @@ module AudioVisualizationSceneBuilder(input CLK, input [1:0] THEME, input THK, i
     reg [15:0] MT [2:0] = {{5'd31,6'd63,5'd0},{5'd0,6'd0,5'd15},{5'd0,6'd63,5'd0}};// yellow, dark blue, green
     reg [15:0] LT [2:0] = {{5'd0,6'd63,5'd0},{5'd0,6'd0,5'd0},{5'd31,6'd0,5'd31}};// green, black, magenta
     reg [15:0] BLACK = {5'd0, 6'd0, 5'd0};
+    wire [15:0] DEFCOL = BG ? BGT[THEME] : BLACK;
+    wire [15:0] BDCOL = BD ? BT[THEME] : DEFCOL;
+    wire [15:0] TBDCOL = (BD & THK) ? BT[THEME] : DEFCOL;
+    wire [15:0] LCCOL = BAR & (LEVEL >= 4'd0) ? LT[THEME] : DEFCOL;
+    wire [15:0] HCCOL = BAR & (LEVEL >= 4'd10) ? HT[THEME] : DEFCOL;
     `include "CommandFunctions.v"
-    assign AudioBar[0] = FillRect(7'd0, 6'd0, 7'd95, 6'd63, BG ? BGT[THEME] : BLACK);//Fill Background
-    assign AudioBar[1] = DrawRect(7'd0, 6'd0, 7'd95, 6'd63, BT[THEME]);// drawboarder outermost 1 pix at THK 1
-    assign AudioBar[2] = DrawRect(7'd1, 6'd1, 7'd94, 6'd62, THK ? BT[THEME] : BGT[THEME]);// drawboarder outermost 2 pix at THK 1
-    assign AudioBar[3] = DrawRect(7'd2, 6'd2, 7'd93, 6'd61, THK ? BT[THEME] : BGT[THEME]);// drawboarder outermost 3 pix at THK 1
-    assign AudioBar[4] = FillRect(7'd42, 6'd58, 7'd53, 6'd59, LEVEL == 4'd0 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel1
-    assign AudioBar[5] = FillRect(7'd42, 6'd55, 7'd53, 6'd56, LEVEL > 4'd0 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel2
-    assign AudioBar[6] = FillRect(7'd42, 6'd52, 7'd53, 6'd53, LEVEL > 4'd1 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel3
-    assign AudioBar[7] = FillRect(7'd42, 6'd49, 7'd53, 6'd50, LEVEL > 4'd2 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel4
-    assign AudioBar[8] = FillRect(7'd42, 6'd46, 7'd53, 6'd47, LEVEL > 4'd3 ? LT[THEME] : BGT[THEME]);//Fill BtmLevel5
-    assign AudioBar[9] = FillRect(7'd42, 6'd43, 7'd53, 6'd44, LEVEL > 4'd4 ? LT[THEME] : BGT[THEME]);//Fill MidLevel6
-    assign AudioBar[10] = FillRect(7'd42, 6'd40, 7'd53, 6'd41, LEVEL > 4'd5 ? MT[THEME] : BGT[THEME]);//Fill MidLevel1
-    assign AudioBar[11] = FillRect(7'd42, 6'd37, 7'd53, 6'd38, LEVEL > 4'd6 ? MT[THEME] : BGT[THEME]);//Fill MidLevel2
-    assign AudioBar[12] = FillRect(7'd42, 6'd34, 7'd53, 6'd35, LEVEL > 4'd7 ? MT[THEME] : BGT[THEME]);//Fill MidLevel3
-    assign AudioBar[13] = FillRect(7'd42, 6'd31, 7'd53, 6'd32, LEVEL > 4'd8 ? MT[THEME] : BGT[THEME]);//Fill MidLevel4
-    assign AudioBar[14] = FillRect(7'd42, 6'd28, 7'd53, 6'd29, LEVEL > 4'd9 ? MT[THEME] : BGT[THEME]);//Fill TopLevel5
-    assign AudioBar[15] = FillRect(7'd42, 6'd25, 7'd53, 6'd26, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME]);//Fill TopLevel1
-    assign AudioBar[16] = FillRect(7'd42, 6'd22, 7'd53, 6'd23, LEVEL > 4'd11 ? HT[THEME] : BGT[THEME]);//Fill TopLevel2
-    assign AudioBar[17] = FillRect(7'd42, 6'd19, 7'd53, 6'd20, LEVEL > 4'd12 ? HT[THEME] : BGT[THEME]);//Fill TopLevel3
-    assign AudioBar[18] = FillRect(7'd42, 6'd16, 7'd53, 6'd17, LEVEL > 4'd13 ? HT[THEME] : BGT[THEME]);//Fill TopLevel4
-    assign AudioBar[18] = FillRect(7'd42, 6'd13, 7'd53, 6'd14, LEVEL > 4'd14 ? HT[THEME] : BGT[THEME]);//Fill TopLevel5    
-    assign AudioBar[19] = DrawChar(7'd55, 6'd53, 20'd11, LEVEL >= 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //L, original size
-    assign AudioBar[20] = DrawChar(7'd60, 6'd53, 20'd14, LEVEL >= 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //O, original size
-    assign AudioBar[21] = DrawChar(7'd65, 6'd53, 20'd22, LEVEL >= 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //W, original size
-    assign AudioBar[22] = DrawChar(7'd75, 6'd53, 20'd21, LEVEL >= 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //V, original size
-    assign AudioBar[23] = DrawChar(7'd80, 6'd53, 20'd14, LEVEL >= 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //O, original size
-    assign AudioBar[24] = DrawChar(7'd85, 6'd53, 20'd11, LEVEL >= 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //L, original size
-    assign AudioBar[25] = DrawChar(7'd55, 6'd13, 20'd7, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //H, original size
-    assign AudioBar[26] = DrawChar(7'd60, 6'd13, 20'd8, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //I, original size
-    assign AudioBar[27] = DrawChar(7'd65, 6'd13, 20'd6, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //G, original size
-    assign AudioBar[28] = DrawChar(7'd70, 6'd13, 20'd7, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //H, original size
-    assign AudioBar[29] = DrawChar(7'd75, 6'd13, 20'd21, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //V, original size
-    assign AudioBar[30] = DrawChar(7'd80, 6'd13, 20'd14, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //O, original size
-    assign AudioBar[31] = DrawChar(7'd85, 6'd13, 20'd11, LEVEL > 4'd10 ? HT[THEME] : BGT[THEME],1'd0); //L, original size
+    function [15:0] LCOL;
+        input [3:0] CMP;
+        LCOL = BAR & (LEVEL > CMP) ? LT[THEME] : DEFCOL;
+    endfunction
+    function [15:0] MCOL;
+        input [3:0] CMP;
+        MCOL = BAR & (LEVEL > CMP) ? MT[THEME] : DEFCOL;
+    endfunction
+    function [15:0] HCOL;
+        input [3:0] CMP;
+        HCOL = BAR & (LEVEL > CMP) ? HT[THEME] : DEFCOL;
+    endfunction
+    assign AudioBar[0] = FillRect(7'd0, 6'd0, 7'd95, 6'd63, DEFCOL);//Fill Background
+    assign AudioBar[1] = DrawRect(7'd0, 6'd0, 7'd95, 6'd63, BDCOL);// drawboarder outermost 1 pix at THK 1
+    assign AudioBar[2] = DrawRect(7'd1, 6'd1, 7'd94, 6'd62, TBDCOL);// drawboarder outermost 2 pix at THK 1
+    assign AudioBar[3] = DrawRect(7'd2, 6'd2, 7'd93, 6'd61, TBDCOL);// drawboarder outermost 3 pix at THK 1
+    assign AudioBar[4] = FillRect(7'd42, 6'd58, 7'd53, 6'd59, LCCOL);//Fill BtmLevel1
+    assign AudioBar[5] = FillRect(7'd42, 6'd55, 7'd53, 6'd56, LCOL(4'd0));//Fill BtmLevel2
+    assign AudioBar[6] = FillRect(7'd42, 6'd52, 7'd53, 6'd53, LCOL(4'd1));//Fill BtmLevel3
+    assign AudioBar[7] = FillRect(7'd42, 6'd49, 7'd53, 6'd50, LCOL(4'd2));//Fill BtmLevel4
+    assign AudioBar[8] = FillRect(7'd42, 6'd46, 7'd53, 6'd47, LCOL(4'd3));//Fill BtmLevel5
+    assign AudioBar[9] = FillRect(7'd42, 6'd43, 7'd53, 6'd44, LCOL(4'd4));//Fill MidLevel6
+    assign AudioBar[10] = FillRect(7'd42, 6'd40, 7'd53, 6'd41, MCOL(4'd5));//Fill MidLevel1
+    assign AudioBar[11] = FillRect(7'd42, 6'd37, 7'd53, 6'd38, MCOL(4'd6));//Fill MidLevel2
+    assign AudioBar[12] = FillRect(7'd42, 6'd34, 7'd53, 6'd35, MCOL(4'd7));//Fill MidLevel3
+    assign AudioBar[13] = FillRect(7'd42, 6'd31, 7'd53, 6'd32, MCOL(4'd8));//Fill MidLevel4
+    assign AudioBar[14] = FillRect(7'd42, 6'd28, 7'd53, 6'd29, MCOL(4'd9));//Fill TopLevel5
+    assign AudioBar[15] = FillRect(7'd42, 6'd25, 7'd53, 6'd26, HCOL(4'd10));//Fill TopLevel1
+    assign AudioBar[16] = FillRect(7'd42, 6'd22, 7'd53, 6'd23, HCOL(4'd11));//Fill TopLevel2
+    assign AudioBar[17] = FillRect(7'd42, 6'd19, 7'd53, 6'd20, HCOL(4'd12));//Fill TopLevel3
+    assign AudioBar[18] = FillRect(7'd42, 6'd16, 7'd53, 6'd17, HCOL(4'd13));//Fill TopLevel4
+    assign AudioBar[19] = FillRect(7'd42, 6'd13, 7'd53, 6'd14, HCOL(4'd14));//Fill TopLevel5    
+    assign AudioBar[20] = DrawChar(7'd55, 6'd53, 20'd11, LCCOL,1'd0); //L, original size
+    assign AudioBar[21] = DrawChar(7'd60, 6'd53, 20'd14, LCCOL,1'd0); //O, original size
+    assign AudioBar[22] = DrawChar(7'd65, 6'd53, 20'd22, LCCOL,1'd0); //W, original size
+    assign AudioBar[23] = DrawChar(7'd75, 6'd53, 20'd21, LCCOL,1'd0); //V, original size
+    assign AudioBar[24] = DrawChar(7'd80, 6'd53, 20'd14, LCCOL,1'd0); //O, original size
+    assign AudioBar[25] = DrawChar(7'd85, 6'd53, 20'd11, LCCOL,1'd0); //L, original size
+    assign AudioBar[26] = DrawChar(7'd55, 6'd13, 20'd7, HCCOL,1'd0); //H, original size
+    assign AudioBar[27] = DrawChar(7'd60, 6'd13, 20'd8, HCCOL,1'd0); //I, original size
+    assign AudioBar[28] = DrawChar(7'd65, 6'd13, 20'd6, HCCOL,1'd0); //G, original size
+    assign AudioBar[29] = DrawChar(7'd70, 6'd13, 20'd7, HCCOL,1'd0); //H, original size
+    assign AudioBar[30] = DrawChar(7'd75, 6'd13, 20'd21, HCCOL,1'd0); //V, original size
+    assign AudioBar[31] = DrawChar(7'd80, 6'd13, 20'd14, HCCOL,1'd0); //O, original size
+    assign AudioBar[32] = DrawChar(7'd85, 6'd13, 20'd11, HCCOL,1'd0); //L, original size
+    assign AudioBar[33] = JMP(7'd0);//Jump to 0;
     always @(posedge CLK) begin
         cmd = AudioBar[count];
-        if((count == 6'd0) && (!BD)) count = 6'd3;
-        if((count == 6'd3) && (!BAR)) count = 6'd18;
-        if((count == 6'd18) && (!TXT)) count = 6'd31;
-        count = count + 6'd1;
+        if (count == 33) count = 0;
+        else count = count + 1;
     end
     assign CMD = cmd;
 endmodule
 
-module StartScreenSceneBuilder(input CLK, input [1:0] CURSORINDEX, output CMD);
-    reg [63:0] StartScreen [31:0];//32 commands
-    reg [5:0] count = 0;
+module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:0] CURSORINDEX, output CMD);
+    reg [63:0] StartScreen [scenesize - 1:0];//15 commands
+    reg [4:0] count = 0;
     reg [63:0] cmd;
     reg [15:0] WHITE = {5'd31,6'd63,5'd31};
+    reg [15:0] AQUA = {5'd10, 6'd40, 5'd31};
     `include "CommandFunctions.v"
-    assign StartScreen[0] = QuickDrawSceneSprite(4'd0, 3'd0, WHITE,3'd1,2'b0 );
+    assign StartScreen[0] = QuickDrawSceneSprite(7'd0, 6'd0, WHITE, 3'd1, 2'b10 );//brick wall (0,0), quadriple size
+    assign StartScreen[1] = QuickDrawSceneSprite(7'd4, 6'd0, WHITE, 3'd1, 2'b10 );//brick wall (1,0), quadriple size
+    assign StartScreen[2] = QuickDrawSceneSprite(7'd8, 6'd0, WHITE, 3'd1, 2'b10 );//brick wall (2,0), quadriple size
+    assign StartScreen[3] = QuickDrawSceneSprite(7'd0, 6'd4, WHITE, 3'd1, 2'b10 );//brick wall (0,1), quadriple size
+    assign StartScreen[4] = QuickDrawSceneSprite(7'd4, 6'd4, WHITE, 3'd1, 2'b10 );//brick wall (1,1), quadriple size
+    assign StartScreen[5] = QuickDrawSceneSprite(7'd8, 6'd4, WHITE, 3'd1, 2'b10 );//brick wall (2,1), quadriple size
+    assign StartScreen[6] = DrawRect(7'd15, 6'd22, 7'd81, 6'd41, WHITE);//Fill Chr Background
+    assign StartScreen[7] = DrawChar(7'd18, 6'd25, 20'd22, AQUA,1'd1); //W, double size
+    assign StartScreen[8] = DrawChar(7'd28, 6'd25, 20'd4, AQUA,1'd1); //E, double size
+    assign StartScreen[9] = DrawChar(7'd38, 6'd25, 20'd11, AQUA,1'd1); //L, double size
+    assign StartScreen[10] = DrawChar(7'd48, 6'd25, 20'd2, AQUA,1'd1); //C, double size
+    assign StartScreen[11] = DrawChar(7'd58, 6'd25, 20'd14, AQUA,1'd1); //O, double size
+    assign StartScreen[12] = DrawChar(7'd68, 6'd25, 20'd12, AQUA,1'd1); //M, double size
+    assign StartScreen[13] = DrawChar(7'd78, 6'd25, 20'd4, AQUA,1'd1); //E, double size
+    assign StartScreen[14] = JMP(7'd0);//JMP to 0
     always @(posedge CLK) begin
         cmd = StartScreen[count];
-        count = count + 6'd1;
+        if (count == 14) count = 0;
+        else count = count + 1;
     end
     assign CMD = cmd;
 endmodule
