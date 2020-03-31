@@ -191,34 +191,21 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     wire win;
     wire [15:0] stream1;
     wire [15:0] stream2;
+    wire [15:0] oled_playmode;
+    wire [15:0] oled_display;
     wire [1:0] sel;
+    reg [1:0] MazeState;
+    
+    
     maze_pixel_map f0(CLK, Pix, xvalue,yvalue);
     maze_map f1(CLK,xvalue,yvalue,xdot, ydot, OnRoad);
     maze_map_color f2(CLK, OnRoad, stream1);
     maze_valid_move f3(CLK, xdot, ydot, validmove);
     maze_dot_movement f4(CLK, BTNC,BTNU, BTND, BTNR, BTNL,validmove, xdot, ydot, gamestart);
-    maze_win f5(CLK, xdot, ydot, sel[0]);
+    maze_win f5(CLK, xdot, ydot, sel[0]);   ///this one will change
     maze_display_win f6(CLK, xvalue, yvalue, stream2);
-    B16_MUX f7(stream2,stream1,sel[0],STREAM); 
-    
-    /*
-    always @ (posedge CLK) begin
-        if(gamestart==1) begin
-            gamestate = 3'd1;
-            counter <= counter + 1;
-            //
-        end
-        if(counter[40]==1) begin 
-            if(validmove==0) gamestate=3'd3;
-            if (win==1) gamestate = 3'd4;
-            else gamestate = 3'd2;
-        end
-        
-        case (gamestate) 
-            3'd01: STREAM=16'b1111100000000000;
-            3'd03: STREAM=16'b0000011110000000;
-            3'd04: STREAM=16'b0000000001111111;
-        endcase
-    end
-    */
+    assign STREAM = MazeState? oled_display : oled_playmode;
+    B16_MUX f7(stream2,stream1,sel[0],oled_playmode); 
+    MazeSceneBuilder MSB(CLK, MazeState, oled_display);
+
 endmodule
