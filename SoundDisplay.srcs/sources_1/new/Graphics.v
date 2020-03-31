@@ -499,55 +499,36 @@ module OnFillCircCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, 
     assign Y = YO;
 endmodule
 
-module Graphics(input [15:0] sw, input [3:0] Volume, input [3:0] swState, input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM);
-    reg [6:0] CmdPushLoc = 0;
-    wire [6:0] CmdX;
-    wire [5:0] CmdY;
-    wire [15:0] CmdCol;
-    wire pixSet;
-    wire CmdBusy;
-    wire NextCmd;
-    wire SW_ON = swState > 0;
-    wire ReadNext = ~CmdBusy ? WCLK : 0;
+module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM);
+    localparam StrSize = 15;
+    localparam AV_Size = 34;
+    integer SIZE = StrSize + AV_Size;
     reg [63:0] StartScreenCmd;
+    wire [6:0] sssbCNT;
+    wire StartScreenWriting = sssbCNT == 14 ? 0 : 1;//finished writing all commands to the queue, then 0
+    wire StartScreenClock = StartScreenWriting ? WCLK : 0;
+    StartScreenSceneBuilder #(StrSize) SSSB(StartScreenClock, 2'b0, StartScreenCmd, sssbCNT);
     reg [63:0] AudioVisualizationCmd;
-    reg cmdPush;
-    pulser Psw(SW_ON, WCLK, cmdPush);
-    pulser Pbz(~CmdBusy, WCLK, NextCmd);
-    wire [63:0] CmdQin;
-    wire Builder_WRITE;
-    wire [6:0] Builder_WADDR;
+    wire [6:0] avsbCNT;
+    wire AudioVisualWriting = sssbCNT == 14 ? (avsbCNT == 33 ? 0 : 1) : 0;//finished writing all commands to the queue, then 0
+    wire AudioVisualClock = AudioVisualWriting ? WCLK : 0;
+    AudioVisualizationSceneBuilder #(AV_Size) AVSB(AudioVisualClock, sw[6:5], sw[4], sw[3], sw[2], sw[1], sw[0], Volume, AudioVisualizationCmd, avsbCNT);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
+    wire [63:0] CmdQin = StartScreenWriting ? StartScreenCmd : (AudioVisualWriting ? AudioVisualizationCmd : 0);
     wire [63:0] CmdQout;
-    reg [63:0] Cmd;
-    reg [6:0] X;
-    reg [5:0] Y;
-    reg [15:0] C;
-    wire GPU_ON;
+    wire Builder_WRITE = StartScreenWriting | AudioVisualWriting;
+    wire [6:0] Builder_WADDR = sssbCNT + avsbCNT;
     wire GPU_BUSY;
     wire [6:0] GPU_RADDR;
     CommandQueue #(128) CMDQ(CmdQin, ~GPU_BUSY, GPU_RADDR, Builder_WRITE, Builder_WADDR, CmdQout);
-    GraphicsProcessingUnit GPU(CmdQout, GPU_ON, WCLK, GPU_RADDR, X, Y, C, GPU_BUSY);
-    assign Cmd = sw[13] ? AudioVisualizationCmd : StartScreenCmd;
-    StartScreenSceneBuilder #(15) SSSB(NextCmd, 2'b0, StartScreenCmd);
-    AudioVisualizationSceneBuilder #(34) AVSB(NextCmd, sw[6:5], sw[4], sw[3], sw[2], sw[1], sw[0], Volume, AudioVisualizationCmd);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
-    DisplayRAM DRAM(Pix, ~WCLK, WCLK, pixSet, CmdX, CmdY, CmdCol, STREAM); //using negedge of WCLK to read, posedge to write
-    /*
-    `include "CommandFunctions.v"
-    always @ (*) begin//redraw onto the DRAM as a new frame
-        if (~CmdBusy) begin
-            CmdPushLoc = CmdPushLoc + 1;
-            case (swState)
-                4'd1: begin Cmd = DrawPoint(7'd48, 6'd32, {5'd31, 6'd63, 5'd31}); end // 1 - point // white point R,G,B
-                4'd2: begin Cmd = DrawLine(7'd16, 6'd48, 7'd80, 6'd48, {5'd31,6'd32,5'd0}); end // 2 - line // orange line R,0.5G,0
-                4'd3: begin Cmd = DrawChar(7'd46, 6'd29, 20'd5, {5'd0, 6'd0, 5'd31},1'd1); end // 3 - char // blue char 0,0,B
-                4'd4: begin Cmd = DrawRect(7'd32, 6'd16, 7'd64, 6'd48, {5'd31,6'd0,5'd0}); end // 4 - rectangle // red rect R,0,0
-                4'd5: begin Cmd = DrawCirc(7'd48, 6'd32, 5'd31, {5'd0, 6'd63, 5'd0}); end // 5 - circle // green circle 0,G,0
-                4'd6: begin Cmd = DrawSceneSprite(7'd0, 6'd48, {5'd31, 6'd63, 5'd31}, 7'd0); end // 6 - scene sprite // sprite scene[0-grass] 0,48 - 7,55
-                4'd7: begin Cmd = FillRect(7'd40, 6'd24, 7'd56, 6'd40, {5'd31,6'd63,5'd0}); end // 7 - fill rectangle // yellow frect R,G,0
-                4'd8: begin Cmd = FillCirc(7'd48, 6'd32, 5'd16, {5'd31, 6'd0, 5'd31}); end //8 - fill circle // magenta fcircle R,0,B
-                default: begin Cmd = 0; end // 0 - idle
-            endcase
-        end
-    end
-    */
+    reg [6:0] X;
+    reg [5:0] Y;
+    reg [15:0] C;
+    wire GPU_ON = 1;
+    reg [1:0] ImmediateState;
+    GraphicsProcessingUnit GPU(CmdQout, GPU_ON, WCLK, ImmediateState, GPU_RADDR, X, Y, C, GPU_BUSY);
+    DisplayRAM DRAM(Pix, ~WCLK, WCLK, GPU_BUSY, X, Y, C, STREAM); //using negedge of WCLK to read, posedge to write
+    localparam [1:0] STARTSCREEN = 2'b00;
+    localparam [1:0] VOLUMEBAR = 2'b01;
+    localparam [1:0] MAZE = 2'b10;
+    localparam [1:0] BADAPPLE = 2'b11;    
 endmodule

@@ -158,6 +158,17 @@ function [63:0] QuickDrawSceneSprite;//using SPRSCN command
     end
 endfunction
 
+function [63:0] SBNCH;
+    input [6:0] ADDR;
+    input [1:0] CMP;
+    begin
+        SBNCH[63] = 1;//Enable
+        SBNCH[62:59] = 4'd15;//JMP
+        SBNCH[6:0] = ADDR;//target address
+        SBNCH[8:7] = CMP;
+    end
+endfunction
+
 function [63:0] JMP;
     input [6:0] ADDR;
     begin

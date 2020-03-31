@@ -78,48 +78,20 @@ module B16_MUX(input [15:0] D1, input [15:0] D2, input S, output [15:0] Q);
     M21 M15(D1[15],D2[15],S,Q[15]);
 endmodule
 
-module swState #(parameter START = 15, END = 0)(input [START:END] sw, input [START:END] password, output state);
-    assign state = sw == password ? 1:0;
-endmodule
-
-module swBitsToState (input [14:0] sw, output [3:0] state);
-    reg mask = 15'b000000000000001;
-    reg [3:0] outstate = 0;
-    always @ (sw) begin
-        outstate = 0;
-        if(sw & (mask << 0)) outstate = 1;
-        if(sw & (mask << 1)) outstate = 2;
-        if(sw & (mask << 2)) outstate = 3;
-        if(sw & (mask << 3)) outstate = 4;
-        if(sw & (mask << 4)) outstate = 5;
-        if(sw & (mask << 5)) outstate = 6;
-        if(sw & (mask << 6)) outstate = 7;
-        if(sw & (mask << 7)) outstate = 8;
-        if(sw & (mask << 8)) outstate = 9;
-        if(sw & (mask << 9)) outstate = 10;
-        if(sw & (mask << 10)) outstate = 11;
-        if(sw & (mask << 11)) outstate = 12;
-        if(sw & (mask << 12)) outstate = 13;
-        if(sw & (mask << 13)) outstate = 14;
-        if(sw & (mask << 14)) outstate = 15;
-    end
-    assign state = outstate;
-endmodule
-
 module ButtonStates(input [4:0] btn, input CLK, output [4:0] IsButtonPressed, output [4:0] ButtonPressPulses, output [4:0] ButtonReleasePulses);
     wire [4:0] PressPulses;
     wire [4:0] ReleasePulses;
     reg [4:0] States;
-    pulser p0(btn[0],PressPulses[0]);
-    pulser p1(btn[1],PressPulses[1]);
-    pulser p2(btn[2],PressPulses[2]);
-    pulser p3(btn[3],PressPulses[3]);
-    pulser p4(btn[4],PressPulses[4]);
-    pulser p5(~btn[0],ReleasePulses[0]);
-    pulser p6(~btn[1],ReleasePulses[1]);
-    pulser p7(~btn[2],ReleasePulses[2]);
-    pulser p8(~btn[3],ReleasePulses[3]);
-    pulser p9(~btn[4],ReleasePulses[4]);
+    pulser p0(btn[0],CLK,PressPulses[0]);
+    pulser p1(btn[1],CLK,PressPulses[1]);
+    pulser p2(btn[2],CLK,PressPulses[2]);
+    pulser p3(btn[3],CLK,PressPulses[3]);
+    pulser p4(btn[4],CLK,PressPulses[4]);
+    pulser p5(~btn[0],CLK,ReleasePulses[0]);
+    pulser p6(~btn[1],CLK,ReleasePulses[1]);
+    pulser p7(~btn[2],CLK,ReleasePulses[2]);
+    pulser p8(~btn[3],CLK,ReleasePulses[3]);
+    pulser p9(~btn[4],CLK,ReleasePulses[4]);
     always @ (posedge CLK) begin
         if (PressPulses[0]) States[0] = 1;
         if (PressPulses[1]) States[1] = 1;
@@ -141,38 +113,38 @@ module SwitchStates(input [15:0] sw, input CLK, output [15:0] IsSwitchOn, output
     wire [15:0] OnPulses;
     wire [15:0] OffPulses;
     reg [15:0] States;
-    pulser p0(sw[0],OnPulses[0]);
-    pulser p1(sw[1],OnPulses[1]);
-    pulser p2(sw[2],OnPulses[2]);
-    pulser p3(sw[3],OnPulses[3]);
-    pulser p4(sw[4],OnPulses[4]);
-    pulser p5(sw[5],OnPulses[5]);
-    pulser p6(sw[6],OnPulses[6]);
-    pulser p7(sw[7],OnPulses[7]);
-    pulser p8(sw[8],OnPulses[8]);
-    pulser p9(sw[9],OnPulses[9]);
-    pulser p10(sw[10],OnPulses[10]);
-    pulser p11(sw[11],OnPulses[11]);
-    pulser p12(sw[12],OnPulses[12]);
-    pulser p13(sw[13],OnPulses[13]);
-    pulser p14(sw[14],OnPulses[14]);
-    pulser p15(sw[15],OnPulses[15]);
-    pulser p16(~sw[0],OffPulses[0]);
-    pulser p17(~sw[1],OffPulses[1]);
-    pulser p18(~sw[2],OffPulses[2]);
-    pulser p19(~sw[3],OffPulses[3]);
-    pulser p20(~sw[4],OffPulses[4]);
-    pulser p21(~sw[5],OffPulses[5]);
-    pulser p22(~sw[6],OffPulses[6]);
-    pulser p23(~sw[7],OffPulses[7]);
-    pulser p24(~sw[8],OffPulses[8]);
-    pulser p25(~sw[9],OffPulses[9]);
-    pulser p26(~sw[10],OffPulses[10]);
-    pulser p27(~sw[11],OffPulses[11]);
-    pulser p28(~sw[12],OffPulses[12]);
-    pulser p29(~sw[13],OffPulses[13]);
-    pulser p30(~sw[14],OffPulses[14]);
-    pulser p31(~sw[15],OffPulses[15]);
+    pulser p0(sw[0],CLK,OnPulses[0]);
+    pulser p1(sw[1],CLK,OnPulses[1]);
+    pulser p2(sw[2],CLK,OnPulses[2]);
+    pulser p3(sw[3],CLK,OnPulses[3]);
+    pulser p4(sw[4],CLK,OnPulses[4]);
+    pulser p5(sw[5],CLK,OnPulses[5]);
+    pulser p6(sw[6],CLK,OnPulses[6]);
+    pulser p7(sw[7],CLK,OnPulses[7]);
+    pulser p8(sw[8],CLK,OnPulses[8]);
+    pulser p9(sw[9],CLK,OnPulses[9]);
+    pulser p10(sw[10],CLK,OnPulses[10]);
+    pulser p11(sw[11],CLK,OnPulses[11]);
+    pulser p12(sw[12],CLK,OnPulses[12]);
+    pulser p13(sw[13],CLK,OnPulses[13]);
+    pulser p14(sw[14],CLK,OnPulses[14]);
+    pulser p15(sw[15],CLK,OnPulses[15]);
+    pulser p16(~sw[0],CLK,OffPulses[0]);
+    pulser p17(~sw[1],CLK,OffPulses[1]);
+    pulser p18(~sw[2],CLK,OffPulses[2]);
+    pulser p19(~sw[3],CLK,OffPulses[3]);
+    pulser p20(~sw[4],CLK,OffPulses[4]);
+    pulser p21(~sw[5],CLK,OffPulses[5]);
+    pulser p22(~sw[6],CLK,OffPulses[6]);
+    pulser p23(~sw[7],CLK,OffPulses[7]);
+    pulser p24(~sw[8],CLK,OffPulses[8]);
+    pulser p25(~sw[9],CLK,OffPulses[9]);
+    pulser p26(~sw[10],CLK,OffPulses[10]);
+    pulser p27(~sw[11],CLK,OffPulses[11]);
+    pulser p28(~sw[12],CLK,OffPulses[12]);
+    pulser p29(~sw[13],CLK,OffPulses[13]);
+    pulser p30(~sw[14],CLK,OffPulses[14]);
+    pulser p31(~sw[15],CLK,OffPulses[15]);
     always @ (posedge CLK) begin
         if (OnPulses[0]) States[0] = 1;
         if (OnPulses[1]) States[1] = 1;
@@ -216,13 +188,10 @@ module Peripherals(
     input CLOCK, [2:0] clkReset, [4:0] slowBit, [4:0] btns,[15:0] sw,
     output [3:0] Clock,//100M, 6.25M, 20k, _flexible_
     output [15:0] swStates, [15:0] swOnPulses, [15:0] swOffPulses,
-    output [4:0] btnStates, [4:0] btnPressPulses, [4:0] btnReleasePulses,
-    output led_MUX_toggle, [3:0] led_oled_state
+    output [4:0] btnStates, [4:0] btnPressPulses, [4:0] btnReleasePulses
     );
     TripleChannelClock tcc(CLOCK,clkReset,slowBit,Clock[2],Clock[1],Clock[0]);
     ButtonStates BS(btns, CLOCK, btnStates, btnPressPulses, btnReleasePulses);
     SwitchStates SS(sw, CLOCK, swStates, swOnPulses, swOffPulses);
-    swState #(15,15) sws(sw[15], 1, led_MUX_toggle);
-    swBitsToState swbts(sw[14:0], led_oled_state);//try to remove this
     assign Clock[3] = CLOCK;
 endmodule

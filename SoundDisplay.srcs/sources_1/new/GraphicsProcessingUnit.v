@@ -19,7 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, output [6:0] RADDR, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);//64-bit command
+module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1:0] IMME, output [6:0] RADDR, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);//64-bit command
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
     localparam [1:0] STP = 2;//end drawing
@@ -32,6 +32,7 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, output [
     localparam [3:0] SPRSCN = 6;//cmd[0:6]X1,[7:12]Y1,[13:28]MCOLOR,[29:35]INDEX,[36:37]POWER
     localparam [3:0] FRECT = 7;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
     localparam [3:0] FCIRC = 8;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
+    localparam [3:0] SBNCH = 13;//cmd[0:6]RADDR,[7:8]CMP
     localparam [3:0] JMP = 15;//cmd[0:6]RADDR;
     reg [1:0] STATE;
     wire busy = STATE == STR;
@@ -89,6 +90,9 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, output [
     reg [6:0] raddr = 0;
     always @ (posedge CLK) begin
         if (commandHead == JMP) raddr = Command[6:0];
+        else if (commandHead == SBNCH) begin
+            if (IMME == Command[8:7]) raddr = Command[6:0];
+        end
         else raddr = raddr + 1;
     end
     assign RADDR = raddr;

@@ -21,17 +21,14 @@ module Top_Student (
     reg [2:0] clkrst = 0;//reset clock
     reg [4:0] sbit = 5'd21;//slow clock's reading bit. Freq(sclk) = Freq(CLK) / 2^(sbit + 1).
     wire [3:0] CLK;//[100M, 6.25M, 20k, _flexible_]
-    wire [15:0] SwitchStates;//the states of switches
-    wire [15:0] SwitchOnPulses;//contains pulses of "turning on" action of switches
-    wire [15:0] SwitchOffPulses;//contains pulses of "turning off" action of switches
-    wire [4:0] ButtonStates;//the states of buttons (is pressed and held down or not)
-    wire [4:0] ButtonPressPulses;//contains pulses of "pressing down" action of buttons
-    wire [4:0] ButtonReleasePulses;//contains pulses of "releasing up" action of buttons
-    wire led_MUX_toggle;
-    wire [3:0] graphicsState;//determines state of graphics
-    Peripherals peripherals(CLK100MHZ, clkrst, sbit, btn, sw,
-                CLK, SwitchStates, SwitchOnPulses, SwitchOffPulses, ButtonStates, ButtonPressPulses, ButtonReleasePulses,led_MUX_toggle, graphicsState);
-    wire reset = ButtonPressPulses[0] | (clkrst ? 1 : 0);
+    wire [15:0] SwStates;//the states of switches
+    wire [15:0] SwOnPulses;//contains pulses of "turning on" action of switches
+    wire [15:0] SwOffPulses;//contains pulses of "turning off" action of switches
+    wire [4:0] BtnStates;//the states of buttons (is pressed and held down or not)
+    wire [4:0] BtnPressPulses;//contains pulses of "pressing down" action of buttons
+    wire [4:0] BtnReleasePulses;//contains pulses of "releasing up" action of buttons
+    Peripherals peripherals(CLK100MHZ, clkrst, sbit, btn, sw, CLK, SwStates, SwOnPulses, SwOffPulses, BtnStates, BtnPressPulses, BtnReleasePulses);
+    wire reset = BtnPressPulses[0] | (clkrst ? 1 : 0);
     wire [15:0] oled_data;// = 16'h07E0;//pixel data to be sent
     wire [12:0] currentPixel;//current pixel being updated, goes from 0 to 6143.
     wire [4:0] testState;
@@ -44,7 +41,7 @@ module Top_Student (
     wire [3:0] volume;//current sound level from 0 to 15
     wire [15:0] mic_mapped;//processed data for led display
     AV_Indicator av1(CLK[3],CLK[1],CLK[0], mic_in,an,seg,mic_mapped,volume);
-    B16_MUX led_mux(mic_mapped,{4'b0,mic_in},led_MUX_toggle,led[15:0]);
-    Graphics g(sw, volume, graphicsState, onRefresh, CLK[3], currentPixel, oled_data);    
+    B16_MUX led_mux(mic_mapped,{4'b0,mic_in},SwStates[15],led[15:0]);
+    Graphics g(SwStates, volume, onRefresh, CLK[3], currentPixel, oled_data);    
     //game_maze(CLK100MHZ,btn[0], btn[1], btn[4], btn[3], btn[2],currentPixel, oled_data);//wait for new devel
 endmodule

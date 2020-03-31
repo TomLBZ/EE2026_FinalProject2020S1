@@ -132,7 +132,7 @@ module SceneSpriteBlocks(input [6:0] SCN, output reg [15:0] COLOR[63:0]);
     end
 endmodule
 
-module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, input [1:0] THEME, input THK, input BD, input BG, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD);
+module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, input [1:0] THEME, input THK, input BD, input BG, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD, output [6:0] CNT);
     reg [63:0] AudioBar [scenesize - 1:0];//34 commands
     reg [6:0] count = 0;
     reg [63:0] cmd;
@@ -200,9 +200,10 @@ module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, in
         else count = count + 1;
     end
     assign CMD = cmd;
+    assign CNT = count;
 endmodule
 
-module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:0] CURSORINDEX, output CMD);
+module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:0] CURSORINDEX, output CMD, output [4:0] CNT);
     reg [63:0] StartScreen [scenesize - 1:0];//15 commands
     reg [4:0] count = 0;
     reg [63:0] cmd;
@@ -223,11 +224,12 @@ module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:
     assign StartScreen[11] = DrawChar(7'd58, 6'd25, 20'd14, AQUA,1'd1); //O, double size
     assign StartScreen[12] = DrawChar(7'd68, 6'd25, 20'd12, AQUA,1'd1); //M, double size
     assign StartScreen[13] = DrawChar(7'd78, 6'd25, 20'd4, AQUA,1'd1); //E, double size
-    assign StartScreen[14] = JMP(7'd0);//JMP to 0
+    assign StartScreen[14] = SBNCH(7'd0, 2'b00);//JMP to 0 if imme is in startscreen mode
     always @(posedge CLK) begin
         cmd = StartScreen[count];
         if (count == 14) count = 0;
         else count = count + 1;
     end
     assign CMD = cmd;
+    assign CNT = count;
 endmodule

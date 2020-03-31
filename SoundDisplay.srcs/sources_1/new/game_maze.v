@@ -180,7 +180,7 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     
     assign STREAM = MazeState? oled_display : oled_playmode;
     //B16_MUX f7(stream2,stream1,sel[0],oled_playmode); 
-    MazeSceneBuilder MSB(CLK, MazeState, oled_display);
+    //MazeSceneBuilder MSB(CLK, MazeState, oled_display);
     
     //Finite State Machine for maze game
     localparam [1:0] IDL = 0;//idle
