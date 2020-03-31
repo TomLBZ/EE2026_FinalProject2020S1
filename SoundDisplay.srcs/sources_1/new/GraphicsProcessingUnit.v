@@ -71,9 +71,6 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, output [
     wire [6:0] Xout[15:0];//Xouts
     wire [5:0] Yout[15:0];//Youts
     wire [15:0] Cout[15:0];//Couts
-    assign Xout[0] = 0;//idle
-    assign Yout[0] = 0;//idle
-    assign Cout[0] = 0;//idle
     OnPointCommand OPC(CLK, O[PT], Command, Xout[PT], Yout[PT], Cout[PT], B[PT]);
     OnLineCommand OLNC(CLK, O[LN], Command, Xout[LN], Yout[LN], Cout[LN], B[LN]);
     OnCharCommand OCHRC(CLK, O[CHR], Command, Xout[CHR], Yout[CHR], Cout[CHR], B[CHR]);

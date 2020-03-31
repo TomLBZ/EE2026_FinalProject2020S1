@@ -223,6 +223,6 @@ module Peripherals(
     ButtonStates BS(btns, CLOCK, btnStates, btnPressPulses, btnReleasePulses);
     SwitchStates SS(sw, CLOCK, swStates, swOnPulses, swOffPulses);
     swState #(15,15) sws(sw[15], 1, led_MUX_toggle);
-    swBitsToState swbts(sw[14:0], led_oled_state);
+    swBitsToState swbts(sw[14:0], led_oled_state);//try to remove this
     assign Clock[3] = CLOCK;
 endmodule

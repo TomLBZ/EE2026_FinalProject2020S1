@@ -163,6 +163,6 @@ function [63:0] JMP;
     begin
         JMP[63] = 1;//Enable
         JMP[62:59] = 4'd15;//JMP
-        JMP[6:0] = ADDR;
+        JMP[6:0] = ADDR;//target address
     end
 endfunction

@@ -215,7 +215,7 @@ module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:
     assign StartScreen[3] = QuickDrawSceneSprite(7'd0, 6'd4, WHITE, 3'd1, 2'b10 );//brick wall (0,1), quadriple size
     assign StartScreen[4] = QuickDrawSceneSprite(7'd4, 6'd4, WHITE, 3'd1, 2'b10 );//brick wall (1,1), quadriple size
     assign StartScreen[5] = QuickDrawSceneSprite(7'd8, 6'd4, WHITE, 3'd1, 2'b10 );//brick wall (2,1), quadriple size
-    assign StartScreen[6] = DrawRect(7'd15, 6'd22, 7'd81, 6'd41, WHITE);//Fill Chr Background
+    assign StartScreen[6] = DrawRect(7'd15, 6'd22, 7'd81, 6'd41, WHITE);//Draw Chr boarderline white
     assign StartScreen[7] = DrawChar(7'd18, 6'd25, 20'd22, AQUA,1'd1); //W, double size
     assign StartScreen[8] = DrawChar(7'd28, 6'd25, 20'd4, AQUA,1'd1); //E, double size
     assign StartScreen[9] = DrawChar(7'd38, 6'd25, 20'd11, AQUA,1'd1); //L, double size
@@ -228,45 +228,6 @@ module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:
         cmd = StartScreen[count];
         if (count == 14) count = 0;
         else count = count + 1;
-    end
-    assign CMD = cmd;
-endmodule
-
-
-module MazeSceneBuilder(input CLK, input [1:0] MazeState, output CMD);
-    reg [63:0] MazeScene [31:0];//32 commands
-    reg [5:0] count = 0;
-    reg [63:0] cmd;
-    reg [15:0] RED = {5'd31,6'd0,5'd0};
-    `include "CommandFunctions.v"
-    // zui hou ce shi shi tong yi gai pai ban, xian zai bu yao guan wei zhi
-    //GAME START             //x position   y    char  on  size
-    assign MazeScene[0] = DrawChar(7'd10, 6'd20, 20'd6, RED ,1'd0); //G, original size
-    assign MazeScene[1] = DrawChar(7'd15, 6'd20, 20'd0, RED ,1'd0); //A, original size
-    assign MazeScene[2] = DrawChar(7'd20, 6'd20, 20'd12, RED ,1'd0); //M, original size
-    assign MazeScene[3] = DrawChar(7'd25, 6'd20, 20'd4, RED ,1'd0); //E, original size
-    assign MazeScene[4] = DrawChar(7'd30, 6'd20, 20'd14, RED ,1'd0); //O, original size
-    assign MazeScene[5] = DrawChar(7'd35, 6'd20, 20'd21, RED ,1'd0); //V, original size
-    assign MazeScene[6] = DrawChar(7'd40, 6'd20, 20'd4, RED ,1'd0); //E, original size
-    assign MazeScene[7] = DrawChar(7'd45, 6'd20, 20'd17, RED ,1'd0); //R, original size
-    
-    //WIN
-    assign MazeScene[8] = DrawChar(7'd10, 6'd20, 20'd22, RED ,1'd0); //W, original size
-    assign MazeScene[9] = DrawChar(7'd20, 6'd20, 20'd8, RED ,1'd0); //I, original size
-    assign MazeScene[10] = DrawChar(7'd30, 6'd20, 20'd13, RED ,1'd0); //N, original size
-    
-    //LOSE
-    assign MazeScene[11] = DrawChar(7'd10, 6'd20, 20'd6, RED ,1'd0); //L, original size
-    assign MazeScene[12] = DrawChar(7'd15, 6'd20, 20'd6, RED ,1'd0); //O, original size
-    assign MazeScene[13] = DrawChar(7'd20, 6'd20, 20'd6, RED ,1'd0); //S, original size
-    assign MazeScene[14] = DrawChar(7'd25, 6'd20, 20'd6, RED ,1'd0); //E, original size
-    
-    always @(posedge CLK) begin
-        cmd = MazeScene[count];
-        if((count == 6'd0) && (MazeState==2'b01)) count = 6'd7;
-        if((count == 6'd7) && (MazeState==2'b10)) count = 6'd10;
-        if((count == 6'd10) && (MazeState==2'b11)) count = 6'd14;
-        count = count + 6'd1;
     end
     assign CMD = cmd;
 endmodule
