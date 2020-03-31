@@ -150,20 +150,7 @@ module maze_display_win(input CLK, xvalue, yvalue, output reg [15:0] STREAM);
     end
 endmodule
 
-module maze_display_start_builder (input CLK,output [63:0] CMD);
-    reg [63:0] MazeScene [31:0];//32 commands
-    reg [5:0] count = 0;
-    reg [63:0] cmd;
-    `include "CommandFunctions.v"
-    //assign MazeScene[0] = DrawChar(7'd55, 6'd53, 20'd11, LEVEL >= 4'd0 ? LT[THEME] : BGT[THEME],1'd0); //L, original size
-    assign MazeScene[0] = DrawChar(7'd46, 6'd29, 20'd5, {5'd0, 6'd0, 5'd31},1'd1); end // 3 - char // blue char 0,0,B
-    always @(posedge CLK) begin
-        cmd = MazeScene[count];
-        count = count + 6'd1;
-    end
-    assign CMD = cmd;
-endmodule
-
+/*
 module maze_display(input CLK, state,[12:0] Pix, output reg [15:0] STREAM);
     reg MAPG; 
     reg MAPA; 
@@ -180,7 +167,7 @@ module maze_display(input CLK, state,[12:0] Pix, output reg [15:0] STREAM);
     CharBlocks charV(20'd21, MAPV);
     CharBlocks charR(20'd17, MAPR);
 endmodule
-/* 
+
 module maze_draw_char(input CLK, [12:0] xvalue,[12:0] yvalue,[12:0] topleftx,[12:0] toplefty, [34:0] MAP, output reg [15:0] STREAM);
     if((xvalue>=topleftx)&&(xvalue<=topleftx+3'd4)&&(yvalue>=toplefty)&&(yvalue<=toplefty+4'd6)) begin
         STREAM = (xvalue && MAP[1])? 16'b1111100000000000:0;
