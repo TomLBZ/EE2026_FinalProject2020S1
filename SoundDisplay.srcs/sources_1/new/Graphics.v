@@ -512,7 +512,8 @@ module Graphics(input [15:0] sw, input [3:0] Volume, input [3:0] swState, input 
     wire ReadNext = ~CmdBusy ? WCLK : 0;
     reg [63:0] StartScreenCmd;
     reg [63:0] AudioVisualizationCmd;
-    reg cmdPush;
+    reg [63:0] StartmazeCmd;
+    reg [1:0] MazeState;
     pulser Psw(SW_ON, WCLK, cmdPush);
     pulser Pbz(~CmdBusy, WCLK, NextCmd);
     wire [63:0] CmdQin;
@@ -532,6 +533,10 @@ module Graphics(input [15:0] sw, input [3:0] Volume, input [3:0] swState, input 
     StartScreenSceneBuilder #(15) SSSB(NextCmd, 2'b0, StartScreenCmd);
     AudioVisualizationSceneBuilder #(34) AVSB(NextCmd, sw[6:5], sw[4], sw[3], sw[2], sw[1], sw[0], Volume, AudioVisualizationCmd);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
     DisplayRAM DRAM(Pix, ~WCLK, WCLK, pixSet, CmdX, CmdY, CmdCol, STREAM); //using negedge of WCLK to read, posedge to write
+    
+    //added maze scene builder (if not correct, just comment)
+    MazeSceneBuilder MSB(NextCmd, MazeState, StartMazeCmd);
+    
     /*
     `include "CommandFunctions.v"
     always @ (*) begin//redraw onto the DRAM as a new frame
