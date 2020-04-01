@@ -202,3 +202,7 @@ function [63:0] JMP;
         JMP[58:7] = 0;
     end
 endfunction
+
+function [63:0] IdleCmd;
+    IdleCmd = {1'b1,63'b0};
+endfunction;
