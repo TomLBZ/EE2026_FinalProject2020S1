@@ -146,7 +146,7 @@ module SceneSpriteBlocks(input [6:0] SCN, output reg [15:0] COLOR[63:0]);
     end
 endmodule
 
-module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, input [6:0] Qstart, input [1:0] THEME, input THK, input BD, input BG, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD, output [6:0] CNT);
+module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, input Reflush, input [6:0] Qstart, input [1:0] THEME, input THK, input BD, input BG, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD, output [6:0] CNT);
     reg [63:0] AudioBar [scenesize - 1:0];//34 commands
     reg [6:0] count = 0 - 1;
     reg [63:0] cmd = 64'd0;
@@ -209,6 +209,7 @@ module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, in
     assign AudioBar[32] = DrawChar(7'd85, 6'd13, 20'd11, HCCOL,1'd0); //L, original size
     assign AudioBar[33] = JMP(Qstart);//Jump to Qstart;
     always @(posedge CLK) begin
+        if (Reflush) count = 0;
         if (count == scenesize) count = 0;
         else count = count + 1;
         cmd = AudioBar[count];
@@ -230,15 +231,15 @@ module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:
     assign StartScreen[3] = QuickDrawSceneSprite(7'd0, 6'd4, WHITE, 3'd0, 2'd2 );//grass block (0,1), quadriple size
     assign StartScreen[4] = QuickDrawSceneSprite(7'd4, 6'd4, WHITE, 3'd0, 2'd2 );//grass block (1,1), quadriple size
     assign StartScreen[5] = QuickDrawSceneSprite(7'd8, 6'd4, WHITE, 3'd0, 2'd2 );//grass block (2,1), quadriple size
-    assign StartScreen[6] = DrawRect(7'd15, 6'd22, 7'd81, 6'd41, WHITE);//Draw Chr boarderline white
-    assign StartScreen[7] = DrawChar(7'd18, 6'd25, 20'd22, AQUA,1'd1); //W, double size
-    assign StartScreen[8] = DrawChar(7'd28, 6'd25, 20'd4, AQUA,1'd1); //E, double size
-    assign StartScreen[9] = DrawChar(7'd38, 6'd25, 20'd11, AQUA,1'd1); //L, double size
-    assign StartScreen[10] = DrawChar(7'd48, 6'd25, 20'd2, AQUA,1'd1); //C, double size
-    assign StartScreen[11] = DrawChar(7'd58, 6'd25, 20'd14, AQUA,1'd1); //O, double size
-    assign StartScreen[12] = DrawChar(7'd68, 6'd25, 20'd12, AQUA,1'd1); //M, double size
-    assign StartScreen[13] = DrawChar(7'd78, 6'd25, 20'd4, AQUA,1'd1); //E, double size
-    assign StartScreen[14] = SBNCH(7'd0, 2'b00);//JMP to 0 if imme is in startscreen mode
+    assign StartScreen[6] = DrawRect(7'd6, 6'd22, 7'd89, 6'd41, WHITE);//Draw Chr boarderline white
+    assign StartScreen[7] = DrawChar(7'd10, 6'd25, 20'd22, AQUA,1'd1); //W, double size
+    assign StartScreen[8] = DrawChar(7'd21, 6'd25, 20'd4, AQUA,1'd1); //E, double size
+    assign StartScreen[9] = DrawChar(7'd32, 6'd25, 20'd11, AQUA,1'd1); //L, double size
+    assign StartScreen[10] = DrawChar(7'd43, 6'd25, 20'd2, AQUA,1'd1); //C, double size
+    assign StartScreen[11] = DrawChar(7'd54, 6'd25, 20'd14, AQUA,1'd1); //O, double size
+    assign StartScreen[12] = DrawChar(7'd65, 6'd25, 20'd12, AQUA,1'd1); //M, double size
+    assign StartScreen[13] = DrawChar(7'd76, 6'd25, 20'd4, AQUA,1'd1); //E, double size
+    assign StartScreen[14] = DBNCH(7'd14, 7'd15, 2'b0);//JMP to 14 if imme is in startscreen mode
     always @(posedge CLK) begin
         if (count == scenesize) count = 0;
         else count = count + 1;

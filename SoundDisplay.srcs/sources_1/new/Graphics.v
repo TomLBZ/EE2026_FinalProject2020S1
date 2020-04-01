@@ -20,14 +20,8 @@ module OnIdleCommand(input CLK, input ON, input [6:0] OldX, input [5:0] OldY, in
     localparam [1:0] STR = 1;//start drawing
     localparam [1:0] STP = 2;//end drawing
     reg [1:0] STATE;//current state
-    reg drawn = 0;
-    wire DONE = drawn;
+    initial STATE = 0;
     wire busy = (STATE == STR);
-    always @ (posedge CLK) begin
-        if (busy) begin
-            drawn <= drawn + 1;
-        end
-    end
     always @ (posedge CLK) begin//change state
         case (STATE)
             IDL: begin
@@ -35,7 +29,7 @@ module OnIdleCommand(input CLK, input ON, input [6:0] OldX, input [5:0] OldY, in
                 else STATE <= IDL;//else idle
             end
             STR: begin
-                if (DONE) STATE <= STP;//if done then stop
+                if (busy) STATE <= STP;//if done then stop
                 else STATE <= STR;//else start
             end
             STP: begin
@@ -165,8 +159,8 @@ module OnCharCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
     wire [19:0] CHR = CMD[48:29];
     wire [1:0] POWER = CMD[50:49];
     wire [34:0] MAP;
-    wire [6:0] RX = LX + (4'd5 << POWER) - 7'd1;
-    wire [5:0] BY = TY + (4'd7 << POWER) - 6'd1;
+    wire [6:0] RX = LX - 7'd1 + (4'd5 << POWER);
+    wire [5:0] BY = TY - 6'd1 + (4'd7 << POWER);
     CharBlocks CB(CHR, MAP);
     assign COLOR = CMD[28:13];
     localparam [1:0] IDL = 0;//idle
@@ -364,8 +358,8 @@ module OnSceneSpriteCommand(input CLK, input ON, input [63:0] CMD, output [6:0] 
     wire [6:0] INDEX = CMD[35:29];
     wire [1:0] POWER = CMD[37:36];
     wire [15:0] MAP[63:0];
-    wire [6:0] RX = LX + (4'd8 << POWER) - 7'd1; // 8x8
-    wire [5:0] BY = TY + (4'd8 << POWER) - 6'd1; // 8x8
+    wire [6:0] RX = LX - 7'd1 + (4'd8 << POWER); // 8x8
+    wire [5:0] BY = TY - 6'd1 + (4'd8 << POWER); // 8x8
     SceneSpriteBlocks CB(INDEX, MAP);
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
@@ -380,9 +374,7 @@ module OnSceneSpriteCommand(input CLK, input ON, input [63:0] CMD, output [6:0] 
     wire [3:0] chrX = (xcount - LX) >> POWER;
     wire [3:0] chrY = (ycount - TY) >> POWER;
     wire [7:0] index = 6'd63 - chrX - chrY * 4'd8;
-    wire [6:0] ENDX = RX > 7'd95 ? 7'd95 : RX;
-    wire [5:0] ENDY = BY > 6'd63 ? 6'd63 : BY;
-    wire DONE = (xcount == ENDX && ycount == ENDY);//reached end point
+    wire DONE = (xcount == RX && ycount == BY);//reached end point
     always @ (posedge CLK) begin // count x and y and update variables
         if (loop) begin
             if (MAP[index] != MASKC) begin
@@ -537,7 +529,7 @@ module OnFillCircCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, 
     assign Y = YO;
 endmodule
 
-module OnSingleBranchCommand(input CLK, input ON, input [63:0] CMD, input [1:0] IMME, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
+module OnSingleBranchCommand(input CLK, input ON, input [63:0] CMD, input [1:0] IMME, input [6:0] OldAddr, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
     wire [6:0] Dest = CMD[6:0];
     wire [5:0] cmp = CMD[8:7];
     localparam [1:0] IDL = 0;//idle
@@ -549,10 +541,10 @@ module OnSingleBranchCommand(input CLK, input ON, input [63:0] CMD, input [1:0] 
     wire busy = (STATE == STR);
     reg [6:0] x;
     reg [5:0] y;
+    assign x = IMME == cmp[1:0] ? Dest : OldAddr; 
+    assign y = IMME == cmp[1:0] ? 6'd1 : 6'd0;   
     always @ (posedge CLK) begin
         if (busy) begin
-            x <= IMME == cmp[1:0] ? Dest : 0; 
-            y <= IMME == cmp[1:0] ? 6'd1 : 6'd0;   
             drawn <= drawn + 1;
         end
     end
@@ -592,10 +584,10 @@ module OnDoubleBranchCommand(input CLK, input ON, input [63:0] CMD, input [1:0] 
     wire busy = (STATE == STR);
     reg [6:0] x;
     reg [5:0] y;
+    assign x = IMME == cmp[1:0] ? Dest1 : Dest2;
+    assign y = IMME == cmp[1:0] ? 6'd1 : 6'd0;        
     always @ (posedge CLK) begin
         if (busy) begin
-            x <= IMME == cmp[1:0] ? Dest1 : Dest2;
-            y <= IMME == cmp[1:0] ? 6'd1 : 6'd0;        
             drawn <= drawn + 1;
         end
     end
@@ -633,10 +625,10 @@ module OnJumpCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
     wire busy = (STATE == STR);
     reg [6:0] x;
     reg [5:0] y;
+    assign x = Dest;
+    assign y = 6'd1;  
     always @ (posedge CLK) begin
         if (busy) begin
-            x <= Dest;
-            y <= 6'd1;  
             drawn <= drawn + 1;
         end
     end
@@ -676,27 +668,21 @@ module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK
     wire [6:0] avsbCNT;
     wire AudioVisualWriting = sssbCNT == StrSize ? (avsbCNT == AV_Size ? 0 : 1) : 0;//finished writing all commands to the queue, then 0
     wire AudioVisualClock = AudioVisualWriting ? WCLK : 0;
-    AudioVisualizationSceneBuilder #(AV_Size) AVSB(AudioVisualClock, sssbCNT, sw[6:5], sw[4], sw[3], sw[2], sw[1], sw[0], Volume, AudioVisualizationCmd, avsbCNT);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
+    wire [6:0] GPU_RADDR;
+    wire AutoRefresh = GPU_RADDR == sssbCNT;
+    AudioVisualizationSceneBuilder #(AV_Size) AVSB(AudioVisualClock, onRefresh, sssbCNT, sw[6:5], sw[4], sw[3], sw[2], sw[1], sw[0], Volume, AudioVisualizationCmd, avsbCNT);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
     wire [63:0] CmdQin = StartScreenWriting ? StartScreenCmd : (AudioVisualWriting ? AudioVisualizationCmd : 0);
     wire [63:0] CmdQout;
     wire Builder_WRITE = StartScreenWriting | AudioVisualWriting ? WCLK : 0;//make sure not reading and writing same address
     wire [6:0] Builder_WADDR = StartScreenWriting ? sssbCNT : sssbCNT + avsbCNT;
+    wire GPU_DONE;
     wire GPU_BUSY;
-    wire [6:0] GPU_RADDR;
-    CommandQueue #(128) CMDQ(CmdQin, ~GPU_BUSY, GPU_RADDR, Builder_WRITE, Builder_WADDR, CmdQout);
+    CommandQueue #(128) CMDQ(CmdQin, GPU_DONE, GPU_RADDR, Builder_WRITE, Builder_WADDR, CmdQout);
     wire [6:0] X;
     wire [5:0] Y;
     wire [15:0] C;
     wire GPU_ON = 1;
     wire [1:0] ImmediateState = sw[14:13];
-    GraphicsProcessingUnit GPU(CmdQout, GPU_ON, WCLK, ImmediateState, GPU_RADDR, X, Y, C, GPU_BUSY);
-    DisplayRAM DRAM(Pix, ~WCLK, WCLK, GPU_BUSY, X, Y, C, STREAM); //using negedge of WCLK to read, posedge to write
-    localparam [1:0] STARTSCREEN = 2'b00;
-    localparam [1:0] VOLUMEBAR = 2'b01;
-    localparam [1:0] MAZE = 2'b10;
-    localparam [1:0] BADAPPLE = 2'b11;    
-    assign debugLED[6:0] = Builder_WADDR;
-    assign debugLED[13:7] = GPU_RADDR;
-    assign debugLED[14] = GPU_BUSY;
-    assign debugLED[15] = ImmediateState[0];
+    GraphicsProcessingUnit GPU(CmdQout, GPU_ON, WCLK, ImmediateState, GPU_RADDR, X, Y, C, GPU_DONE, GPU_BUSY);
+    DisplayRAM DRAM(Pix, ~WCLK, WCLK, GPU_BUSY, X, Y, C, STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
 endmodule

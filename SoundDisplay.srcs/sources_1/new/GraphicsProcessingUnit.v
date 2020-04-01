@@ -19,7 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1:0] IMME, output [6:0] RADDR, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);//64-bit command
+module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1:0] IMME, output [6:0] RADDR, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output DONE, output BUSY);//64-bit command
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
     localparam [1:0] STP = 2;//end drawing
@@ -42,16 +42,16 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
     wire busy = STATE == STR;
     wire [15:0] B;//busy wires
     wire OnCommand = Command[63];
-    wire [3:0] commandHead = OnCommand ? Command[62:59] : 4'd0;//read 4 bit head if OnCommand, else set zero
-    wire DONE = OnCommand ? B[commandHead] == 0 : 1;//if OnCommand, check if current command is no longer busy. else set 1
+    wire [3:0] commandHead = Command[62:59];//read 4 bit head if OnCommand
+    assign DONE = busy && B[commandHead] == 0;//if OnCommand, check if current command is no longer busy. else set 1
     wire [15:0] O;//on wires
-    assign O[IDLE] = OnCommand && (commandHead == IDLE);
+    assign O[IDLE] = (commandHead == IDLE);
     assign O[PT] = OnCommand && (commandHead == PT);
     assign O[LN] = OnCommand && (commandHead == LN);
     assign O[CHR] = OnCommand && (commandHead == CHR);
     assign O[RECT] = OnCommand && (commandHead == RECT);
     assign O[CIRC] = OnCommand && (commandHead == CIRC);
-    assign O[SPRSCN] = OnCommand && (commandHead == SPRSCN);
+    assign O[SPRSCN] = busy && OnCommand && (commandHead == SPRSCN);
     assign O[FRECT] = OnCommand && (commandHead == FRECT);
     assign O[FCIRC] = OnCommand && (commandHead == FCIRC);
     assign O[9] = OnCommand && (commandHead == 9);
@@ -97,14 +97,14 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
     OnIdleCommand OIC10(CLK, O[10], XO, YO, CO, Xout[10], Yout[10], Cout[10], B[10]);
     OnIdleCommand OIC11(CLK, O[11], XO, YO, CO, Xout[11], Yout[11], Cout[11], B[11]);
     OnIdleCommand OIC12(CLK, O[12], XO, YO, CO, Xout[12], Yout[12], Cout[12], B[12]);
-    OnSingleBranchCommand OSBC(CLK, O[SBNCH], Command, IMME, Xout[SBNCH], Yout[SBNCH], Cout[SBNCH], B[SBNCH]);
+    OnSingleBranchCommand OSBC(CLK, O[SBNCH], Command, IMME, raddr, Xout[SBNCH], Yout[SBNCH], Cout[SBNCH], B[SBNCH]);
     OnDoubleBranchCommand ODBC(CLK, O[DBNCH], Command, IMME, Xout[DBNCH], Yout[DBNCH], Cout[DBNCH], B[DBNCH]);
     OnJumpCommand OJC(CLK, O[JMP], Command, Xout[JMP], Yout[JMP], Cout[JMP], B[JMP]);    
     wire STPCLK = STATE == STP ? 1 : 0;
     always @ (*) begin
-        if (busy && OnCommand) begin //state is str
+        if (busy) begin //state is str
             if(commandHead < CommandUpperBound) begin
-                if (XO < XupperBound) begin
+                if (Xout[commandHead] < XupperBound) begin
                     XO = Xout[commandHead];
                     YO = Yout[commandHead];
                     CO = Cout[commandHead];
@@ -128,8 +128,8 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
             endcase
         end else raddr = raddr + 1;//normal commands
     end
-    assign RADDR = raddr;
     assign BUSY = busy;
+    assign RADDR = raddr;
     assign X = XO;
     assign Y = YO;
     assign COLOR = CO;
