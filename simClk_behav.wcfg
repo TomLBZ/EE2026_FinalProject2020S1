@@ -11,18 +11,18 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="39333333333fs"></ZoomStartTime>
-      <ZoomEndTime time="65333333334fs"></ZoomEndTime>
-      <Cursor1Time time="61000000000fs"></Cursor1Time>
+      <ZoomStartTime time="14083333333fs"></ZoomStartTime>
+      <ZoomEndTime time="117183333334fs"></ZoomEndTime>
+      <Cursor1Time time="100000000000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="81"></NameColumnWidth>
-      <ValueColumnWidth column_width="58"></ValueColumnWidth>
+      <NameColumnWidth column_width="77"></NameColumnWidth>
+      <ValueColumnWidth column_width="77"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="14" />
-   <wvobject fp_name="/simClk/clk" type="logic">
-      <obj_property name="ElementShortName">clk</obj_property>
-      <obj_property name="ObjectShortName">clk</obj_property>
+   <WVObjectSize size="12" />
+   <wvobject fp_name="/simClk/ts/g/GPU/CLK" type="logic">
+      <obj_property name="ElementShortName">CLK</obj_property>
+      <obj_property name="ObjectShortName">CLK</obj_property>
    </wvobject>
    <wvobject fp_name="/simClk/ts/g/GPU/Command" type="array">
       <obj_property name="ElementShortName">Command[63:0]</obj_property>
@@ -31,14 +31,6 @@
    <wvobject fp_name="/simClk/ts/g/GPU/commandHead" type="array">
       <obj_property name="ElementShortName">commandHead[3:0]</obj_property>
       <obj_property name="ObjectShortName">commandHead[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/CLK" type="logic">
-      <obj_property name="ElementShortName">CLK</obj_property>
-      <obj_property name="ObjectShortName">CLK</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/RADDR" type="array">
-      <obj_property name="ElementShortName">RADDR[6:0]</obj_property>
-      <obj_property name="ObjectShortName">RADDR[6:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/simClk/ts/g/GPU/STATE" type="array">
       <obj_property name="ElementShortName">STATE[1:0]</obj_property>
@@ -52,28 +44,28 @@
       <obj_property name="ElementShortName">OnCommand</obj_property>
       <obj_property name="ObjectShortName">OnCommand</obj_property>
    </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/JmpDestination" type="array">
-      <obj_property name="ElementShortName">JmpDestination[6:0]</obj_property>
-      <obj_property name="ObjectShortName">JmpDestination[6:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/Jumping" type="logic">
-      <obj_property name="ElementShortName">Jumping</obj_property>
-      <obj_property name="ObjectShortName">Jumping</obj_property>
-   </wvobject>
    <wvobject fp_name="/simClk/ts/g/CMDQ/RCLK" type="logic">
       <obj_property name="ElementShortName">RCLK</obj_property>
       <obj_property name="ObjectShortName">RCLK</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/CMDQ/WCLK" type="logic">
-      <obj_property name="ElementShortName">WCLK</obj_property>
-      <obj_property name="ObjectShortName">WCLK</obj_property>
    </wvobject>
    <wvobject fp_name="/simClk/ts/g/CMDQ/RADDR" type="array">
       <obj_property name="ElementShortName">RADDR[6:0]</obj_property>
       <obj_property name="ObjectShortName">RADDR[6:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simClk/ts/g/CMDQ/WADDR" type="array">
-      <obj_property name="ElementShortName">WADDR[6:0]</obj_property>
-      <obj_property name="ObjectShortName">WADDR[6:0]</obj_property>
+   <wvobject fp_name="/simClk/ts/g/GPU/XO" type="array">
+      <obj_property name="ElementShortName">XO[6:0]</obj_property>
+      <obj_property name="ObjectShortName">XO[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/GPU/YO" type="array">
+      <obj_property name="ElementShortName">YO[5:0]</obj_property>
+      <obj_property name="ObjectShortName">YO[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/GPU/raddr" type="array">
+      <obj_property name="ElementShortName">raddr[6:0]</obj_property>
+      <obj_property name="ObjectShortName">raddr[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/GPU/CO" type="array">
+      <obj_property name="ElementShortName">CO[15:0]</obj_property>
+      <obj_property name="ObjectShortName">CO[15:0]</obj_property>
    </wvobject>
 </wave_config>
