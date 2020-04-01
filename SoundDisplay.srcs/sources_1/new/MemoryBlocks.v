@@ -285,7 +285,6 @@ module MazeSceneBuilder(input CLK, input [1:0] MazeDState, output CMD);
         if((count == 6'd8) && (MazeDState==2'b10)) count = 6'd11; //WIN
         if((count == 6'd11) && (MazeDState==2'b11)) count = 6'd15; //LOSE
         count = count + 6'd1;
->>>>>>> Stashed changes
     end
     assign CMD = cmd;
 endmodule

@@ -98,7 +98,6 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-<<<<<<< Updated upstream
       <File Path="$PSRCDIR/sources_1/new/GraphicsProcessingUnit.v">
         <FileInfo SFType="SVerilog">
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -106,8 +105,6 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-=======
->>>>>>> Stashed changes
       <File Path="$PSRCDIR/sources_1/new/CommandFunctions.v">
         <FileInfo SFType="VHeader">
           <Attr Name="UsedIn" Val="synthesis"/>
