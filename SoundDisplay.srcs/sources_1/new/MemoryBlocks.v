@@ -248,3 +248,44 @@ module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:
     assign CMD = cmd;
     assign CNT = count;
 endmodule
+
+
+module MazeSceneBuilder(input CLK, input [1:0] MazeDState, output CMD);
+    reg [63:0] MazeScene [31:0];//32 commands
+    reg [5:0] count = 0;
+    reg [63:0] cmd;
+    reg [15:0] RED = {5'd31,6'd0,5'd0};
+    `include "CommandFunctions.v"
+    // zui hou ce shi shi tong yi gai pai ban, xian zai bu yao guan wei zhi
+    //GAME START             //x position   y    char  on  size
+    assign MazeScene[0] = DrawChar(7'd10, 6'd20, 20'd6, RED ,1'd0); //G, original size
+    assign MazeScene[1] = DrawChar(7'd15, 6'd20, 20'd0, RED ,1'd0); //A, original size
+    assign MazeScene[2] = DrawChar(7'd20, 6'd20, 20'd12, RED ,1'd0); //M, original size
+    assign MazeScene[3] = DrawChar(7'd25, 6'd20, 20'd4, RED ,1'd0); //E, original size
+    assign MazeScene[4] = DrawChar(7'd30, 6'd20, 20'd19, RED ,1'd0); //S, original size
+    assign MazeScene[5] = DrawChar(7'd35, 6'd20, 20'd20, RED ,1'd0); //T, original size
+    assign MazeScene[6] = DrawChar(7'd40, 6'd20, 20'd0, RED ,1'd0); //A, original size
+    assign MazeScene[7] = DrawChar(7'd45, 6'd20, 20'd18, RED ,1'd0); //R, original size
+    assign MazeScene[8] = DrawChar(7'd45, 6'd20, 20'd20, RED ,1'd0); //T, original size
+    
+    //WIN
+    assign MazeScene[9] = DrawChar(7'd10, 6'd20, 20'd22, RED ,1'd0); //W, original size
+    assign MazeScene[10] = DrawChar(7'd20, 6'd20, 20'd8, RED ,1'd0); //I, original size
+    assign MazeScene[11] = DrawChar(7'd30, 6'd20, 20'd13, RED ,1'd0); //N, original size
+    
+    //LOSE
+    assign MazeScene[12] = DrawChar(7'd10, 6'd20, 20'd6, RED ,1'd0); //L, original size
+    assign MazeScene[13] = DrawChar(7'd15, 6'd20, 20'd6, RED ,1'd0); //O, original size
+    assign MazeScene[14] = DrawChar(7'd20, 6'd20, 20'd6, RED ,1'd0); //S, original size
+    assign MazeScene[15] = DrawChar(7'd25, 6'd20, 20'd6, RED ,1'd0); //E, original size
+    
+    always @(posedge CLK) begin
+        cmd = MazeScene[count];
+        if((count == 6'd0) && (MazeDState==2'b01)) count = 6'd8; //GAME START
+        if((count == 6'd8) && (MazeDState==2'b10)) count = 6'd11; //WIN
+        if((count == 6'd11) && (MazeDState==2'b11)) count = 6'd15; //LOSE
+        count = count + 6'd1;
+>>>>>>> Stashed changes
+    end
+    assign CMD = cmd;
+endmodule

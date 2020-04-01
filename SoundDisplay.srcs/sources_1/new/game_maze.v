@@ -168,19 +168,29 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     wire [15:0] oled_playmode;
     wire [15:0] oled_display;
     wire [1:0] sel;
-    reg [1:0] MazeState;
+    reg [1:0] MazeDState = 2'b00;
     
     maze_pixel_mapping f0(CLK, Pix, xvalue,yvalue);
     maze_map f1(CLK,xvalue,yvalue,xdot, ydot, OnRoad);
-    maze_map_color f2(CLK, OnRoad, stream1);
+    maze_map_color f2(CLK, OnRoad, oled_playmode);   //play mode display (STREAM)
     maze_valid_move f3(CLK, xdot, ydot, validmove);
     maze_dot_movement f4(CLK, BTNC,BTNU, BTND, BTNR, BTNL,validmove, xdot, ydot, gamestart);
-    maze_win f5(CLK, xdot, ydot, sel[0]);   ///this one will change
-    //maze_display_win f6(CLK, xvalue, yvalue, stream2);
+    maze_win f5(CLK, xdot, ydot, win); 
     
     assign STREAM = MazeState? oled_display : oled_playmode;
     //B16_MUX f7(stream2,stream1,sel[0],oled_playmode); 
     //MazeSceneBuilder MSB(CLK, MazeState, oled_display);
+    
+    //Below are a series of modules that output the three game scenes (GAMESTART, WIN, LOSE)
+    reg [63:0] Cmd;
+    wire [6:0] CmdX;
+    wire [5:0] CmdY;
+    wire [15:0] CmdCol;
+    wire pixSet;
+    wire CmdBusy;
+    MazeSceneBuilder MSB(CLK, MazeDState, Cmd); //scene mode display (STREAM)
+    DisplayCommandCore DCMD(Cmd, DisplayControl, CLK, pixSet, CmdX, CmdY, CmdCol, CmdBusy);
+    DisplayRAM DRAM(Pix, ~CLK, CLK, pixSet, CmdX, CmdY, CmdCol, oled_display);   //scene mode display (STREAM)
     
     //Finite State Machine for maze game
     localparam [1:0] IDL = 0;//idle
@@ -188,7 +198,7 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     localparam [1:0] STP = 2;//display WIN/LOSE
     reg [1:0] STATE;
     wire ON = gamestart;  //once gamestart=1, will change from IDL to STR
-    wire DONE;
+    wire DONE = (~validmove)||win;  //once validmove=0 or win=1, will change from STR to STP
     always @ (posedge CLK) begin//change state
         case (STATE)
             IDL: begin
@@ -210,10 +220,21 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     always@(*)begin
         case (STATE)
             IDL: begin  //gamestart = 2'b00;
+                MazeDState = 2'b01;
+                DisplayControl = 1;
             end
             STR: begin
+                DisplayControl = 0; 
             end
             STP: begin
+                if(validmove==1'b0) begin
+                    MazeDState = 2'b11;
+                    DisplayControl = 1;
+                end
+                else if (win == 1'b1) begin
+                    MazeDState = 2'b10;
+                    DisplayControl = 1;
+                end
             end
         endcase
     end
