@@ -18,11 +18,11 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
+/*
 module mux_4to1_assign ( input [15:0] a, [15:0] b, [15:0] c, [15:0] d, [1:0] sel, [15:0] out);  
    assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a); 
 endmodule
-
+*/
 module maze_pixel_mapping (input CLK, input [12:0] Pix, output reg [12:0] xvalue,reg [12:0] yvalue);
     always @ (posedge CLK) begin
         yvalue = Pix / 8'd96;   //0~64
@@ -52,15 +52,17 @@ module maze_map(input CLK, [12:0] xvalue, [12:0] yvalue,[12:0] xdot, [12:0] ydot
             else if ((xvalue >= 7'd72) && (xvalue<=7'd80) && (yvalue >= 7'd16) && (yvalue <= 7'd40)) OnRoad = 0;
             else if ((xvalue >= 7'd80) && (xvalue<=7'd92) && (yvalue >= 7'd16) && (yvalue <= 7'd24)) OnRoad = 0;
             else if ((xvalue >= 7'd84) && (xvalue<=7'd90) && (yvalue >= 7'd0) && (yvalue <= 7'd16)) OnRoad = 0;
+            else if ((xvalue >= 7'd84) && (xvalue<=7'd90) && (yvalue >= 7'd0) && (yvalue <= 7'd8)) OnRoad = 2'b11;
             else OnRoad = 2'b01; 
     end
 endmodule
 
-module maze_map_color(input CLK, [2:0] OnRoad,output reg [15:0] STREAM);
-    always @ (posedge CLK) begin
-        if (OnRoad == 2'b10) STREAM = 16'b0000000000001111;   //blue
-        else if (OnRoad == 0) STREAM = 16'b1101100000000000;     //red
-        else if (OnRoad == 1) STREAM = 16'b0000000111100000;   //green 
+module maze_map_color(input [2:0] OnRoad,output reg [15:0] STREAM);
+    always @ (*) begin
+        if (OnRoad == 2'b10) STREAM = 16'b1111111111111111;   //dot
+        else if (OnRoad == 0) STREAM = 16'h6C12;     //wall
+        else if (OnRoad == 1) STREAM = 16'h24A7;   //road
+        else if (OnRoad == 2'b11) STREAM = 16'b0000000000111111;
     end
 endmodule
 
@@ -104,52 +106,55 @@ module maze_dot_movement (input CLK, BTNC,BTNU, BTND, BTNR, BTNL, validmove, out
 endmodule
 
 module maze_checkwall(input CLK, [12:0] xvalue, [12:0] yvalue, output reg onwall);
-     always @ (posedge CLK) begin
-             if ((xvalue >= 7'd0) && (xvalue<=7'd18) && (yvalue >= 7'd56) && (yvalue <= 7'd64)) onwall=1;
-             else if ((xvalue >= 7'd12) && (xvalue<=7'd18) && (yvalue >= 7'd32) && (yvalue <= 7'd56)) onwall=1;
-             else if ((xvalue >= 7'd6) && (xvalue<=7'd12) && (yvalue >= 7'd8) && (yvalue <= 7'd40)) onwall=1;
-             else if ((xvalue >= 7'd12) && (xvalue<=7'd30) && (yvalue >= 7'd8) && (yvalue <= 7'd16)) onwall=1;
-             else if ((xvalue >= 7'd24) && (xvalue<=7'd54) && (yvalue >= 7'd16) && (yvalue <= 7'd24)) onwall=1;
-             else if ((xvalue >= 7'd36) && (xvalue<=7'd42) && (yvalue >= 7'd0) && (yvalue <= 7'd16)) onwall=1;
-             else if ((xvalue >= 7'd42) && (xvalue<=7'd66) && (yvalue >= 7'd0) && (yvalue <= 7'd8)) onwall=1;
-             else if ((xvalue >= 7'd36) && (xvalue<=7'd42) && (yvalue >= 7'd0) && (yvalue <= 7'd16)) onwall=1;
-             else if ((xvalue >= 7'd60) && (xvalue<=7'd66) && (yvalue >= 7'd8) && (yvalue <= 7'd40)) onwall=1;
-             else if ((xvalue >= 7'd48) && (xvalue<=7'd60) && (yvalue >= 7'd24) && (yvalue <= 7'd32)) onwall=1;
-             else if ((xvalue >= 7'd30) && (xvalue<=7'd54) && (yvalue >= 7'd32) && (yvalue <= 7'd40)) onwall=1;
-             else if ((xvalue >= 7'd30) && (xvalue<=7'd36) && (yvalue >= 7'd40) && (yvalue <= 7'd48)) onwall=1;
-             else if ((xvalue >= 7'd18) && (xvalue<=7'd60) && (yvalue >= 7'd48) && (yvalue <= 7'd56)) onwall=1;
-             else if ((xvalue >= 7'd84) && (xvalue<=7'd90) && (yvalue >= 7'd40) && (yvalue <= 7'd64)) onwall=1;
-             else if ((xvalue >= 7'd72) && (xvalue<=7'd84) && (yvalue >= 7'd40) && (yvalue <= 7'd48)) onwall=1;
-             else if ((xvalue >= 7'd66) && (xvalue<=7'd72) && (yvalue >= 7'd24) && (yvalue <= 7'd32)) onwall=1;
-             else if ((xvalue >= 7'd72) && (xvalue<=7'd80) && (yvalue >= 7'd16) && (yvalue <= 7'd40)) onwall=1;
-             else if ((xvalue >= 7'd80) && (xvalue<=7'd92) && (yvalue >= 7'd16) && (yvalue <= 7'd24)) onwall=1;
-             else if ((xvalue >= 7'd84) && (xvalue<=7'd90) && (yvalue >= 7'd0) && (yvalue <= 7'd16)) onwall=1;
-             else onwall=0; 
+     always @ (*) begin
+                  if ((xvalue >= 7'd0) && (xvalue<=7'd18) && (yvalue >= 7'd56) && (yvalue <= 7'd64)) onwall=1;
+                  else if ((xvalue >= 7'd12) && (xvalue<=7'd18) && (yvalue >= 7'd32) && (yvalue <= 7'd56)) onwall=1;
+                  else if ((xvalue >= 7'd6) && (xvalue<=7'd12) && (yvalue >= 7'd8) && (yvalue <= 7'd40)) onwall=1;
+                  else if ((xvalue >= 7'd12) && (xvalue<=7'd30) && (yvalue >= 7'd8) && (yvalue <= 7'd16)) onwall=1;
+                  else if ((xvalue >= 7'd24) && (xvalue<=7'd54) && (yvalue >= 7'd16) && (yvalue <= 7'd24)) onwall=1;
+                  else if ((xvalue >= 7'd36) && (xvalue<=7'd42) && (yvalue >= 7'd0) && (yvalue <= 7'd16)) onwall=1;
+                  else if ((xvalue >= 7'd42) && (xvalue<=7'd66) && (yvalue >= 7'd0) && (yvalue <= 7'd8)) onwall=1;
+                  else if ((xvalue >= 7'd36) && (xvalue<=7'd42) && (yvalue >= 7'd0) && (yvalue <= 7'd16)) onwall=1;
+                  else if ((xvalue >= 7'd60) && (xvalue<=7'd66) && (yvalue >= 7'd8) && (yvalue <= 7'd40)) onwall=1;
+                  else if ((xvalue >= 7'd48) && (xvalue<=7'd60) && (yvalue >= 7'd24) && (yvalue <= 7'd32)) onwall=1;
+                  else if ((xvalue >= 7'd30) && (xvalue<=7'd54) && (yvalue >= 7'd32) && (yvalue <= 7'd40)) onwall=1;
+                  else if ((xvalue >= 7'd30) && (xvalue<=7'd36) && (yvalue >= 7'd40) && (yvalue <= 7'd48)) onwall=1;
+                  else if ((xvalue >= 7'd18) && (xvalue<=7'd60) && (yvalue >= 7'd48) && (yvalue <= 7'd56)) onwall=1;
+                  else if ((xvalue >= 7'd84) && (xvalue<=7'd90) && (yvalue >= 7'd40) && (yvalue <= 7'd64)) onwall=1;
+                  else if ((xvalue >= 7'd72) && (xvalue<=7'd84) && (yvalue >= 7'd40) && (yvalue <= 7'd48)) onwall=1;
+                  else if ((xvalue >= 7'd66) && (xvalue<=7'd72) && (yvalue >= 7'd24) && (yvalue <= 7'd32)) onwall=1;
+                  else if ((xvalue >= 7'd72) && (xvalue<=7'd80) && (yvalue >= 7'd16) && (yvalue <= 7'd40)) onwall=1;
+                  else if ((xvalue >= 7'd80) && (xvalue<=7'd92) && (yvalue >= 7'd16) && (yvalue <= 7'd24)) onwall=1;
+                  else if ((xvalue >= 7'd84) && (xvalue<=7'd90) && (yvalue >= 7'd0) && (yvalue <= 7'd16)) onwall=1;
+                  else onwall=0; 
      end
 endmodule
 
 module maze_valid_move (input CLK, [12:0] xdot, [12:0] ydot, onwall, output reg validmove=1);
     maze_checkwall mvm0(CLK, xdot, ydot, onwall);
     always @ (posedge CLK) begin
-        if(onwall==1) validmove = 0;
-        else validmove = 1;
+        if(onwall==1) validmove <= 0;
+        else validmove <= 1;
     end
 endmodule
 
 module maze_win (input CLK, [12:0] xvalue, [12:0] yvalue, output reg win);
     always @ (posedge CLK) begin
-        if ((xvalue >= 7'd84) && (xvalue<=7'd90) && (yvalue >= 7'd0) && (yvalue <= 7'd8)) win=1;
-        else win = 0;
-    end
-endmodule
-
-module maze_display_win(input CLK, xvalue, yvalue, output reg [15:0] STREAM);
-    always @ (posedge CLK) begin
-        STREAM = 16'b0001111000000000;
+        if ((xvalue >= 7'd84) && (xvalue<=7'd90) && (yvalue >= 7'd0) && (yvalue <= 7'd8)) win<=1;
+        else win <= 0;
     end
 endmodule
 
 
+module MazeSceneBuilder_temp(input CLK, input [1:0] MazeDState, output [15:0] STREAM);
+    reg [15:0] stream;
+    always @(posedge CLK) begin
+        if(MazeDState==2'b01) stream = 16'b1111000000000000; //GAME START
+        if(MazeDState==2'b10) stream = 16'b0000111110000000; //WIN
+        if(MazeDState==2'b11) stream = 16'b0000000000001111; //LOSE
+    end
+    assign STREAM = stream;
+endmodule
 
 //The main module
 module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
@@ -169,15 +174,16 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     wire [15:0] oled_display;
     wire [1:0] sel;
     reg [1:0] MazeDState = 2'b00;
+    reg DisplayControl;
     
     maze_pixel_mapping f0(CLK, Pix, xvalue,yvalue);
     maze_map f1(CLK,xvalue,yvalue,xdot, ydot, OnRoad);
-    maze_map_color f2(CLK, OnRoad, oled_playmode);   //play mode display (STREAM)
+    maze_map_color f2(OnRoad, oled_playmode);   //play mode display (STREAM)
     maze_valid_move f3(CLK, xdot, ydot, validmove);
-    maze_dot_movement f4(CLK, BTNC,BTNU, BTND, BTNR, BTNL,validmove, xdot, ydot, gamestart);
+    maze_dot_movement f4(CLK,BTNC,BTNU, BTND, BTNR, BTNL,validmove, xdot, ydot, gamestart);
     maze_win f5(CLK, xdot, ydot, win); 
     
-    assign STREAM = MazeState? oled_display : oled_playmode;
+    assign STREAM = DisplayControl? oled_display : oled_playmode;
     //B16_MUX f7(stream2,stream1,sel[0],oled_playmode); 
     //MazeSceneBuilder MSB(CLK, MazeState, oled_display);
     
@@ -188,9 +194,11 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     wire [15:0] CmdCol;
     wire pixSet;
     wire CmdBusy;
-    MazeSceneBuilder MSB(CLK, MazeDState, Cmd); //scene mode display (STREAM)
-    DisplayCommandCore DCMD(Cmd, DisplayControl, CLK, pixSet, CmdX, CmdY, CmdCol, CmdBusy);
-    DisplayRAM DRAM(Pix, ~CLK, CLK, pixSet, CmdX, CmdY, CmdCol, oled_display);   //scene mode display (STREAM)
+    
+    MazeSceneBuilder_temp(CLK, MazeDState, oled_display);
+    //MazeSceneBuilder MSB(CLK, MazeDState, Cmd); //scene mode display (STREAM)
+    //DisplayCommandCore DCMD(Cmd, DisplayControl, CLK, pixSet, CmdX, CmdY, CmdCol, CmdBusy);
+    //DisplayRAM DRAM(Pix, ~CLK, CLK, pixSet, CmdX, CmdY, CmdCol, oled_display);   //scene mode display (STREAM)
     
     //Finite State Machine for maze game
     localparam [1:0] IDL = 0;//idle

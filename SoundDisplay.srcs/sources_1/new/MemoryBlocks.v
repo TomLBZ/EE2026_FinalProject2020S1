@@ -263,9 +263,9 @@ module MazeSceneBuilder(input CLK, input [1:0] MazeDState, output CMD);
     
     always @(posedge CLK) begin
         cmd = MazeScene[count];
-        if((count == 6'd0) && (MazeDState==2'b01)) count = 6'd8; //GAME START
-        if((count == 6'd8) && (MazeDState==2'b10)) count = 6'd11; //WIN
-        if((count == 6'd11) && (MazeDState==2'b11)) count = 6'd15; //LOSE
+        if((count == 6'd8) && (MazeDState==2'b01)) count = 6'd0; //GAME START
+        if((count == 6'd11) && (MazeDState==2'b10)) count = 6'd8; //WIN
+        if((count == 6'd15) && (MazeDState==2'b11)) count = 6'd11; //LOSE
         count = count + 6'd1;
     end
     assign CMD = cmd;
