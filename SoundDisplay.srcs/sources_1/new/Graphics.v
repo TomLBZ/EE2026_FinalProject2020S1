@@ -165,8 +165,8 @@ module OnCharCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
     wire [19:0] CHR = CMD[48:29];
     wire [1:0] POWER = CMD[50:49];
     wire [34:0] MAP;
-    wire [6:0] RX = LX + (4'd4 << POWER);
-    wire [5:0] BY = TY + (4'd6 << POWER);
+    wire [6:0] RX = LX + (4'd5 << POWER) - 7'd1;
+    wire [5:0] BY = TY + (4'd7 << POWER) - 6'd1;
     CharBlocks CB(CHR, MAP);
     assign COLOR = CMD[28:13];
     localparam [1:0] IDL = 0;//idle
@@ -364,8 +364,8 @@ module OnSceneSpriteCommand(input CLK, input ON, input [63:0] CMD, output [6:0] 
     wire [6:0] INDEX = CMD[35:29];
     wire [1:0] POWER = CMD[37:36];
     wire [15:0] MAP[63:0];
-    wire [6:0] RX = LX + (3'd7 << POWER); // 8x8
-    wire [5:0] BY = TY + (3'd7 << POWER); // 8x8
+    wire [6:0] RX = LX + (4'd8 << POWER) - 7'd1; // 8x8
+    wire [5:0] BY = TY + (4'd8 << POWER) - 6'd1; // 8x8
     SceneSpriteBlocks CB(INDEX, MAP);
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
@@ -380,7 +380,9 @@ module OnSceneSpriteCommand(input CLK, input ON, input [63:0] CMD, output [6:0] 
     wire [3:0] chrX = (xcount - LX) >> POWER;
     wire [3:0] chrY = (ycount - TY) >> POWER;
     wire [7:0] index = 6'd63 - chrX - chrY * 4'd8;
-    wire DONE = (xcount == RX && ycount == BY);//reached end point
+    wire [6:0] ENDX = RX > 7'd95 ? 7'd95 : RX;
+    wire [5:0] ENDY = BY > 6'd63 ? 6'd63 : BY;
+    wire DONE = (xcount == ENDX && ycount == ENDY);//reached end point
     always @ (posedge CLK) begin // count x and y and update variables
         if (loop) begin
             if (MAP[index] != MASKC) begin
@@ -682,14 +684,9 @@ module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK
     wire GPU_BUSY;
     wire [6:0] GPU_RADDR;
     CommandQueue #(128) CMDQ(CmdQin, ~GPU_BUSY, GPU_RADDR, Builder_WRITE, Builder_WADDR, CmdQout);
-    reg [6:0] X;
-    reg [5:0] Y;
-    reg [15:0] C;
-    initial begin
-        X = 7'd0;
-        Y = 6'd0;
-        C = 16'd0;
-    end
+    wire [6:0] X;
+    wire [5:0] Y;
+    wire [15:0] C;
     wire GPU_ON = 1;
     wire [1:0] ImmediateState = sw[14:13];
     GraphicsProcessingUnit GPU(CmdQout, GPU_ON, WCLK, ImmediateState, GPU_RADDR, X, Y, C, GPU_BUSY);

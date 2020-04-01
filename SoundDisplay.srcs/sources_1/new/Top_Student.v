@@ -28,16 +28,14 @@ module Top_Student (
     wire [4:0] BtnPressPulses;//contains pulses of "pressing down" action of buttons
     wire [4:0] BtnReleasePulses;//contains pulses of "releasing up" action of buttons
     Peripherals peripherals(CLK100MHZ, clkrst, sbit, btn, sw, CLK, SwStates, SwOnPulses, SwOffPulses, BtnStates, BtnPressPulses, BtnReleasePulses);
-    wire reset = BtnPressPulses[0] | (clkrst ? 1 : 0);
-    wire ResetScreen;
-    pulser prst(reset, CLK[0], ResetScreen);
+    wire reset = BtnStates[0] | (clkrst ? 1 : 0);
     wire [15:0] oled_data;// = 16'h07E0;//pixel data to be sent
     wire [12:0] currentPixel;//current pixel being updated, goes from 0 to 6143.
     wire [4:0] testState;
     wire onRefresh;//asserted for 1 clk cycle when drawing new frame on the screen
     wire sendingPixels;
     wire samplePixel;
-    Oled_Display oled(CLK[2],ResetScreen,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
+    Oled_Display oled(CLK[2],reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
     wire [11:0] mic_in;//mic sample input from the mic
     Audio_Capture ac(CLK[3],CLK[1],JAI, JAO[0], JAO[1], mic_in);
     wire [3:0] volume;//current sound level from 0 to 15

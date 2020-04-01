@@ -9,6 +9,7 @@
 *.ipdefs/**
 *.runs/**
 *.sim/**
+.sim/**
 
 # Ignore all text and log files
 .txt

@@ -78,9 +78,9 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
             default: STATE <= IDL;//default idle
         endcase
     end
-    reg [6:0] XO = 7'd0;
-    reg [5:0] YO = 6'd0;
-    reg [15:0] CO = 16'd0;
+    reg [6:0] XO; initial XO = 7'd0;
+    reg [5:0] YO; initial YO = 6'd0;
+    reg [15:0] CO; initial CO = 16'd0;
     wire [6:0] Xout[15:0];//Xouts
     wire [5:0] Yout[15:0];//Youts
     wire [15:0] Cout[15:0];//Couts
