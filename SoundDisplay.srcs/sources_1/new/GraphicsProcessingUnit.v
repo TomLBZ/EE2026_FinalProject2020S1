@@ -33,22 +33,34 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
     localparam [3:0] FRECT = 7;//cmd[0:6]X1,[7:12]Y1,[13:28]C,[29:35]X2,[36:41]Y2
     localparam [3:0] FCIRC = 8;//cmd[0:6]X,[7:12]Y,[13:28]C,[29:33]R
     localparam [3:0] SBNCH = 13;//cmd[0:6]RADDR,[7:8]CMP
+    localparam [3:0] DBNCH = 14;//cmd[0:6]RADDR1,[7:13]RADDR2,[14:15]CMP
     localparam [3:0] JMP = 15;//cmd[0:6]RADDR;
-    reg [1:0] STATE;
+    localparam [3:0] CommandUpperBound = 9;
+    localparam [6:0] XupperBound = 96;
+    reg [1:0] STATE; initial STATE = 2'd0;
+    reg [6:0] raddr; initial raddr = 0 - 1;
     wire busy = STATE == STR;
     wire [15:0] B;//busy wires
-    wire OnCommand = Command[63];//enabling signal
-    wire [3:0] commandHead = Command[62:59];//4 bit head
-    wire DONE = !B[commandHead];//if current command is no longer busy then done
+    wire OnCommand = Command[63];
+    wire [3:0] commandHead = OnCommand ? Command[62:59] : 4'd0;//read 4 bit head if OnCommand, else set zero
+    wire DONE = OnCommand ? B[commandHead] == 0 : 1;//if OnCommand, check if current command is no longer busy. else set 1
     wire [15:0] O;//on wires
-    assign O[PT] = busy && OnCommand && (commandHead == PT);
-    assign O[LN] = busy && OnCommand && (commandHead == LN);
-    assign O[CHR] = busy && OnCommand && (commandHead == CHR);
-    assign O[RECT] = busy && OnCommand && (commandHead == RECT);
-    assign O[CIRC] = busy && OnCommand && (commandHead == CIRC);
-    assign O[SPRSCN] = busy && OnCommand && (commandHead == SPRSCN);
-    assign O[FRECT] = busy && OnCommand && (commandHead == FRECT);
-    assign O[FCIRC] = busy && OnCommand && (commandHead == FCIRC);
+    assign O[IDLE] = OnCommand && (commandHead == IDLE);
+    assign O[PT] = OnCommand && (commandHead == PT);
+    assign O[LN] = OnCommand && (commandHead == LN);
+    assign O[CHR] = OnCommand && (commandHead == CHR);
+    assign O[RECT] = OnCommand && (commandHead == RECT);
+    assign O[CIRC] = OnCommand && (commandHead == CIRC);
+    assign O[SPRSCN] = OnCommand && (commandHead == SPRSCN);
+    assign O[FRECT] = OnCommand && (commandHead == FRECT);
+    assign O[FCIRC] = OnCommand && (commandHead == FCIRC);
+    assign O[9] = OnCommand && (commandHead == 9);
+    assign O[10] = OnCommand && (commandHead == 10);
+    assign O[11] = OnCommand && (commandHead == 11);
+    assign O[12] = OnCommand && (commandHead == 12);
+    assign O[SBNCH] = OnCommand && (commandHead == SBNCH);
+    assign O[DBNCH] = OnCommand && (commandHead == DBNCH);
+    assign O[JMP] = OnCommand && (commandHead == JMP);
     always @ (posedge CLK) begin//change state
         case (STATE)
             IDL: begin
@@ -66,12 +78,13 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
             default: STATE <= IDL;//default idle
         endcase
     end
-    reg [6:0] XO;
-    reg [5:0] YO;
-    reg [15:0] CO;
+    reg [6:0] XO = 7'd0;
+    reg [5:0] YO = 6'd0;
+    reg [15:0] CO = 16'd0;
     wire [6:0] Xout[15:0];//Xouts
     wire [5:0] Yout[15:0];//Youts
     wire [15:0] Cout[15:0];//Couts
+    OnIdleCommand OIC(CLK, O[IDLE], XO, YO, CO, Xout[IDLE], Yout[IDLE], Cout[IDLE], B[IDLE]);
     OnPointCommand OPC(CLK, O[PT], Command, Xout[PT], Yout[PT], Cout[PT], B[PT]);
     OnLineCommand OLNC(CLK, O[LN], Command, Xout[LN], Yout[LN], Cout[LN], B[LN]);
     OnCharCommand OCHRC(CLK, O[CHR], Command, Xout[CHR], Yout[CHR], Cout[CHR], B[CHR]);
@@ -80,20 +93,40 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
     OnSceneSpriteCommand OSPRSCNC(CLK, O[SPRSCN], Command, Xout[SPRSCN], Yout[SPRSCN], Cout[SPRSCN], B[SPRSCN]);
     OnFillRectCommand OFRECTC(CLK, O[FRECT], Command, Xout[FRECT], Yout[FRECT], Cout[FRECT], B[FRECT]);
     OnFillCircCommand OFCIRCC(CLK, O[FCIRC], Command, Xout[FCIRC], Yout[FCIRC], Cout[FCIRC], B[FCIRC]);  
+    OnIdleCommand OIC9(CLK, O[9], XO, YO, CO, Xout[9], Yout[9], Cout[9], B[9]);
+    OnIdleCommand OIC10(CLK, O[10], XO, YO, CO, Xout[10], Yout[10], Cout[10], B[10]);
+    OnIdleCommand OIC11(CLK, O[11], XO, YO, CO, Xout[11], Yout[11], Cout[11], B[11]);
+    OnIdleCommand OIC12(CLK, O[12], XO, YO, CO, Xout[12], Yout[12], Cout[12], B[12]);
+    OnSingleBranchCommand OSBC(CLK, O[SBNCH], Command, IMME, Xout[SBNCH], Yout[SBNCH], Cout[SBNCH], B[SBNCH]);
+    OnDoubleBranchCommand ODBC(CLK, O[DBNCH], Command, IMME, Xout[DBNCH], Yout[DBNCH], Cout[DBNCH], B[DBNCH]);
+    OnJumpCommand OJC(CLK, O[JMP], Command, Xout[JMP], Yout[JMP], Cout[JMP], B[JMP]);    
+    wire STPCLK = STATE == STP ? 1 : 0;
     always @ (*) begin
-        if (busy && OnCommand) begin
-            XO = Xout[commandHead];
-            YO = Yout[commandHead];
-            CO = Cout[commandHead];
+        if (busy && OnCommand) begin //state is str
+            if(commandHead < CommandUpperBound) begin
+                if (XO < XupperBound) begin
+                    XO = Xout[commandHead];
+                    YO = Yout[commandHead];
+                    CO = Cout[commandHead];
+                end //else means idle
+            end  
         end
     end
-    reg [6:0] raddr = 0;
-    always @ (posedge CLK) begin
-        if (commandHead == JMP) raddr = Command[6:0];
-        else if (commandHead == SBNCH) begin
-            if (IMME == Command[8:7]) raddr = Command[6:0];
-        end
-        else raddr = raddr + 1;
+    always @ (posedge STPCLK) begin
+        if (commandHead >= CommandUpperBound) begin //special commands
+            case (commandHead)
+                SBNCH:begin 
+                    raddr = Xout[commandHead];
+                end
+                DBNCH:begin
+                    raddr = Xout[commandHead];
+                end
+                JMP:begin
+                    raddr = Xout[commandHead];
+                end
+                default:begin raddr = raddr + 1; end
+            endcase
+        end else raddr = raddr + 1;//normal commands
     end
     assign RADDR = raddr;
     assign BUSY = busy;

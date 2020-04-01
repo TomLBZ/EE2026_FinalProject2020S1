@@ -3,38 +3,5 @@ Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
 Running: C:/Xilinx/Vivado/2018.2/bin/unwrapped/win64.o/xelab.exe -wto 0917254c695c4cb5998f17b74e73445e --incr --debug typical --relax --mt 2 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot simClk_behav xil_defaultlib.simClk xil_defaultlib.glbl -log elaborate.log 
 Using 2 slave threads.
 Starting static elaboration
-WARNING: [VRFC 10-278] actual bit length 32 differs from formal bit length 1 for port password [C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Peripherals.v:151]
-Completed static elaboration
-Starting simulation data flow analysis
-Completed simulation data flow analysis
-Time Resolution for simulation is 1ps
-Compiling module xil_defaultlib.TripleChannelClock
-Compiling module xil_defaultlib.dff
-Compiling module xil_defaultlib.pulser
-Compiling module xil_defaultlib.btnDebouncer
-Compiling module xil_defaultlib.swState(END=15)
-Compiling module xil_defaultlib.swBitsToState
-Compiling module xil_defaultlib.Peripherals
-Compiling module xil_defaultlib.Audio_Capture
-Compiling module xil_defaultlib.M21
-Compiling module xil_defaultlib.B16_MUX
-Compiling module xil_defaultlib.Oled_Display_default
-Compiling module xil_defaultlib.CommandQueue
-Compiling module xil_defaultlib.OnPointCommand
-Compiling module xil_defaultlib.OnLineCommand
-Compiling module xil_defaultlib.CharBlocks
-Compiling module xil_defaultlib.OnCharCommand
-Compiling module xil_defaultlib.OnRectCommand
-Compiling module xil_defaultlib.OnCircleCommand
-Compiling module xil_defaultlib.SceneSpriteBlocks
-Compiling module xil_defaultlib.OnSceneSpriteCommand
-Compiling module xil_defaultlib.OnFillRectCommand
-Compiling module xil_defaultlib.OnFillCircCommand
-Compiling module xil_defaultlib.DisplayCommandCore
-Compiling module xil_defaultlib.DisplayRAM
-Compiling module xil_defaultlib.Graphics
-Compiling module xil_defaultlib.AV_Indicator
-Compiling module xil_defaultlib.Top_Student
-Compiling module xil_defaultlib.simClk
-Compiling module xil_defaultlib.glbl
-Built simulation snapshot simClk_behav
+ERROR: [VRFC 10-1546] variable X might have multiple concurrent drivers [C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Graphics.v:695]
+ERROR: [XSIM 43-3322] Static elaboration of top level Verilog design unit(s) in library work failed.

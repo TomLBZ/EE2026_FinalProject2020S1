@@ -12,5 +12,5 @@ module simClk();
     always begin
     # 5 clk = ~clk;
     end
-    Top_Student ts(clk, btns,sw,jai, jao,jb,led);
+    Top_Student ts(clk, jai, btns, sw, jao, jb, led, seg, an); 
 endmodule

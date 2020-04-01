@@ -15,6 +15,42 @@
 // Revision 0.01 - File Created
 // Additional Comments:
 //////////////////////////////////////////////////////////////////////////////////
+module OnIdleCommand(input CLK, input ON, input [6:0] OldX, input [5:0] OldY, input [15:0] OldC, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
+    localparam [1:0] IDL = 0;//idle
+    localparam [1:0] STR = 1;//start drawing
+    localparam [1:0] STP = 2;//end drawing
+    reg [1:0] STATE;//current state
+    reg drawn = 0;
+    wire DONE = drawn;
+    wire busy = (STATE == STR);
+    always @ (posedge CLK) begin
+        if (busy) begin
+            drawn <= drawn + 1;
+        end
+    end
+    always @ (posedge CLK) begin//change state
+        case (STATE)
+            IDL: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            STR: begin
+                if (DONE) STATE <= STP;//if done then stop
+                else STATE <= STR;//else start
+            end
+            STP: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            default: STATE <= IDL;//default idle
+        endcase
+    end
+    assign BUSY = busy;
+    assign X = OldX;
+    assign Y = OldY;
+    assign COLOR = OldC;
+endmodule
+
 module OnPointCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
     wire [6:0] pX = CMD[6:0];
     wire [5:0] pY = CMD[12:7];
@@ -336,8 +372,8 @@ module OnSceneSpriteCommand(input CLK, input ON, input [63:0] CMD, output [6:0] 
     localparam [1:0] STP = 2;//end drawing
     reg [1:0] STATE;//current state
     wire loop = (STATE == STR);//if started, then loops
-    reg [6:0] XO;
-    reg [5:0] YO;
+    reg [6:0] XO = LX;
+    reg [5:0] YO = TY;
     reg [15:0] CO;
     reg [6:0] xcount;
     reg [5:0] ycount;
@@ -499,36 +535,171 @@ module OnFillCircCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, 
     assign Y = YO;
 endmodule
 
-module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM);
+module OnSingleBranchCommand(input CLK, input ON, input [63:0] CMD, input [1:0] IMME, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
+    wire [6:0] Dest = CMD[6:0];
+    wire [5:0] cmp = CMD[8:7];
+    localparam [1:0] IDL = 0;//idle
+    localparam [1:0] STR = 1;//start drawing
+    localparam [1:0] STP = 2;//end drawing
+    reg [1:0] STATE;//current state
+    reg drawn = 0;
+    wire DONE = drawn;
+    wire busy = (STATE == STR);
+    reg [6:0] x;
+    reg [5:0] y;
+    always @ (posedge CLK) begin
+        if (busy) begin
+            x <= IMME == cmp[1:0] ? Dest : 0; 
+            y <= IMME == cmp[1:0] ? 6'd1 : 6'd0;   
+            drawn <= drawn + 1;
+        end
+    end
+    always @ (posedge CLK) begin//change state
+        case (STATE)
+            IDL: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            STR: begin
+                if (DONE) STATE <= STP;//if done then stop
+                else STATE <= STR;//else start
+            end
+            STP: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            default: STATE <= IDL;//default idle
+        endcase
+    end
+    assign BUSY = busy;
+    assign X = x;
+    assign Y = y;
+    assign COLOR = 0;
+endmodule
+
+module OnDoubleBranchCommand(input CLK, input ON, input [63:0] CMD, input [1:0] IMME, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
+    wire [6:0] Dest1 = CMD[6:0];
+    wire [6:0] Dest2 = CMD[13:7];
+    wire [5:0] cmp = CMD[15:14];
+    localparam [1:0] IDL = 0;//idle
+    localparam [1:0] STR = 1;//start drawing
+    localparam [1:0] STP = 2;//end drawing
+    reg [1:0] STATE;//current state
+    reg drawn = 0;
+    wire DONE = drawn;
+    wire busy = (STATE == STR);
+    reg [6:0] x;
+    reg [5:0] y;
+    always @ (posedge CLK) begin
+        if (busy) begin
+            x <= IMME == cmp[1:0] ? Dest1 : Dest2;
+            y <= IMME == cmp[1:0] ? 6'd1 : 6'd0;        
+            drawn <= drawn + 1;
+        end
+    end
+    always @ (posedge CLK) begin//change state
+        case (STATE)
+            IDL: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            STR: begin
+                if (DONE) STATE <= STP;//if done then stop
+                else STATE <= STR;//else start
+            end
+            STP: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            default: STATE <= IDL;//default idle
+        endcase
+    end
+    assign BUSY = busy;
+    assign X = x;
+    assign Y = y;
+    assign COLOR = 0;
+endmodule
+
+module OnJumpCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
+    wire [6:0] Dest = CMD[6:0];
+    localparam [1:0] IDL = 0;//idle
+    localparam [1:0] STR = 1;//start drawing
+    localparam [1:0] STP = 2;//end drawing
+    reg [1:0] STATE;//current state
+    reg drawn = 0;
+    wire DONE = drawn;
+    wire busy = (STATE == STR);
+    reg [6:0] x;
+    reg [5:0] y;
+    always @ (posedge CLK) begin
+        if (busy) begin
+            x <= Dest;
+            y <= 6'd1;  
+            drawn <= drawn + 1;
+        end
+    end
+    always @ (posedge CLK) begin//change state
+        case (STATE)
+            IDL: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            STR: begin
+                if (DONE) STATE <= STP;//if done then stop
+                else STATE <= STR;//else start
+            end
+            STP: begin
+                if (ON) STATE <= STR;//if on then start
+                else STATE <= IDL;//else idle
+            end
+            default: STATE <= IDL;//default idle
+        endcase
+    end
+    assign BUSY = busy;
+    assign X = x;
+    assign Y = y;
+    assign COLOR = 0;
+endmodule
+
+module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM, output [15:0] debugLED);
     localparam StrSize = 15;
     localparam AV_Size = 34;
     integer SIZE = StrSize + AV_Size;
-    reg [63:0] StartScreenCmd;
+    wire [63:0] StartScreenCmd;
     wire [6:0] sssbCNT;
-    wire StartScreenWriting = sssbCNT == 14 ? 0 : 1;//finished writing all commands to the queue, then 0
+    wire StartScreenWriting = sssbCNT == StrSize ? 0 : 1;//finished writing all commands to the queue, then 0
     wire StartScreenClock = StartScreenWriting ? WCLK : 0;
     StartScreenSceneBuilder #(StrSize) SSSB(StartScreenClock, 2'b0, StartScreenCmd, sssbCNT);
-    reg [63:0] AudioVisualizationCmd;
+    wire [63:0] AudioVisualizationCmd;
     wire [6:0] avsbCNT;
-    wire AudioVisualWriting = sssbCNT == 14 ? (avsbCNT == 33 ? 0 : 1) : 0;//finished writing all commands to the queue, then 0
+    wire AudioVisualWriting = sssbCNT == StrSize ? (avsbCNT == AV_Size ? 0 : 1) : 0;//finished writing all commands to the queue, then 0
     wire AudioVisualClock = AudioVisualWriting ? WCLK : 0;
-    AudioVisualizationSceneBuilder #(AV_Size) AVSB(AudioVisualClock, sw[6:5], sw[4], sw[3], sw[2], sw[1], sw[0], Volume, AudioVisualizationCmd, avsbCNT);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
+    AudioVisualizationSceneBuilder #(AV_Size) AVSB(AudioVisualClock, sssbCNT, sw[6:5], sw[4], sw[3], sw[2], sw[1], sw[0], Volume, AudioVisualizationCmd, avsbCNT);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
     wire [63:0] CmdQin = StartScreenWriting ? StartScreenCmd : (AudioVisualWriting ? AudioVisualizationCmd : 0);
     wire [63:0] CmdQout;
-    wire Builder_WRITE = StartScreenWriting | AudioVisualWriting;
-    wire [6:0] Builder_WADDR = sssbCNT + avsbCNT;
+    wire Builder_WRITE = StartScreenWriting | AudioVisualWriting ? WCLK : 0;//make sure not reading and writing same address
+    wire [6:0] Builder_WADDR = StartScreenWriting ? sssbCNT : sssbCNT + avsbCNT;
     wire GPU_BUSY;
     wire [6:0] GPU_RADDR;
     CommandQueue #(128) CMDQ(CmdQin, ~GPU_BUSY, GPU_RADDR, Builder_WRITE, Builder_WADDR, CmdQout);
     reg [6:0] X;
     reg [5:0] Y;
     reg [15:0] C;
+    initial begin
+        X = 7'd0;
+        Y = 6'd0;
+        C = 16'd0;
+    end
     wire GPU_ON = 1;
-    reg [1:0] ImmediateState;
+    wire [1:0] ImmediateState = sw[14:13];
     GraphicsProcessingUnit GPU(CmdQout, GPU_ON, WCLK, ImmediateState, GPU_RADDR, X, Y, C, GPU_BUSY);
     DisplayRAM DRAM(Pix, ~WCLK, WCLK, GPU_BUSY, X, Y, C, STREAM); //using negedge of WCLK to read, posedge to write
     localparam [1:0] STARTSCREEN = 2'b00;
     localparam [1:0] VOLUMEBAR = 2'b01;
     localparam [1:0] MAZE = 2'b10;
     localparam [1:0] BADAPPLE = 2'b11;    
+    assign debugLED[6:0] = Builder_WADDR;
+    assign debugLED[13:7] = GPU_RADDR;
+    assign debugLED[14] = GPU_BUSY;
+    assign debugLED[15] = ImmediateState[0];
 endmodule

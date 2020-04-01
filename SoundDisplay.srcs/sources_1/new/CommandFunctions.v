@@ -23,6 +23,7 @@ function [63:0] DrawPoint;
         DrawPoint[6:0] = X;
         DrawPoint[12:7] = Y;
         DrawPoint[28:13] = COLOR;
+        DrawPoint[58:29] = 0;
     end
 endfunction
 
@@ -40,6 +41,7 @@ function [63:0] DrawLine;
         DrawLine[28:13] = COLOR;
         DrawLine[35:29] = X2;
         DrawLine[41:36] = Y2;
+        DrawLine[58:42] = 0;
     end
 endfunction
 
@@ -57,6 +59,7 @@ function [63:0] DrawChar;
         DrawChar[28:13] = COLOR;
         DrawChar[48:29] = CHR;
         DrawChar[50:49] = POWER;
+        DrawChar[58:51] = 0;
     end
 endfunction
 
@@ -74,6 +77,7 @@ function [63:0] DrawRect;
         DrawRect[28:13] = COLOR;
         DrawRect[35:29] = X2;
         DrawRect[41:36] = Y2;
+        DrawRect[58:42] = 0;
     end
 endfunction
 
@@ -89,6 +93,7 @@ function [63:0] DrawCirc;
         DrawCirc[12:7] = Y;
         DrawCirc[28:13] = COLOR;
         DrawCirc[33:29] = R;
+        DrawCirc[58:34] = 0;
     end
 endfunction
 
@@ -106,6 +111,7 @@ function [63:0] DrawSceneSprite;
         DrawSceneSprite[28:13] = MCOLOR;
         DrawSceneSprite[35:29] = INDEX;
         DrawSceneSprite[37:36] = POWER;
+        DrawSceneSprite[58:38] = 0;
     end
 endfunction
 
@@ -123,6 +129,7 @@ function [63:0] FillRect;
         FillRect[28:13] = COLOR;
         FillRect[35:29] = X2;
         FillRect[41:36] = Y2;
+        FillRect[58:42] = 0;
     end
 endfunction
 
@@ -138,6 +145,7 @@ function [63:0] FillCirc;
         FillCirc[12:7] = Y;
         FillCirc[28:13] = COLOR;
         FillCirc[33:29] = R;
+        FillCirc[58:34] = 0;
     end
 endfunction
 
@@ -155,6 +163,7 @@ function [63:0] QuickDrawSceneSprite;//using SPRSCN command
         QuickDrawSceneSprite[28:13] = MCOLOR;
         QuickDrawSceneSprite[35:29] = INDEX;
         QuickDrawSceneSprite[37:36] = POWER;
+        QuickDrawSceneSprite[58:38] = 0;
     end
 endfunction
 
@@ -163,9 +172,24 @@ function [63:0] SBNCH;
     input [1:0] CMP;
     begin
         SBNCH[63] = 1;//Enable
-        SBNCH[62:59] = 4'd15;//JMP
+        SBNCH[62:59] = 4'd13;//SBNCH
         SBNCH[6:0] = ADDR;//target address
         SBNCH[8:7] = CMP;
+        SBNCH[58:9] = 0;
+    end
+endfunction
+
+function [63:0] DBNCH;
+    input [6:0] ADDR1;
+    input [6:0] ADDR2;
+    input [1:0] CMP;
+    begin
+        DBNCH[63] = 1;//Enable
+        DBNCH[62:59] = 4'd14;//DBNCH
+        DBNCH[6:0] = ADDR1;//target address 1
+        DBNCH[13:7] = ADDR2;//target address 2
+        DBNCH[15:14] = CMP;
+        DBNCH[58:16] = 0;
     end
 endfunction
 
@@ -175,5 +199,6 @@ function [63:0] JMP;
         JMP[63] = 1;//Enable
         JMP[62:59] = 4'd15;//JMP
         JMP[6:0] = ADDR;//target address
+        JMP[58:7] = 0;
     end
 endfunction

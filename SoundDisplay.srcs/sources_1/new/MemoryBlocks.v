@@ -18,6 +18,13 @@
 module DisplayRAM(input [12:0] readPix, input AsyncReadCLK, input WCLK, input Write, input [6:0] X, input [5:0] Y, input [15:0] COLOR, output [15:0] STREAM);
     reg [15:0] DRAM [6143:0];
     reg [15:0] stream;
+    reg [12:0] c;
+    initial begin
+        stream = 16'd0;
+        for (c = 0; c < 13'd6144;c = c + 1) begin
+            DRAM[c] = 16'd0;
+        end
+    end
     always @(posedge AsyncReadCLK) begin
         stream = DRAM[readPix]; 
     end
@@ -32,17 +39,24 @@ endmodule
 module CommandQueue #(parameter size = 128) (input [63:0] CMD, input RCLK, input [6:0] RADDR, input WCLK, input [6:0] WADDR, output [63:0] CurrentCommand);
     reg [63:0] CMDQ [size - 1:0];
     reg [63:0] cCmd;
+    reg [7:0] c;
+    initial begin
+        cCmd = 64'b0;
+        for (c = 0; c < size; c = c + 1) begin
+            CMDQ[c] = 64'b0;
+        end
+    end
     always @ (posedge RCLK) begin
         cCmd = CMDQ[RADDR];
     end
     assign CurrentCommand = cCmd;
     always @ (posedge WCLK) begin
-        if (WADDR != RADDR) CMDQ[WADDR] = CMD;
+        CMDQ[WADDR] = CMD;
     end
 endmodule
 
 module CharBlocks(input [19:0] CHR, output [34:0] MAP);
-    reg [34:0] map;
+    reg [34:0] map = 35'd0;
     always @ (*) begin
         case (CHR)
             20'd0:begin map = 35'b00100_01010_10001_11111_10001_10001_10001; end//A
@@ -132,10 +146,10 @@ module SceneSpriteBlocks(input [6:0] SCN, output reg [15:0] COLOR[63:0]);
     end
 endmodule
 
-module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, input [1:0] THEME, input THK, input BD, input BG, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD, output [6:0] CNT);
+module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, input [6:0] Qstart, input [1:0] THEME, input THK, input BD, input BG, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD, output [6:0] CNT);
     reg [63:0] AudioBar [scenesize - 1:0];//34 commands
-    reg [6:0] count = 0;
-    reg [63:0] cmd;
+    reg [6:0] count = 0 - 1;
+    reg [63:0] cmd = 64'd0;
     reg [15:0] BGT [2:0] = {{5'd0,6'd0,5'd0},{5'd31,6'd63,5'd31},{5'd0,6'd0,5'd31}};// black, white, blue
     reg [15:0] BT [2:0] = {{5'd31,6'd63,5'd31},{5'd0,6'd31,5'd0},{5'd31,6'd32,5'd0}};// white, dark green, orange
     reg [15:0] HT [2:0] = {{5'd31,6'd0,5'd0},{5'd0,6'd0,5'd31},{5'd31,6'd63,5'd0}};// red, blue, yellow
@@ -193,29 +207,29 @@ module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, in
     assign AudioBar[30] = DrawChar(7'd75, 6'd13, 20'd21, HCCOL,1'd0); //V, original size
     assign AudioBar[31] = DrawChar(7'd80, 6'd13, 20'd14, HCCOL,1'd0); //O, original size
     assign AudioBar[32] = DrawChar(7'd85, 6'd13, 20'd11, HCCOL,1'd0); //L, original size
-    assign AudioBar[33] = JMP(7'd0);//Jump to 0;
+    assign AudioBar[33] = JMP(Qstart);//Jump to Qstart;
     always @(posedge CLK) begin
-        cmd = AudioBar[count];
-        if (count == 33) count = 0;
+        if (count == scenesize) count = 0;
         else count = count + 1;
+        cmd = AudioBar[count];
     end
     assign CMD = cmd;
     assign CNT = count;
 endmodule
 
-module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:0] CURSORINDEX, output CMD, output [4:0] CNT);
+module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:0] CURSORINDEX, output [63:0] CMD, output [6:0] CNT);
     reg [63:0] StartScreen [scenesize - 1:0];//15 commands
-    reg [4:0] count = 0;
-    reg [63:0] cmd;
+    reg [4:0] count = 0 - 1;
+    reg [63:0] cmd = 64'd0;
     reg [15:0] WHITE = {5'd31,6'd63,5'd31};
     reg [15:0] AQUA = {5'd10, 6'd40, 5'd31};
     `include "CommandFunctions.v"
-    assign StartScreen[0] = QuickDrawSceneSprite(7'd0, 6'd0, WHITE, 3'd1, 2'b10 );//brick wall (0,0), quadriple size
-    assign StartScreen[1] = QuickDrawSceneSprite(7'd4, 6'd0, WHITE, 3'd1, 2'b10 );//brick wall (1,0), quadriple size
-    assign StartScreen[2] = QuickDrawSceneSprite(7'd8, 6'd0, WHITE, 3'd1, 2'b10 );//brick wall (2,0), quadriple size
-    assign StartScreen[3] = QuickDrawSceneSprite(7'd0, 6'd4, WHITE, 3'd1, 2'b10 );//brick wall (0,1), quadriple size
-    assign StartScreen[4] = QuickDrawSceneSprite(7'd4, 6'd4, WHITE, 3'd1, 2'b10 );//brick wall (1,1), quadriple size
-    assign StartScreen[5] = QuickDrawSceneSprite(7'd8, 6'd4, WHITE, 3'd1, 2'b10 );//brick wall (2,1), quadriple size
+    assign StartScreen[0] = QuickDrawSceneSprite(7'd0, 6'd0, WHITE, 3'd1, 2'd0 );//brick wall (0,0), quadriple size
+    assign StartScreen[1] = QuickDrawSceneSprite(7'd4, 6'd0, WHITE, 3'd1, 2'd0 );//brick wall (1,0), quadriple size
+    assign StartScreen[2] = QuickDrawSceneSprite(7'd8, 6'd0, WHITE, 3'd1, 2'd0 );//brick wall (2,0), quadriple size
+    assign StartScreen[3] = QuickDrawSceneSprite(7'd0, 6'd4, WHITE, 3'd1, 2'd2 );//brick wall (0,1), quadriple size
+    assign StartScreen[4] = QuickDrawSceneSprite(7'd4, 6'd4, WHITE, 3'd1, 2'd0 );//brick wall (1,1), quadriple size
+    assign StartScreen[5] = QuickDrawSceneSprite(7'd8, 6'd4, WHITE, 3'd1, 2'd0 );//brick wall (2,1), quadriple size
     assign StartScreen[6] = DrawRect(7'd15, 6'd22, 7'd81, 6'd41, WHITE);//Draw Chr boarderline white
     assign StartScreen[7] = DrawChar(7'd18, 6'd25, 20'd22, AQUA,1'd1); //W, double size
     assign StartScreen[8] = DrawChar(7'd28, 6'd25, 20'd4, AQUA,1'd1); //E, double size
@@ -226,9 +240,9 @@ module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:
     assign StartScreen[13] = DrawChar(7'd78, 6'd25, 20'd4, AQUA,1'd1); //E, double size
     assign StartScreen[14] = SBNCH(7'd0, 2'b00);//JMP to 0 if imme is in startscreen mode
     always @(posedge CLK) begin
-        cmd = StartScreen[count];
-        if (count == 14) count = 0;
+        if (count == scenesize) count = 0;
         else count = count + 1;
+        cmd = StartScreen[count];
     end
     assign CMD = cmd;
     assign CNT = count;
