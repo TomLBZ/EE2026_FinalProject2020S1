@@ -239,7 +239,7 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
                     MazeDState = 2'b11;
                     DisplayControl = 1;
                 end
-                else if (win == 1'b1) begin
+                else if (win == 1'b1) begin 
                     MazeDState = 2'b10;
                     DisplayControl = 1;
                 end

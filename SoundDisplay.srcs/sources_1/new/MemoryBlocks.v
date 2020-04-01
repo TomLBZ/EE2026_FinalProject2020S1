@@ -100,6 +100,7 @@ module SceneSpriteBlocks(input [6:0] SCN, output reg [15:0] COLOR[63:0]);
     localparam [2:0] BRICK = 1;    
     localparam [2:0] CACTUS = 2;
     localparam [2:0] STEVE = 3;
+    localparam [3:0] MOTHCOBBLESTONE = 4;
     always @(*) begin
         case (SCN)
             GRASS: COLOR = {{5'd12,6'd32,5'd8},{5'd12,6'd32,5'd8},{5'd12,6'd32,5'd8},{5'd8,6'd32,5'd8},{5'd12,6'd40,5'd8},{5'd12,6'd32,5'd8},{5'd12,6'd32,5'd8},{5'd8,6'd24,5'd8},
@@ -134,6 +135,14 @@ module SceneSpriteBlocks(input [6:0] SCN, output reg [15:0] COLOR[63:0]);
                             {5'd18,6'd25,5'd11},{5'd20,6'd30,5'd14},{5'd23,6'd34,5'd16},{5'd13,6'd14,5'd7},{5'd13,6'd14,5'd6},{5'd22,6'd34,5'd16},{5'd19,6'd27,5'd12},{5'd15,6'd20,5'd8},
                             {5'd17,6'd23,5'd8},{5'd17,6'd24,5'd9},{5'd14,6'd16,5'd5},{5'd14,6'd18,5'd6},{5'd14,6'd17,5'd6},{5'd13,6'd16,5'd5},{5'd17,6'd24,5'd8},{5'd15,6'd20,5'd7},
                             {5'd14,6'd17,5'd4},{5'd14,6'd17,5'd4},{5'd16,6'd21,5'd6},{5'd15,6'd20,5'd6},{5'd15,6'd19,5'd6},{5'd16,6'd21,5'd7},{5'd16,6'd21,5'd7},{5'd15,6'd19,5'd5}};
+            MOTHCOBBLESTONE: COLOR = {{5'd20,6'd40,5'd20},{5'd20,6'd40,5'd20},{5'd20,6'd40,5'd20},{5'd8,6'd24,5'd8},{5'd12,6'd24,5'd16},{5'd20,6'd40,5'd20},{5'd16,6'd32,5'd16},{5'd24,6'd48,5'd24},
+                            {5'd8,6'd24,5'd8},{5'd16,6'd32,5'd16},{5'd8,6'd24,5'd8},{5'd20,6'd40,5'd20},{5'd8,6'd16,5'd8},{5'd16,6'd32,5'd16},{5'd8,6'd16,5'd8},{5'd8,6'd24,5'd8},
+                            {5'd20,6'd40,5'd20},{5'd12,6'd24,5'd16},{5'd20,6'd40,5'd20},{5'd16,6'd32,5'd16},{5'd8,6'd24,5'd8},{5'd20,6'd40,5'd20},{5'd8,6'd24,5'd8},{5'd20,6'd40,5'd20},
+                            {5'd16,6'd32,5'd16},{5'd8,6'd32,5'd8},{5'd8,6'd24,5'd8},{5'd12,6'd24,5'd8},{5'd8,6'd24,5'd8},{5'd20,6'd40,5'd20},{5'd16,6'd32,5'd16},{5'd8,6'd32,5'd8},
+                            {5'd16,6'd32,5'd16},{5'd8,6'd24,5'd8},{5'd8,6'd40,5'd8},{5'd8,6'd24,5'd8},{5'd20,6'd40,5'd20},{5'd8,6'd24,5'd8},{5'd8,6'd24,5'd8},{5'd24,6'd48,5'd24},
+                            {5'd12,6'd24,5'd16},{5'd16,6'd32,5'd16},{5'd16,6'd32,5'd16},{5'd20,6'd40,5'd20},{5'd16,6'd32,5'd16},{5'd16,6'd32,5'd16},{5'd8,6'd24,5'd8},{5'd20,6'd40,5'd20},
+                            {5'd20,6'd40,5'd20},{5'd8,6'd16,5'd8},{5'd8,6'd16,5'd8},{5'd8,6'd24,5'd8},{5'd8,6'd24,5'd8},{5'd20,6'd40,5'd20},{5'd8,6'd32,5'd8},{5'd8,6'd24,5'd8},
+                            {5'd16,6'd32,5'd16},{5'd8,6'd24,5'd8},{5'd16,6'd32,5'd16},{5'd16,6'd32,5'd16},{5'd8,6'd24,5'd8},{5'd16,6'd32,5'd16},{5'd16,6'd32,5'd16},{5'd12,6'd24,5'd8}};
             default: COLOR ={{5'd5,6'd7,5'd1},{5'd5,6'd7,5'd1},{5'd5,6'd7,5'd2},{5'd5,6'd6,5'd1},{5'd4,6'd5,5'd1},{5'd5,6'd7,5'd2},{5'd4,6'd6,5'd1},{5'd4,6'd7,5'd1},
                             {5'd6,6'd7,5'd0},{5'd6,6'd7,5'd1},{5'd6,6'd7,5'd1},{5'd7,6'd9,5'd2},{5'd7,6'd10,5'd3},{5'd7,6'd10,5'd3},{5'd5,6'd7,5'd1},{5'd5,6'd7,5'd0},
                             {5'd7,6'd6,5'd0},{5'd21,6'd34,5'd13},{5'd23,6'd37,5'd15},{5'd23,6'd37,5'd16},{5'd22,6'd36,5'd15},{5'd22,6'd36,5'd15},{5'd19,6'd31,5'd12},{5'd8,6'd8,5'd0},
@@ -232,34 +241,43 @@ module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:
 endmodule
 
 
-module MazeSceneBuilder(input CLK, input [1:0] MazeDState, output CMD);
+module MazeSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:0] MazeDState, output CMD);
     reg [63:0] MazeScene [31:0];//32 commands
     reg [5:0] count = 0;
     reg [63:0] cmd;
     reg [15:0] RED = {5'd31,6'd0,5'd0};
+    reg [15:0] WHITE = {5'd31,6'd63,5'd31};
     `include "CommandFunctions.v"
-    // zui hou ce shi shi tong yi gai pai ban, xian zai bu yao guan wei zhi
-    //GAME START             //x position   y    char  on  size
-    assign MazeScene[0] = DrawChar(7'd10, 6'd20, 20'd6, RED ,1'd0); //G, original size
-    assign MazeScene[1] = DrawChar(7'd15, 6'd20, 20'd0, RED ,1'd0); //A, original size
-    assign MazeScene[2] = DrawChar(7'd20, 6'd20, 20'd12, RED ,1'd0); //M, original size
-    assign MazeScene[3] = DrawChar(7'd25, 6'd20, 20'd4, RED ,1'd0); //E, original size
-    assign MazeScene[4] = DrawChar(7'd30, 6'd20, 20'd19, RED ,1'd0); //S, original size
-    assign MazeScene[5] = DrawChar(7'd35, 6'd20, 20'd20, RED ,1'd0); //T, original size
-    assign MazeScene[6] = DrawChar(7'd40, 6'd20, 20'd0, RED ,1'd0); //A, original size
-    assign MazeScene[7] = DrawChar(7'd45, 6'd20, 20'd18, RED ,1'd0); //R, original size
-    assign MazeScene[8] = DrawChar(7'd45, 6'd20, 20'd20, RED ,1'd0); //T, original size
+    
+    //Background - MothCobblestone
+    assign MazeScene[0] = QuickDrawSceneSprite(7'd0, 6'd0, WHITE, 3'd4, 2'd2 );//MothCobblestone (0,0), quadriple size
+    assign MazeScene[1] = QuickDrawSceneSprite(7'd4, 6'd0, WHITE, 3'd4, 2'd2 );//MothCobblestone (1,0), quadriple size
+    assign MazeScene[2] = QuickDrawSceneSprite(7'd8, 6'd0, WHITE, 3'd4, 2'd2 );//MothCobblestone (2,0), quadriple size
+    assign MazeScene[3] = QuickDrawSceneSprite(7'd0, 6'd4, WHITE, 3'd4, 2'd2 );//MothCobblestone (0,1), quadriple size
+    assign MazeScene[4] = QuickDrawSceneSprite(7'd4, 6'd4, WHITE, 3'd4, 2'd2 );//MothCobblestone (1,1), quadriple size
+    assign MazeScene[5] = QuickDrawSceneSprite(7'd8, 6'd4, WHITE, 3'd4, 2'd2 );//MothCobblestone (2,1), quadriple size
+    
+    //GAME START             //x position   y    char  color  size
+    assign MazeScene[6] = DrawChar(7'd10, 6'd20, 20'd6, RED ,1'd0); //G, original size
+    assign MazeScene[7] = DrawChar(7'd15, 6'd20, 20'd0, RED ,1'd0); //A, original size
+    assign MazeScene[8] = DrawChar(7'd20, 6'd20, 20'd12, RED ,1'd0); //M, original size
+    assign MazeScene[9] = DrawChar(7'd25, 6'd20, 20'd4, RED ,1'd0); //E, original size
+    assign MazeScene[10] = DrawChar(7'd30, 6'd20, 20'd19, RED ,1'd0); //S, original size
+    assign MazeScene[11] = DrawChar(7'd35, 6'd20, 20'd20, RED ,1'd0); //T, original size
+    assign MazeScene[12] = DrawChar(7'd40, 6'd20, 20'd0, RED ,1'd0); //A, original size
+    assign MazeScene[13] = DrawChar(7'd45, 6'd20, 20'd18, RED ,1'd0); //R, original size
+    assign MazeScene[14] = DrawChar(7'd45, 6'd20, 20'd20, RED ,1'd0); //T, original size
     
     //WIN
-    assign MazeScene[9] = DrawChar(7'd10, 6'd20, 20'd22, RED ,1'd0); //W, original size
-    assign MazeScene[10] = DrawChar(7'd20, 6'd20, 20'd8, RED ,1'd0); //I, original size
-    assign MazeScene[11] = DrawChar(7'd30, 6'd20, 20'd13, RED ,1'd0); //N, original size
+    assign MazeScene[15] = DrawChar(7'd10, 6'd20, 20'd22, RED ,1'd0); //W, original size
+    assign MazeScene[16] = DrawChar(7'd20, 6'd20, 20'd8, RED ,1'd0); //I, original size
+    assign MazeScene[17] = DrawChar(7'd30, 6'd20, 20'd13, RED ,1'd0); //N, original size
     
     //LOSE
-    assign MazeScene[12] = DrawChar(7'd10, 6'd20, 20'd6, RED ,1'd0); //L, original size
-    assign MazeScene[13] = DrawChar(7'd15, 6'd20, 20'd6, RED ,1'd0); //O, original size
-    assign MazeScene[14] = DrawChar(7'd20, 6'd20, 20'd6, RED ,1'd0); //S, original size
-    assign MazeScene[15] = DrawChar(7'd25, 6'd20, 20'd6, RED ,1'd0); //E, original size
+    assign MazeScene[18] = DrawChar(7'd10, 6'd20, 20'd6, RED ,1'd0); //L, original size
+    assign MazeScene[19] = DrawChar(7'd15, 6'd20, 20'd6, RED ,1'd0); //O, original size
+    assign MazeScene[20] = DrawChar(7'd20, 6'd20, 20'd6, RED ,1'd0); //S, original size
+    assign MazeScene[21] = DrawChar(7'd25, 6'd20, 20'd6, RED ,1'd0); //E, original size
     
     always @(posedge CLK) begin
         cmd = MazeScene[count];
