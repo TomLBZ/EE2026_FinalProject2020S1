@@ -684,5 +684,9 @@ module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK
     wire GPU_ON = 1;
     wire [1:0] ImmediateState = sw[14:13];
     GraphicsProcessingUnit GPU(CmdQout, GPU_ON, WCLK, ImmediateState, GPU_RADDR, X, Y, C, GPU_DONE, GPU_BUSY);
-    DisplayRAM DRAM(Pix, ~WCLK, WCLK, GPU_BUSY, X, Y, C, STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
+    wire BACLK;
+    wire BA_PLAYING;
+    CLOCK10HZ C10(WCLK, BACLK);
+    BadApple BA(WCLK, sw[10], ~sw[10], BACLK, BA_PLAYING, X, Y, C);
+    DisplayRAM DRAM(Pix, ~WCLK, WCLK, GPU_BUSY | BA_PLAYING, X, Y, C, STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
 endmodule
