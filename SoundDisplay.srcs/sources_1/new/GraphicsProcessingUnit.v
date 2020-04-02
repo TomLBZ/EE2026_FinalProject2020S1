@@ -43,7 +43,7 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
     wire [15:0] B;//busy wires
     wire OnCommand = Command[63];
     wire [3:0] commandHead = Command[62:59];//read 4 bit head if OnCommand
-    assign DONE = busy && B[commandHead] == 0;//if OnCommand, check if current command is no longer busy. else set 1
+    assign DONE = busy && OnCommand && B[commandHead] == 0;//if OnCommand, check if current command is no longer busy. else set 1
     wire [15:0] O;//on wires
     assign O[IDLE] = (commandHead == IDLE);
     assign O[PT] = OnCommand && (commandHead == PT);
@@ -51,7 +51,7 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
     assign O[CHR] = OnCommand && (commandHead == CHR);
     assign O[RECT] = OnCommand && (commandHead == RECT);
     assign O[CIRC] = OnCommand && (commandHead == CIRC);
-    assign O[SPRSCN] = busy && OnCommand && (commandHead == SPRSCN);
+    assign O[SPRSCN] = OnCommand && (commandHead == SPRSCN);
     assign O[FRECT] = OnCommand && (commandHead == FRECT);
     assign O[FCIRC] = OnCommand && (commandHead == FCIRC);
     assign O[9] = OnCommand && (commandHead == 9);

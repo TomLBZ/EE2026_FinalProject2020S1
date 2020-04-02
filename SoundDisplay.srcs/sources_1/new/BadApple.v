@@ -19,16 +19,6 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module CLOCK10HZ(input CLK100MHZ, output CLK);
-    reg clk = 0;
-    reg [22:0] accumulator = 0;
-    always @ (posedge CLK100MHZ) begin
-        accumulator = accumulator + 1'b1;
-        if (accumulator == 23'd5000000) clk = ~clk;
-    end
-    assign CLK = clk ? 1 : 0;
-endmodule
-
 module BadApple(input CLK, input ON, input PAUSE, input Clk10Hz, output Write, output [6:0] WX, output [5:0] WY, output [15:0] COLOR);
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing

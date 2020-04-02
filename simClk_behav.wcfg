@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="14083333333fs"></ZoomStartTime>
-      <ZoomEndTime time="117183333334fs"></ZoomEndTime>
-      <Cursor1Time time="100000000000fs"></Cursor1Time>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="108900000001fs"></ZoomEndTime>
+      <Cursor1Time time="0fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="77"></NameColumnWidth>
-      <ValueColumnWidth column_width="77"></ValueColumnWidth>
+      <ValueColumnWidth column_width="73"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="12" />
+   <WVObjectSize size="13" />
    <wvobject fp_name="/simClk/ts/g/GPU/CLK" type="logic">
       <obj_property name="ElementShortName">CLK</obj_property>
       <obj_property name="ObjectShortName">CLK</obj_property>
@@ -67,5 +67,9 @@
    <wvobject fp_name="/simClk/ts/g/GPU/CO" type="array">
       <obj_property name="ElementShortName">CO[15:0]</obj_property>
       <obj_property name="ObjectShortName">CO[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/GPU/IMME" type="array">
+      <obj_property name="ElementShortName">IMME[1:0]</obj_property>
+      <obj_property name="ObjectShortName">IMME[1:0]</obj_property>
    </wvobject>
 </wave_config>

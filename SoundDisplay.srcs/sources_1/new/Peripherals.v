@@ -184,14 +184,26 @@ module SwitchStates(input [15:0] sw, input CLK, output [15:0] IsSwitchOn, output
     assign SwitchOffPulses = OffPulses;
 endmodule
 
+module CLOCK10HZ(input CLK100MHZ, output CLK);
+    reg clk = 0;
+    reg [22:0] accumulator = 0;
+    always @ (posedge CLK100MHZ) begin
+        accumulator = accumulator + 1'b1;
+        if (accumulator == 23'd5000000) clk = ~clk;
+    end
+    assign CLK = clk ? 1 : 0;
+endmodule
+
 module Peripherals(
     input CLOCK, [2:0] clkReset, [4:0] slowBit, [4:0] btns,[15:0] sw,
     output [3:0] Clock,//100M, 6.25M, 20k, _flexible_
     output [15:0] swStates, [15:0] swOnPulses, [15:0] swOffPulses,
-    output [4:0] btnStates, [4:0] btnPressPulses, [4:0] btnReleasePulses
+    output [4:0] btnStates, [4:0] btnPressPulses, [4:0] btnReleasePulses,
+    output BadAppleClock
     );
     TripleChannelClock tcc(CLOCK,clkReset,slowBit,Clock[2],Clock[1],Clock[0]);
     ButtonStates BS(btns, CLOCK, btnStates, btnPressPulses, btnReleasePulses);
     SwitchStates SS(sw, CLOCK, swStates, swOnPulses, swOffPulses);
+    CLOCK10HZ C10(CLOCK, BadAppleClock);
     assign Clock[3] = CLOCK;
 endmodule

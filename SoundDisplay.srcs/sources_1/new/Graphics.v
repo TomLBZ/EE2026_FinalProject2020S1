@@ -655,38 +655,35 @@ module OnJumpCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
     assign COLOR = 0;
 endmodule
 
-module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK, input [12:0] Pix, output [15:0] STREAM, output [15:0] debugLED);
+module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK, input BadAppleClock, input [12:0] Pix, output [15:0] STREAM, output [15:0] debugLED);
+    localparam [2:0] STARTSCREEN = 0;
+    localparam [2:0] VOLUMEBAR = 1;
+    localparam [2:0] GAMEMAZE = 2;
+    localparam [2:0] BADAPPLE = 3;
+    wire [2:0] STATE = sw[14:13];
     localparam StrSize = 15;
     localparam AV_Size = 34;
     integer SIZE = StrSize + AV_Size;
-    wire [63:0] StartScreenCmd;
-    wire [6:0] sssbCNT;
-    wire StartScreenWriting = sssbCNT == StrSize ? 0 : 1;//finished writing all commands to the queue, then 0
-    wire StartScreenClock = StartScreenWriting ? WCLK : 0;
-    StartScreenSceneBuilder #(StrSize) SSSB(StartScreenClock, 2'b0, StartScreenCmd, sssbCNT);
-    wire [63:0] AudioVisualizationCmd;
-    wire [6:0] avsbCNT;
-    wire AudioVisualWriting = sssbCNT == StrSize ? (avsbCNT == AV_Size ? 0 : 1) : 0;//finished writing all commands to the queue, then 0
-    wire AudioVisualClock = AudioVisualWriting ? WCLK : 0;
+    wire [6:0] CmdAddr;
+    wire StartScreenWriting = STATE == STARTSCREEN && CmdAddr < StrSize;//finished writing all commands to the queue, then 0
+    wire AudioVisualWriting = STATE == VOLUMEBAR  && CmdAddr < AV_Size;//finished writing all commands to the queue, then 0
+    wire CmdQWriteClock = StartScreenWriting | AudioVisualWriting ? WCLK : 0;
+    wire [63:0] CmdQin;
+    StartScreenSceneBuilder #(StrSize) SSSB(CmdQWriteClock, 2'b0, CmdQin, CmdAddr);//to implement cursor if have time
+    AudioVisualizationSceneBuilder #(AV_Size) AVSB(CmdQWriteClock, onRefresh, sw[1:0], sw[2], sw[3], sw[4], sw[5], Volume, CmdQin, CmdAddr);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
     wire [6:0] GPU_RADDR;
-    wire AutoRefresh = GPU_RADDR == sssbCNT;
-    AudioVisualizationSceneBuilder #(AV_Size) AVSB(AudioVisualClock, onRefresh, sssbCNT, sw[6:5], sw[4], sw[3], sw[2], sw[1], sw[0], Volume, AudioVisualizationCmd, avsbCNT);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
-    wire [63:0] CmdQin = StartScreenWriting ? StartScreenCmd : (AudioVisualWriting ? AudioVisualizationCmd : 0);
     wire [63:0] CmdQout;
-    wire Builder_WRITE = StartScreenWriting | AudioVisualWriting ? WCLK : 0;//make sure not reading and writing same address
-    wire [6:0] Builder_WADDR = StartScreenWriting ? sssbCNT : sssbCNT + avsbCNT;
     wire GPU_DONE;
     wire GPU_BUSY;
-    CommandQueue #(128) CMDQ(CmdQin, GPU_DONE, GPU_RADDR, Builder_WRITE, Builder_WADDR, CmdQout);
+    CommandQueue #(128) CMDQ(CmdQin, GPU_DONE, GPU_RADDR, CmdQWriteClock, CmdAddr, CmdQout);
     wire [6:0] X;
     wire [5:0] Y;
     wire [15:0] C;
-    wire GPU_ON = 1;
+    wire GPU_ON = sw[12];
     wire [1:0] ImmediateState = sw[14:13];
     GraphicsProcessingUnit GPU(CmdQout, GPU_ON, WCLK, ImmediateState, GPU_RADDR, X, Y, C, GPU_DONE, GPU_BUSY);
-    wire BACLK;
-    wire BA_PLAYING;
-    CLOCK10HZ C10(WCLK, BACLK);
-    BadApple BA(WCLK, sw[10], ~sw[10], BACLK, BA_PLAYING, X, Y, C);
+    wire BA_PLAYING = STATE == BADAPPLE;
+    wire BA_WRITE;
+    BadApple BA(WCLK, BA_PLAYING, ~BA_PLAYING, BadAppleClock, BA_WRITE, X, Y, C);//not using GPU, but rather uses its own video decoder (LBZ all rights reserved)
     DisplayRAM DRAM(Pix, ~WCLK, WCLK, GPU_BUSY | BA_PLAYING, X, Y, C, STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
 endmodule
