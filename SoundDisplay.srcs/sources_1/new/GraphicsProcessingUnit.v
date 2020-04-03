@@ -37,13 +37,13 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
     localparam [3:0] JMP = 15;//cmd[0:6]RADDR;
     localparam [3:0] CommandUpperBound = 9;
     localparam [6:0] XupperBound = 96;
-    reg [1:0] STATE; initial STATE = 2'd0;
-    reg [6:0] raddr; initial raddr = 0 - 1;
+    reg [1:0] STATE; initial STATE = 2'd1;
+    reg [6:0] raddr; initial raddr = 7'b0;
     wire busy = STATE == STR;
     wire [15:0] B;//busy wires
     wire OnCommand = Command[63];
     wire [3:0] commandHead = Command[62:59];//read 4 bit head if OnCommand
-    assign DONE = busy && OnCommand && B[commandHead] == 0;//if OnCommand, check if current command is no longer busy. else set 1
+    assign DONE = busy && B[commandHead] == 0;//if OnCommand, check if current command is no longer busy. else set 1
     wire [15:0] O;//on wires
     assign O[IDLE] = (commandHead == IDLE);
     assign O[PT] = OnCommand && (commandHead == PT);
@@ -126,7 +126,9 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
                 end
                 default:begin raddr = raddr + 1; end
             endcase
-        end else raddr = raddr + 1;//normal commands
+        end else begin
+            if (ON) raddr = raddr + 1;//normal commands
+        end 
     end
     assign BUSY = busy;
     assign RADDR = raddr;

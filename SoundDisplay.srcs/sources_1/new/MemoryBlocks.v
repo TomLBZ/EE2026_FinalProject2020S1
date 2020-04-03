@@ -170,8 +170,8 @@ module SceneSpriteBlocks(input [6:0] SCN, output reg [15:0] COLOR[63:0]);
     end
 endmodule
 
-module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, input Reflush, input [1:0] THEME, input BD, input THK, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD, output [6:0] CNT);
-    reg [63:0] AudioBar [scenesize - 1:0];//34 commands
+module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK,input Enable, input Reflush, input [1:0] THEME, input BD, input THK, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD, output [6:0] CNT);
+    reg [63:0] AudioBar [scenesize:0];//33 commands + 1 idle spaceholder
     reg [6:0] count = 7'b0;
     reg [63:0] cmd = 64'd0;
     reg [15:0] BGT [2:0] = {{5'd0,6'd0,5'd0},{5'd31,6'd63,5'd31},{5'd0,6'd0,5'd31}};// black, white, blue
@@ -213,19 +213,22 @@ module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, in
     assign AudioBar[30] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd75, 6'd13, 20'd21, HT[THEME], 1'd0) : IdleCmd(); //V, original size
     assign AudioBar[31] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd80, 6'd13, 20'd14, HT[THEME], 1'd0) : IdleCmd(); //O, original size
     assign AudioBar[32] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd85, 6'd13, 20'd11, HT[THEME], 1'd0) : IdleCmd(); //L, original size
-    assign AudioBar[33] = JMP(1'b0);//Jump to 0;
+    assign AudioBar[33] = JMP(1'b1);//Jump to 0;
+    assign AudioBar[34] = IdleCmd();
     always @(posedge CLK) begin
-        cmd = AudioBar[count];
-        if (Reflush) count = 0;
-        if (count == scenesize) count = 0;
-        else count = count + 1;
+        if (Enable) begin
+            cmd = AudioBar[count];
+            if (Reflush) count = 0;
+            if (count > scenesize) count = 0;
+            else count = count + 1;
+        end else count = 0;
     end
     assign CMD = cmd;
     assign CNT = count;
 endmodule
 
-module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:0] CURSORINDEX, output [63:0] CMD, output [6:0] CNT);
-    reg [63:0] StartScreen [scenesize - 1:0];//15 commands
+module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK,input Enable, input [1:0] CURSORINDEX, output [63:0] CMD, output [6:0] CNT);
+    reg [63:0] StartScreen [scenesize:0];//14 commands + 1 idle spaceholder
     reg [4:0] count = 5'b0;
     reg [63:0] cmd = 64'd0;
     reg [15:0] WHITE = {5'd31,6'd63,5'd31};
@@ -245,11 +248,14 @@ module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:
     assign StartScreen[11] = DrawChar(7'd54, 6'd25, 20'd14, AQUA,1'd1); //O, double size
     assign StartScreen[12] = DrawChar(7'd65, 6'd25, 20'd12, AQUA,1'd1); //M, double size
     assign StartScreen[13] = DrawChar(7'd76, 6'd25, 20'd4, AQUA,1'd1); //E, double size
-    assign StartScreen[14] = JMP(1'b0);//JMP to 0
+    assign StartScreen[14] = JMP(4'd15);//JMP to this same command, holding the screen still
+    assign StartScreen[15] = IdleCmd();
     always @(posedge CLK) begin
-        cmd = StartScreen[count];
-        if (count == scenesize) count = 0;
-        else count = count + 1;
+        if (Enable) begin
+            cmd = StartScreen[count];
+            if (count > scenesize) count = 0;
+            else count = count + 1;
+        end else count = 0;
     end
     assign CMD = cmd;
     assign CNT = count;
