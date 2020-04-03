@@ -679,14 +679,16 @@ module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK
     localparam [5:0] AV_Size = 6'd34;
     wire StartScreenWriting = STATE == STARTSCREEN && AddrSS < StrSize;//finished writing all commands to the queue, then 0
     wire AudioVisualWriting = STATE == VOLUMEBAR  && AddrVB < AV_Size;//finished writing all commands to the queue, then 0
-    wire CmdQWriteClock = StartScreenWriting | AudioVisualWriting ? WCLK : 0;
-    StartScreenSceneBuilder #(StrSize) SSSB(CmdQWriteClock, 2'b0, CmdSS, AddrSS);//to implement cursor if have time
-    AudioVisualizationSceneBuilder #(AV_Size) AVSB(CmdQWriteClock, onRefresh, sw[1:0], sw[2], sw[3], sw[4], sw[5], Volume, CmdVB, AddrVB);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
+    wire AnyWriting = StartScreenWriting | AudioVisualWriting;
+    wire CmdQWriteClock = AnyWriting ? WCLK : 0;
+    StartScreenSceneBuilder #(StrSize) SSSB(StartScreenWriting ? WCLK : 0, 2'b0, CmdSS, AddrSS);//to implement cursor if have time
+    AudioVisualizationSceneBuilder #(AV_Size) AVSB(AudioVisualWriting ? WCLK : 0, onRefresh, sw[1:0], sw[2], sw[3], sw[4], sw[5], Volume, CmdVB, AddrVB);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
     wire [6:0] GPU_RADDR;
     wire [63:0] CmdQout;
     wire GPU_DONE;
     wire GPU_BUSY;
-    CommandQueue #(128) CMDQ(CmdQin, GPU_DONE, GPU_RADDR, CmdQWriteClock, AddrQ, CmdQout);//The GPU has no ram, thus this command queue is what the GPU will read commands from
+    wire QueueReady = GPU_DONE | (~GPU_BUSY & ~AnyWriting);
+    CommandQueue #(128) CMDQ(CmdQin, QueueReady, GPU_RADDR, CmdQWriteClock, AddrQ, CmdQout);//The GPU has no ram, thus this command queue is what the GPU will read commands from
     wire [6:0] X;
     wire [5:0] Y;
     wire [15:0] C;
@@ -697,7 +699,7 @@ module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK
     wire BA_WRITE;
     wire [12:0] DRAM_WADDR;
     wire [15:0] AppleColor;
-    BadApple BA(WCLK, BA_PLAYING, ~BA_PLAYING, BadAppleClock, BA_WRITE, DRAM_WADDR, AppleColor);//not using GPU, but rather uses its own video decoder (LBZ all rights reserved)
+    BadApple BA(WCLK, BA_PLAYING, ~BA_PLAYING, onRefresh, BA_WRITE, DRAM_WADDR, AppleColor);//not using GPU, but rather uses its own video decoder (LBZ all rights reserved)
     wire [15:0] ColorInput = BA_PLAYING ? AppleColor : C;
     DisplayRAM DRAM(Pix, ~WCLK, WCLK, GPU_BUSY | BA_PLAYING, X, Y, BA_WRITE, DRAM_WADDR, ColorInput, STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
 endmodule

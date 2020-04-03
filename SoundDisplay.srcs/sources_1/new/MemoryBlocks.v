@@ -56,6 +56,20 @@ module CommandQueue #(parameter size = 128) (input [63:0] CMD, input RCLK, input
     end
 endmodule
 
+module ReadOnlyBadAppleCompressedData(input RCLK, input R, input W, input [17:0] ADDR, input [7:0] IN, output reg [7:0] DATA);
+    reg [7:0] BAM [159969:0];//159970 cmds
+    parameter MEM_INIT_FILE = "BadAppleMem.mem";
+    initial begin
+        if (MEM_INIT_FILE != "") begin
+            $readmemh(MEM_INIT_FILE, BAM);
+        end
+    end
+    always @ (posedge RCLK) begin
+        if (R) DATA = BAM[ADDR];
+        else if (W) BAM[ADDR] = IN;
+    end
+endmodule
+
 module CharBlocks(input [19:0] CHR, output [34:0] MAP);
     reg [34:0] map = 35'd0;
     always @ (*) begin
@@ -158,7 +172,7 @@ endmodule
 
 module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, input Reflush, input [1:0] THEME, input BD, input THK, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD, output [6:0] CNT);
     reg [63:0] AudioBar [scenesize - 1:0];//34 commands
-    reg [6:0] count = 0 - 1;
+    reg [6:0] count = 7'b0;
     reg [63:0] cmd = 64'd0;
     reg [15:0] BGT [2:0] = {{5'd0,6'd0,5'd0},{5'd31,6'd63,5'd31},{5'd0,6'd0,5'd31}};// black, white, blue
     reg [15:0] BT [2:0] = {{5'd31,6'd63,5'd31},{5'd0,6'd31,5'd0},{5'd31,6'd32,5'd0}};// white, dark green, orange
@@ -201,10 +215,10 @@ module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK, in
     assign AudioBar[32] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd85, 6'd13, 20'd11, HT[THEME], 1'd0) : IdleCmd(); //L, original size
     assign AudioBar[33] = JMP(1'b0);//Jump to 0;
     always @(posedge CLK) begin
+        cmd = AudioBar[count];
         if (Reflush) count = 0;
         if (count == scenesize) count = 0;
         else count = count + 1;
-        cmd = AudioBar[count];
     end
     assign CMD = cmd;
     assign CNT = count;
@@ -212,7 +226,7 @@ endmodule
 
 module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:0] CURSORINDEX, output [63:0] CMD, output [6:0] CNT);
     reg [63:0] StartScreen [scenesize - 1:0];//15 commands
-    reg [4:0] count = 0 - 1;
+    reg [4:0] count = 5'b0;
     reg [63:0] cmd = 64'd0;
     reg [15:0] WHITE = {5'd31,6'd63,5'd31};
     reg [15:0] AQUA = {5'd10, 6'd40, 5'd31};
@@ -233,9 +247,9 @@ module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK, input [1:
     assign StartScreen[13] = DrawChar(7'd76, 6'd25, 20'd4, AQUA,1'd1); //E, double size
     assign StartScreen[14] = JMP(1'b0);//JMP to 0
     always @(posedge CLK) begin
+        cmd = StartScreen[count];
         if (count == scenesize) count = 0;
         else count = count + 1;
-        cmd = StartScreen[count];
     end
     assign CMD = cmd;
     assign CNT = count;

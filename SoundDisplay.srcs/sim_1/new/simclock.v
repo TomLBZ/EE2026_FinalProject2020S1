@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 module simClk();
     reg clk = 0;
-    reg [15:0] sw = 15'b000000000010000;
+    reg [15:0] sw = 15'b000100000111100;
     reg [4:0] btns = 0;
     wire jai;
     wire [1:0] jao;
