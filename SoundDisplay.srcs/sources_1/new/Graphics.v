@@ -10,10 +10,12 @@
 // Target Devices: Basys 3
 // Tool Versions: Vivado 2018.2
 // Description: This module can be used to draw geometric shapes and texts conveniently.
-// Dependencies: MemoryBlocks.v, CommandFunctions.v, Peripherals.v
+// Dependencies: MemoryBlocks.v, CommandFunctions.v, Peripherals.v, BadApple.v
 // Revision:
 // Revision 0.01 - File Created
-// Additional Comments:
+// Additional Comments: 
+// The module GPU is not really a "GPU" per sei, but a module that does image processing. I'd prefer calling it GPU for the simplicity.
+// All Graphics Related Code Developed by Li Bozhao, all rights reserved.
 //////////////////////////////////////////////////////////////////////////////////
 module OnIdleCommand(input CLK, input ON, input [6:0] OldX, input [5:0] OldY, input [15:0] OldC, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output BUSY);
     localparam [1:0] IDL = 0;//idle
@@ -656,26 +658,35 @@ module OnJumpCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
 endmodule
 
 module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK, input BadAppleClock, input [12:0] Pix, output [15:0] STREAM, output [15:0] debugLED);
-    localparam [2:0] STARTSCREEN = 0;
-    localparam [2:0] VOLUMEBAR = 1;
-    localparam [2:0] GAMEMAZE = 2;
-    localparam [2:0] BADAPPLE = 3;
-    wire [2:0] STATE = sw[14:13];
-    localparam StrSize = 15;
-    localparam AV_Size = 34;
-    integer SIZE = StrSize + AV_Size;
-    wire [6:0] CmdAddr;
-    wire StartScreenWriting = STATE == STARTSCREEN && CmdAddr < StrSize;//finished writing all commands to the queue, then 0
-    wire AudioVisualWriting = STATE == VOLUMEBAR  && CmdAddr < AV_Size;//finished writing all commands to the queue, then 0
-    wire CmdQWriteClock = StartScreenWriting | AudioVisualWriting ? WCLK : 0;
+    localparam [1:0] STARTSCREEN = 2'd0;
+    localparam [1:0] VOLUMEBAR = 2'd1;
+    localparam [1:0] GAMEMAZE = 2'd2;
+    localparam [1:0] BADAPPLE = 2'd3;
+    wire [1:0] STATE = sw[14:13];
+    wire [63:0] CmdSS;
+    wire [63:0] CmdVB;
+    wire [63:0] CmdGM;
+    wire [63:0] CmdBA;
     wire [63:0] CmdQin;
-    StartScreenSceneBuilder #(StrSize) SSSB(CmdQWriteClock, 2'b0, CmdQin, CmdAddr);//to implement cursor if have time
-    AudioVisualizationSceneBuilder #(AV_Size) AVSB(CmdQWriteClock, onRefresh, sw[1:0], sw[2], sw[3], sw[4], sw[5], Volume, CmdQin, CmdAddr);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
+    CommandMUX41 CM(STATE, CmdSS, CmdVB, CmdGM, CmdBA, CmdQin);
+    wire [6:0] AddrSS;
+    wire [6:0] AddrVB;
+    wire [6:0] AddrGM;
+    wire [6:0] AddrBA;
+    wire [6:0] AddrQ;
+    CommandAddressMUX41 CAM(STATE, AddrSS, AddrVB, AddrGM, AddrBA, AddrQ);
+    localparam [3:0] StrSize = 4'd15;
+    localparam [5:0] AV_Size = 6'd34;
+    wire StartScreenWriting = STATE == STARTSCREEN && AddrSS < StrSize;//finished writing all commands to the queue, then 0
+    wire AudioVisualWriting = STATE == VOLUMEBAR  && AddrVB < AV_Size;//finished writing all commands to the queue, then 0
+    wire CmdQWriteClock = StartScreenWriting | AudioVisualWriting ? WCLK : 0;
+    StartScreenSceneBuilder #(StrSize) SSSB(CmdQWriteClock, 2'b0, CmdSS, AddrSS);//to implement cursor if have time
+    AudioVisualizationSceneBuilder #(AV_Size) AVSB(CmdQWriteClock, onRefresh, sw[1:0], sw[2], sw[3], sw[4], sw[5], Volume, CmdVB, AddrVB);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
     wire [6:0] GPU_RADDR;
     wire [63:0] CmdQout;
     wire GPU_DONE;
     wire GPU_BUSY;
-    CommandQueue #(128) CMDQ(CmdQin, GPU_DONE, GPU_RADDR, CmdQWriteClock, CmdAddr, CmdQout);
+    CommandQueue #(128) CMDQ(CmdQin, GPU_DONE, GPU_RADDR, CmdQWriteClock, AddrQ, CmdQout);//The GPU has no ram, thus this command queue is what the GPU will read commands from
     wire [6:0] X;
     wire [5:0] Y;
     wire [15:0] C;
@@ -684,6 +695,9 @@ module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK
     GraphicsProcessingUnit GPU(CmdQout, GPU_ON, WCLK, ImmediateState, GPU_RADDR, X, Y, C, GPU_DONE, GPU_BUSY);
     wire BA_PLAYING = STATE == BADAPPLE;
     wire BA_WRITE;
-    BadApple BA(WCLK, BA_PLAYING, ~BA_PLAYING, BadAppleClock, BA_WRITE, X, Y, C);//not using GPU, but rather uses its own video decoder (LBZ all rights reserved)
-    DisplayRAM DRAM(Pix, ~WCLK, WCLK, GPU_BUSY | BA_PLAYING, X, Y, C, STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
+    wire [12:0] DRAM_WADDR;
+    wire [15:0] AppleColor;
+    BadApple BA(WCLK, BA_PLAYING, ~BA_PLAYING, BadAppleClock, BA_WRITE, DRAM_WADDR, AppleColor);//not using GPU, but rather uses its own video decoder (LBZ all rights reserved)
+    wire [15:0] ColorInput = BA_PLAYING ? AppleColor : C;
+    DisplayRAM DRAM(Pix, ~WCLK, WCLK, GPU_BUSY | BA_PLAYING, X, Y, BA_WRITE, DRAM_WADDR, ColorInput, STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
 endmodule

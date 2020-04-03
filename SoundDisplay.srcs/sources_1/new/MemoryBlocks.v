@@ -15,7 +15,7 @@
 // Additional Comments:
 //
 //////////////////////////////////////////////////////////////////////////////////
-module DisplayRAM(input [12:0] readPix, input AsyncReadCLK, input WCLK, input Write, input [6:0] X, input [5:0] Y, input [15:0] COLOR, output [15:0] STREAM);
+module DisplayRAM(input [12:0] readPix, input AsyncReadCLK, input WCLK, input Write, input [6:0] X, input [5:0] Y, input USINGADDR, input [12:0] ADDR, input [15:0] COLOR, output [15:0] STREAM);
     reg [15:0] DRAM [6143:0];
     reg [15:0] stream;
     reg [12:0] c;
@@ -31,7 +31,8 @@ module DisplayRAM(input [12:0] readPix, input AsyncReadCLK, input WCLK, input Wr
     assign STREAM = stream;
     always @(posedge WCLK) begin
         if (Write) begin
-            DRAM[Y * 96 + X] = COLOR;
+            if (USINGADDR) DRAM[ADDR] = COLOR;
+            else DRAM[Y * 96 + X] = COLOR;
         end
     end
 endmodule

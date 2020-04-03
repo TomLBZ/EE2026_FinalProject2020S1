@@ -194,6 +194,45 @@ module CLOCK10HZ(input CLK100MHZ, output CLK);
     assign CLK = clk ? 1 : 0;
 endmodule
 
+module CommandMUX41(input [1:0] STATE, input [63:0] CMD0, input [63:0] CMD1, input [63:0] CMD2, input [63:0] CMD3, output [63:0] CMD);
+    reg [63:0] cmd;
+    always @(*) begin
+        case (STATE)
+            2'd1: cmd = CMD1;
+            2'd2: cmd = CMD2;
+            2'd3: cmd = CMD3;
+            default: cmd = CMD0;
+        endcase
+    end
+    assign CMD = cmd;
+endmodule
+
+module CommandAddressMUX41(input [1:0] STATE, input [6:0] ADDR0, input [6:0] ADDR1, input [6:0] ADDR2, input [6:0] ADDR3, output [6:0] ADDR);
+    reg [6:0] addr;
+    always @(*) begin
+        case (STATE)
+            2'd1: addr = ADDR1;
+            2'd2: addr = ADDR2;
+            2'd3: addr = ADDR3;
+            default: addr = ADDR0;
+        endcase
+    end
+    assign ADDR = addr;
+endmodule
+
+module PixAddr13bMUX41(input [1:0] STATE, input [12:0] ADDR0, input [12:0] ADDR1, input [12:0] ADDR2, input [12:0] ADDR3, output [12:0] ADDR);
+    reg [12:0] addr;
+    always @(*) begin
+        case (STATE)
+            2'd1: addr = ADDR1;
+            2'd2: addr = ADDR2;
+            2'd3: addr = ADDR3;
+            default: addr = ADDR0;
+        endcase
+    end
+    assign ADDR = addr;
+endmodule
+
 module Peripherals(
     input CLOCK, [2:0] clkReset, [4:0] slowBit, [4:0] btns,[15:0] sw,
     output [3:0] Clock,//100M, 6.25M, 20k, _flexible_
