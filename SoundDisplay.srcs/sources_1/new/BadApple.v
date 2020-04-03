@@ -19,7 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module BadApple(input CLK, input ON, input PAUSE, input Clk10Hz, output Write, output [12:0] ADDR, output [15:0] COLOR);
+module BadAppleCore(input CLK, input ON, input PAUSE, input Clk10Hz, output Write, output [6:0] X, output [5:0] Y, output [15:0] C);
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
     localparam [1:0] STP = 2;//end drawing
@@ -47,15 +47,14 @@ module BadApple(input CLK, input ON, input PAUSE, input Clk10Hz, output Write, o
     reg [17:0] AddrCount;
     wire [7:0] Data;
     ReadOnlyBadAppleCompressedData BAD(CLK, Write,0, AddrCount, Data, Data);
-    wire [15:0] C = Data[7] ? 16'b0 : 16'd65535;
+    assign C = Data[7] ? 16'b0 : 16'd65535;
     wire [6:0] LEN = Data[6:0];//63:0
     wire [5:0] y = PosOnFrame / 7'd48;//0-63
     wire [6:0] x = PosOnFrame - y * 7'd48;//[0,0],[47,63]
     wire [6:0] x2 = x << 1;//[0,94]
-    wire [12:0] Addr1 = y * 7'd96 + x2;//[0,0]->[0,0];[47,63]->[94,63]
-    wire [12:0] Addr2 = y * 7'd96 + x2 + 1'b1;//[0,0]->[0,1];[47,63]->[95,63]
     reg vDup = 2'd1;
-    assign ADDR = vDup ? Addr1 : Addr2;
+    assign X = vDup ? x2 : x2 + 1'b1;
+    assign Y = y;
     reg [11:0] Frame = 12'b0;
     reg [11:0] NextFrame = 12'b0;
     reg [12:0] PosUBound = 13'd127;
@@ -73,7 +72,7 @@ module BadApple(input CLK, input ON, input PAUSE, input Clk10Hz, output Write, o
                 if (vDup == 2'd0) PosOnFrame = PosOnFrame + 1;
                 vDup = vDup + 1;
                 if (DONEFRAME) PosOnFrame = 1'b0;
-                if (AddrCount == 18'd159970) AddrCount = 18'b0;
+                if (AddrCount == 18'd179996) AddrCount = 18'b0;//18'd159970
                 else if (PosOnFrame == PosUBound) begin
                     AddrCount = AddrCount + 1'd1;
                     PosUBound = PosOnFrame + LEN;
@@ -81,5 +80,4 @@ module BadApple(input CLK, input ON, input PAUSE, input Clk10Hz, output Write, o
             end        
         end
     end
-    assign COLOR = C;
 endmodule

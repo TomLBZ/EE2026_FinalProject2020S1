@@ -1,5 +1,5 @@
 INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/BadApple.v" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module BadApple
+INFO: [VRFC 10-311] analyzing module BadAppleCore
 INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Graphics.v" into library xil_defaultlib
 INFO: [VRFC 10-311] analyzing module OnIdleCommand
 INFO: [VRFC 10-311] analyzing module OnPointCommand
@@ -15,6 +15,9 @@ INFO: [VRFC 10-311] analyzing module OnDoubleBranchCommand
 INFO: [VRFC 10-311] analyzing module OnJumpCommand
 INFO: [VRFC 10-311] analyzing module Graphics
 INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/GraphicsProcessingUnit.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module StartScreenCore
+INFO: [VRFC 10-311] analyzing module BarDisplayCore
+INFO: [VRFC 10-311] analyzing module MazeCore
 INFO: [VRFC 10-311] analyzing module GraphicsProcessingUnit
 INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/MemoryBlocks.v" into library xil_defaultlib
 INFO: [VRFC 10-311] analyzing module DisplayRAM

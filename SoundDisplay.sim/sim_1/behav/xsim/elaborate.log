@@ -20,11 +20,7 @@ Compiling module xil_defaultlib.Audio_Capture
 Compiling module xil_defaultlib.AV_Indicator
 Compiling module xil_defaultlib.M21
 Compiling module xil_defaultlib.B16_MUX
-Compiling module xil_defaultlib.CommandMUX41
-Compiling module xil_defaultlib.CommandAddressMUX41
 Compiling module xil_defaultlib.StartScreenSceneBuilder(scenesiz...
-Compiling module xil_defaultlib.AudioVisualizationSceneBuilder(s...
-Compiling module xil_defaultlib.CommandQueue
 Compiling module xil_defaultlib.OnIdleCommand
 Compiling module xil_defaultlib.OnPointCommand
 Compiling module xil_defaultlib.OnLineCommand
@@ -40,8 +36,13 @@ Compiling module xil_defaultlib.OnSingleBranchCommand
 Compiling module xil_defaultlib.OnDoubleBranchCommand
 Compiling module xil_defaultlib.OnJumpCommand
 Compiling module xil_defaultlib.GraphicsProcessingUnit
+Compiling module xil_defaultlib.StartScreenCore
+Compiling module xil_defaultlib.AudioVisualizationSceneBuilder(s...
+Compiling module xil_defaultlib.BarDisplayCore
+Compiling module xil_defaultlib.MazeSceneBuilder
+Compiling module xil_defaultlib.MazeCore
 Compiling module xil_defaultlib.ReadOnlyBadAppleCompressedData
-Compiling module xil_defaultlib.BadApple
+Compiling module xil_defaultlib.BadAppleCore
 Compiling module xil_defaultlib.DisplayRAM
 Compiling module xil_defaultlib.Graphics
 Compiling module xil_defaultlib.Top_Student
