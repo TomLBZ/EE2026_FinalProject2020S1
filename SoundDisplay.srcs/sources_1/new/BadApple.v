@@ -44,7 +44,9 @@ module BadAppleCore(input CLK, input ON, input PAUSE, input Clk10Hz, output Writ
                 else STATE <= IDL;//else idle
             end
             STR: begin
-                if (PAUSE | DONEFRAME) STATE <= STP;//if done then stop
+                if (PAUSE | DONEFRAME) begin
+                    STATE <= STP;//if done then stop
+                end
                 else STATE <= STR;//else start
             end
             STP: begin
@@ -87,6 +89,7 @@ module BadAppleCore(input CLK, input ON, input PAUSE, input Clk10Hz, output Writ
                     AddrCount = AddrCount + 1'd1;
                 end
                 if (vDup) PosOnFrame = PosOnFrame + 1;
+                if (PosOnFrame == 12'd3072) PosOnFrame = 0;
             end        
         end
     end
