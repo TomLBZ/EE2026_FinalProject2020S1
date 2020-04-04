@@ -30,7 +30,7 @@ module StartScreenCore(input CLK, input ON, input onRefresh, output [6:0] X, out
 endmodule
 
 module BarDisplayCore(input CLK, input ON, input onRefresh, input [10:0] states, output [6:0] X, output [5:0] Y, output [15:0] C);
-    localparam [5:0] StrSize = 6'd34;
+    localparam [5:0] StrSize = 6'd35;
     wire [63:0] CmdVB;
     wire NextCmd;
     wire [6:0] GPU_RADDR;
@@ -41,14 +41,70 @@ module BarDisplayCore(input CLK, input ON, input onRefresh, input [10:0] states,
     GraphicsProcessingUnit GPUVB(CmdVB, ON, CLK,onRefresh ,GPU_RADDR,X,Y,C,NextCmd, );//use onrefresh as IMME for branching
 endmodule
 
-module MazeCore(input CLK, input ON, input OnRefresh, input [1:0] states, output [6:0] X, output [5:0] Y, output [15:0] C);
-    localparam [5:0] StrSize = 6'd23;
+module MazeCore(input CLK, input ON, input OnRefresh, input [4:0] btns, output [6:0] X, output [5:0] Y, output [15:0] C);
+    localparam [5:0] StrSize = 6'd38;
+    localparam [1:0] PLAYING = 2'b00;
+    localparam [1:0] START = 2'b01;
+    localparam [1:0] WIN = 2'b10;
+    localparam [1:0] LOSE = 2'b11;
     wire [63:0] CmdMC;
     wire NextCmd;
     wire [6:0] GPU_RADDR;
+    wire AnyPressed = btns[0] | btns[1] | btns[2] | btns[3] | btns[4];
+    reg [6:0] cX = 7'd3;
+    reg [5:0] cY = 6'd53;
+    reg [1:0] MazeState; initial MazeState = START;
+    wire Playing = MazeState == PLAYING ? 1 : 0;
+    wire Center = btns[0];
+    wire Top = btns[1] & Playing;
+    wire Left = btns[2] & Playing;
+    wire Right = btns[3] & Playing;
+    wire Bottom = btns[4] & Playing;
+    wire [6:0] Xleft = cX > 1'b0 ? cX - 1'b1 : 1'b0;
+    wire [6:0] Xright = cX < 7'd86 ? cX + 1'b1 : 7'd86;
+    wire [5:0] Yup = cY > 1'b0 ? cY - 1'b1 : 1'b0;
+    wire [5:0] Ydown = cY < 6'd54 ? cY + 1'b1 : 6'd54;
     reg Mode = 1;//1 for instant access mode, 0 for clocked command queue mode
-    MazeSceneBuilder #(StrSize) MSB(NextCmd, ON, Mode, GPU_RADDR, states, CmdMC, );
-    GraphicsProcessingUnit GPUVB(CmdMC, ON, CLK,OnRefresh ,GPU_RADDR,X,Y,C,NextCmd, );
+    always @ (posedge AnyPressed) begin
+        if (Top) cY = Yup;
+        if (Bottom) cY = Ydown;
+        if (Left) cX = Xleft;
+        if (Right) cX = Xright;
+        if (Center) begin
+            cX = 7'd3;
+            cY = 6'd53;
+        end
+    end
+    wire [12:0] OnRoad;
+    assign OnRoad[0] = cY > 6'd1 && cY < 6'd5 && cX > 7'd81 && cX < 7'd86;//goal
+    assign OnRoad[1] = cY > 6'd51 && cY < 6'd55 && cX > 7'd1 && cX < 7'd46;//1
+    assign OnRoad[2] = cY > 6'd31 && cY < 6'd55 && cX > 7'd11 && cX < 7'd16;//2
+    assign OnRoad[3] = cY > 6'd31 && cY < 6'd35 && cX > 7'd11 && cX < 7'd26;//3
+    assign OnRoad[4] = cY > 6'd11 && cY < 6'd55 && cX > 7'd41 && cX < 7'd46;//7
+    assign OnRoad[5] = cY > 6'd11 && cY < 6'd15 && cX > 7'd11 && cX < 7'd46;//6
+    assign OnRoad[6] = cY > 6'd1 && cY < 6'd15 && cX > 7'd11 && cX < 7'd16;//4
+    assign OnRoad[7] = cY > 6'd1 && cY < 6'd15 && cX > 7'd31 && cX < 7'd36;//5
+    assign OnRoad[8] = cY > 6'd41 && cY < 6'd45 && cX > 7'd41 && cX < 7'd66;//8
+    assign OnRoad[9] = cY > 6'd1 && cY < 6'd45 && cX > 7'd61 && cX < 7'd66;//9
+    assign OnRoad[10] = cY > 6'd21 && cY < 6'd25 && cX > 7'd61 && cX < 7'd86;//10
+    assign OnRoad[11] = cY > 6'd21 && cY < 6'd55 && cX > 7'd81 && cX < 7'd86;//11
+    assign OnRoad[12] = cY > 6'd1 && cY < 6'd5 && cX > 7'd61 && cX < 7'd82;//12
+    wire InBounds = OnRoad[1] | OnRoad[2] | OnRoad[3] | OnRoad[4] | OnRoad[5] | OnRoad[6] | OnRoad[7] | OnRoad[8] | OnRoad[9] | OnRoad[10] | OnRoad[11] | OnRoad[12];
+    always @ (posedge CLK) begin
+        case (MazeState)
+            START:if(Center) MazeState = PLAYING;//btn0
+            PLAYING: begin
+                if (~InBounds) begin 
+                    MazeState = LOSE; 
+                end 
+                if (OnRoad[0] == 1'b1) MazeState = WIN;
+            end
+            default: if(Center) MazeState = START;//win or lose
+        endcase
+    end
+    wire [1:0] Update = {AnyPressed, OnRefresh};
+    MazeSceneBuilder #(StrSize) MSB(NextCmd, ON, cX, cY, Mode, GPU_RADDR, MazeState, CmdMC, );
+    GraphicsProcessingUnit GPUVB(CmdMC, ON, CLK, Update ,GPU_RADDR,X,Y,C,NextCmd, );
 endmodule
 
 module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1:0] IMME, output [6:0] RADDR, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output DONE, output BUSY);//64-bit command
