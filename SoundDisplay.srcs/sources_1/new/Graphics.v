@@ -657,14 +657,14 @@ module OnJumpCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
     assign COLOR = 0;
 endmodule
 
-module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK, input BadAppleClock, input [12:0] Pix, output [15:0] STREAM, output [15:0] debugLED);
+module Graphics(input [15:0]sw,input [4:0] BtnPressPulses, input [3:0] Volume, input onRefresh, input WCLK, input BadAppleClock, input [12:0] Pix, output [15:0] STREAM, output [15:0] debugLED);
     localparam [1:0] STARTSCREEN = 2'd0;
     localparam [1:0] VOLUMEBAR = 2'd1;
     localparam [1:0] GAMEMAZE = 2'd2;
     localparam [1:0] BADAPPLE = 2'd3;
     wire [1:0] STATE = sw[14:13];
     wire [10:0] statesV = {Volume[3:0],sw[5:0],onRefresh};
-    wire [1:0] MazeState = sw[7:6];
+    wire [1:0] MazeState = MazeDState;
     wire [6:0] X [3:0];
     wire [5:0] Y [3:0];
     wire [15:0] C [3:0];
@@ -673,6 +673,7 @@ module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK
     MazeCore MC(WCLK, STATE == GAMEMAZE, MazeState, X[GAMEMAZE], Y[GAMEMAZE], C[GAMEMAZE]);
     BadAppleCore BAC(WCLK, STATE == BADAPPLE, STATE != BADAPPLE, BadAppleClock,, X[BADAPPLE], Y[BADAPPLE], C[BADAPPLE]);
     DisplayRAM DRAM(Pix, ~WCLK, WCLK, 1'b1, X[STATE], Y[STATE], C[STATE], STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
+    game_maze(WCLK,BtnPressPulses[0], BtnPressPulses[1], BtnPressPulses[4], BtnPressPulses[3], BtnPressPulses[2],currentPixel, oled_data,MazeDState);//wait for new devel
 endmodule
 
 /*
