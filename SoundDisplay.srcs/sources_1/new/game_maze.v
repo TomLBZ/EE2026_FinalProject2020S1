@@ -63,6 +63,7 @@ module maze_map_color(input [2:0] OnRoad,output reg [15:0] STREAM);
 endmodule
 
 //Button Debouncing
+/*
 module my_dff (input CLOCK, D, output reg Q = 0);
     always @ (posedge CLOCK) Q <= D;
 endmodule
@@ -73,7 +74,7 @@ module task1(input CLOCK, BTN, output Q);
     my_dff f1(CLOCK, Q1, Q2);
     assign Q = (Q1 & ~Q2);
 endmodule
-
+*/
 module maze_dot_movement (input CLK, BTNC,BTNU, BTND, BTNR, BTNL, validmove, output reg [12:0] xdot,reg [12:0] ydot, reg [1:0] gamestart = 2'b00);
     wire QC; wire QU; wire QD; wire QR; wire QL;
     task1 ef0(CLK, BTNC, QC);
@@ -141,7 +142,7 @@ module maze_win (input CLK, [12:0] xvalue, [12:0] yvalue, output reg win);
     end
 endmodule
 
-
+/*
 module MazeSceneBuilder_temp(input CLK, input [1:0] MazeDState, output [15:0] STREAM);
     reg [15:0] stream;
     always @(posedge CLK) begin
@@ -151,9 +152,9 @@ module MazeSceneBuilder_temp(input CLK, input [1:0] MazeDState, output [15:0] ST
     end
     assign STREAM = stream;
 endmodule
-
+*/
 //The main module
-module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
+module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM, output reg [1:0] MazeDState = 2'b00);
     wire [12:0] xvalue;
     wire [12:0] yvalue;
     wire [12:0] xdot;
@@ -169,7 +170,7 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     wire [15:0] oled_playmode;
     wire [15:0] oled_display;
     wire [1:0] sel;
-    reg [1:0] MazeDState = 2'b00;
+    //reg [1:0] MazeDState = 2'b00;
     reg DisplayControl;
     
     maze_pixel_mapping f0(CLK, Pix, xvalue,yvalue);
@@ -191,7 +192,7 @@ module game_maze(input CLK,BTNC,BTNU, BTND, BTNR, BTNL, [12:0] Pix, STREAM);
     wire pixSet;
     wire CmdBusy;
     
-    MazeSceneBuilder_temp(CLK, MazeDState, oled_display);
+    //MazeSceneBuilder_temp(CLK, MazeDState, oled_display);
     //MazeSceneBuilder MSB(CLK, MazeDState, Cmd); //scene mode display (STREAM)
     //DisplayCommandCore DCMD(Cmd, DisplayControl, CLK, pixSet, CmdX, CmdY, CmdCol, CmdBusy);
     //DisplayRAM DRAM(Pix, ~CLK, CLK, pixSet, CmdX, CmdY, CmdCol, oled_display);   //scene mode display (STREAM)

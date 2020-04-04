@@ -36,17 +36,19 @@ module Top_Student (
     wire onRefresh;//asserted for 1 clk cycle when drawing new frame on the screen
     wire sendingPixels;
     wire samplePixel;
-    //Oled_Display oled(CLK[2],reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
+    Oled_Display oled(CLK[2],reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
     wire [11:0] mic_in;//mic sample input from the mic
     Audio_Capture ac(CLK[3],CLK[1],JAI, JAO[0], JAO[1], mic_in);
     wire [3:0] volume;//current sound level from 0 to 15
     wire [15:0] mic_mapped;//processed data for led display
     AV_Indicator av1(CLK[3],CLK[1],CLK[0], mic_in,an,seg,mic_mapped,volume);
     B16_MUX led_mux(mic_mapped,{4'b0,mic_in},SwStates[15],led[15:0]);
-    //Graphics g(SwStates, volume, onRefresh, CLK[3], BadAppleClock, currentPixel, oled_data, led);    
-    //game_maze(CLK100MHZ,btn[0], btn[1], btn[4], btn[3], btn[2],currentPixel, oled_data);//wait for new devel
+    wire [1:0] MazeDState;  
+    Graphics g(SwStates, volume, onRefresh, CLK[3], BadAppleClock, currentPixel, oled_data, led);  
+    
+    
     
     //wire [2:0]FREQ;
-    //Audio_FFT_top fft1(mic_in,CLK100MHZ,CLK[1],FREQ);
+    //Audio_FFT_discrete fft1(mic_in,CLK100MHZ,CLK[1],FREQ);
     //assign led[2:0] = FREQ;
 endmodule

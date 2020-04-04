@@ -91,7 +91,7 @@ module CharBlocks(input [19:0] CHR, output [34:0] MAP);
             20'd15:begin map = 35'b11111_10001_10001_11111_10000_10000_10000; end//P
             20'd16:begin map = 35'b01100_10010_10010_10010_10010_10110_01111; end//Q
             20'd17:begin map = 35'b11111_10001_10001_11110_10100_10010_10001; end//R
-            20'd08:begin map = 35'b01110_10001_10000_01110_00001_10001_01110; end//S
+            20'd18:begin map = 35'b01110_10001_10000_01110_00001_10001_01110; end//S
             20'd19:begin map = 35'b11111_00100_00100_00100_00100_00100_00100; end//T
             20'd20:begin map = 35'b10001_10001_10001_10001_10001_10001_01110; end//U
             20'd21:begin map = 35'b10001_10001_10001_10001_10001_01010_00100; end//V
@@ -264,7 +264,7 @@ module MazeSceneBuilder #(parameter scenesize = 32) (input CLK,input Enable, inp
     reg [63:0] MazeScene [scenesize:0];//32 commands
     reg [5:0] count = 0;
     reg [63:0] cmd;
-    reg [15:0] RED = {5'd31,6'd0,5'd0};
+    reg [15:0] RED = {5'd31,6'd59,5'd24};
     reg [15:0] WHITE = {5'd31,6'd63,5'd31};
     localparam [1:0] START = 2'b01;
     localparam [1:0] WIN = 2'b10;
@@ -278,24 +278,24 @@ module MazeSceneBuilder #(parameter scenesize = 32) (input CLK,input Enable, inp
     assign MazeScene[4] = QuickDrawSceneSprite(7'd4, 6'd4, WHITE, 3'd4, 2'd2 );//MothCobblestone (1,1), quadriple size
     assign MazeScene[5] = QuickDrawSceneSprite(7'd8, 6'd4, WHITE, 3'd4, 2'd2 );//MothCobblestone (2,1), quadriple size
     //GAME START             //x position   y    char  color  size
-    assign MazeScene[6] = STATE == START ? DrawChar(7'd10, 6'd20, 20'd6, RED ,1'd0) : IdleCmd(); //G, original size
-    assign MazeScene[7] = STATE == START ? DrawChar(7'd15, 6'd20, 20'd0, RED ,1'd0) : IdleCmd(); //A, original size
-    assign MazeScene[8] = STATE == START ? DrawChar(7'd20, 6'd20, 20'd12, RED ,1'd0) : IdleCmd(); //M, original size
-    assign MazeScene[9] = STATE == START ? DrawChar(7'd25, 6'd20, 20'd4, RED ,1'd0) : IdleCmd(); //E, original size
-    assign MazeScene[10] = STATE == START ? DrawChar(7'd30, 6'd20, 20'd19, RED ,1'd0) : IdleCmd(); //S, original size
-    assign MazeScene[11] = STATE == START ? DrawChar(7'd35, 6'd20, 20'd20, RED ,1'd0) : IdleCmd(); //T, original size
-    assign MazeScene[12] = STATE == START ? DrawChar(7'd40, 6'd20, 20'd0, RED ,1'd0) : IdleCmd(); //A, original size
-    assign MazeScene[13] = STATE == START ? DrawChar(7'd45, 6'd20, 20'd18, RED ,1'd0) : IdleCmd(); //R, original size
-    assign MazeScene[14] = STATE == START ? DrawChar(7'd45, 6'd20, 20'd20, RED ,1'd0) : IdleCmd(); //T, original size
+    assign MazeScene[6] = STATE == START ? DrawChar(7'd10, 6'd25, 20'd6, RED ,1'd1) : IdleCmd(); //G, original size
+    assign MazeScene[7] = STATE == START ? DrawChar(7'd20, 6'd25, 20'd0, RED ,1'd1) : IdleCmd(); //A, original size
+    assign MazeScene[8] = STATE == START ? DrawChar(7'd30, 6'd25, 20'd12, RED ,1'd1) : IdleCmd(); //M, original size
+    assign MazeScene[9] = STATE == START ? DrawChar(7'd40, 6'd25, 20'd4, RED ,1'd1) : IdleCmd(); //E, original size
+    assign MazeScene[10] = STATE == START ? DrawChar(7'd50, 6'd25, 20'd18, RED ,1'd1) : IdleCmd(); //S, original size
+    assign MazeScene[11] = STATE == START ? DrawChar(7'd60, 6'd25, 20'd19, RED ,1'd1) : IdleCmd(); //T, original size
+    assign MazeScene[12] = STATE == START ? DrawChar(7'd70, 6'd25, 20'd0, RED ,1'd1) : IdleCmd(); //A, original size
+    assign MazeScene[13] = STATE == START ? DrawChar(7'd80, 6'd25, 20'd17, RED ,1'd1) : IdleCmd(); //R, original size
+    assign MazeScene[14] = STATE == START ? DrawChar(7'd90, 6'd25, 20'd19, RED ,1'd1) : IdleCmd(); //T, original size
     //WIN
-    assign MazeScene[15] = STATE == WIN ? DrawChar(7'd10, 6'd20, 20'd22, RED ,1'd0) : IdleCmd(); //W, original size
-    assign MazeScene[16] = STATE == WIN ? DrawChar(7'd20, 6'd20, 20'd8, RED ,1'd0) : IdleCmd(); //I, original size
-    assign MazeScene[17] = STATE == WIN ? DrawChar(7'd30, 6'd20, 20'd13, RED ,1'd0) : IdleCmd(); //N, original size
+    assign MazeScene[15] = STATE == WIN ? DrawChar(7'd10, 6'd25, 20'd22, RED ,1'd1) : IdleCmd(); //W, original size
+    assign MazeScene[16] = STATE == WIN ? DrawChar(7'd43, 6'd25, 20'd8, RED ,1'd1) : IdleCmd(); //I, original size
+    assign MazeScene[17] = STATE == WIN ? DrawChar(7'd76, 6'd25, 20'd13, RED ,1'd1) : IdleCmd(); //N, original size
     //LOSE
-    assign MazeScene[18] = STATE == LOSE ? DrawChar(7'd10, 6'd20, 20'd6, RED ,1'd0) : IdleCmd(); //L, original size
-    assign MazeScene[19] = STATE == LOSE ? DrawChar(7'd15, 6'd20, 20'd6, RED ,1'd0) : IdleCmd(); //O, original size
-    assign MazeScene[20] = STATE == LOSE ? DrawChar(7'd20, 6'd20, 20'd6, RED ,1'd0) : IdleCmd(); //S, original size
-    assign MazeScene[21] = STATE == LOSE ? DrawChar(7'd25, 6'd20, 20'd6, RED ,1'd0) : IdleCmd(); //E, original size
+    assign MazeScene[18] = STATE == LOSE ? DrawChar(7'd10, 6'd25, 20'd6, RED ,1'd1) : IdleCmd(); //L, original size
+    assign MazeScene[19] = STATE == LOSE ? DrawChar(7'd15, 6'd25, 20'd6, RED ,1'd1) : IdleCmd(); //O, original size
+    assign MazeScene[20] = STATE == LOSE ? DrawChar(7'd20, 6'd25, 20'd6, RED ,1'd1) : IdleCmd(); //S, original size
+    assign MazeScene[21] = STATE == LOSE ? DrawChar(7'd25, 6'd25, 20'd6, RED ,1'd1) : IdleCmd(); //E, original size
     assign MazeScene[22] = IdleCmd();
     always @(posedge CLK) begin
         if (Enable) begin
