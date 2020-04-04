@@ -42,7 +42,9 @@ module Audio_FFT_top(input [11:0] mic_in,CLK,MCLK,output reg [2:0]FREQ);
     end
     //sample volume at 20kHz frequency
     always @(posedge MCLK) begin
-        if (counter == 14'd9999) FREQ = (result[0]>result[1] && result[0]>result[2]) ? 3'b001 : (result[1]>result[2])? 3'b011:3'b111;
+        if (counter == 14'd9999) begin
+            FREQ = (result[0]>result[1] && result[0]>result[2]) ? 3'b001 : (result[1]>result[2])? 3'b011:3'b111;
+        end
         else begin
             counter <= counter + 1;    
             SAMPLE[counter] = mic_in;   //g(t)

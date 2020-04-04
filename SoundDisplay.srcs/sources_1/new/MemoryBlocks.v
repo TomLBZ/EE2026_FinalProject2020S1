@@ -310,6 +310,7 @@ module MazeSceneBuilder #(parameter scenesize = 32) (input CLK,input Enable, inp
 endmodule
 
 //Divide by 4096
+//input 0 ~ 90  (7'b0 ~7'b1011010)
 module FFT_sin (input [90:0] angle, output [12:0] SIN_value);
     reg [12:0] SIN_TABLE[90:0];
     always @(*) begin
