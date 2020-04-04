@@ -30,7 +30,7 @@ module PixelFromPos(input [7:0] Data, input [12:0] PosOnFrame, output [6:0] X1, 
     assign LEN = Data[6:0];
 endmodule
 
-module BadAppleCore(input CLK, input ON, input PAUSE, input Clk10Hz, output Write, output [6:0] X, output [5:0] Y, output [15:0] C);
+module BadAppleCore(input CLK, input ON, input PAUSE, input Clk10Hz, output Write, output [6:0] X, output [5:0] Y, output [15:0] C, output [15:0] DebugLED);
     localparam [1:0] IDL = 0;//idle
     localparam [1:0] STR = 1;//start drawing
     localparam [1:0] STP = 2;//end drawing
@@ -67,6 +67,8 @@ module BadAppleCore(input CLK, input ON, input PAUSE, input Clk10Hz, output Writ
     reg vDup = 2'd1;
     assign X = vDup ? x1 : x2;
     reg [11:0] Frame = 12'b0;
+    assign DebugLED[12:1] = Frame;
+    assign DebugLED[0] = DONEFRAME;
     reg [11:0] NextFrame = 12'b0;
     reg [12:0] StartPos = 0;
     wire [12:0] PosUBound = StartPos + LEN;

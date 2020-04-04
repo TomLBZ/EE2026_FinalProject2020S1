@@ -667,9 +667,9 @@ module Graphics(input [15:0] sw, input [4:0] btns, input [3:0] Volume, input onR
     wire [6:0] X [3:0];
     wire [5:0] Y [3:0];
     wire [15:0] C [3:0];
-    StartScreenCore SSC(WCLK, STATE == STARTSCREEN, onRefresh, X[STARTSCREEN], Y[STARTSCREEN], C[STARTSCREEN]);
-    BarDisplayCore BDC(WCLK, STATE == VOLUMEBAR, onRefresh, statesV, X[VOLUMEBAR], Y[VOLUMEBAR], C[VOLUMEBAR]);
-    MazeCore MC(WCLK, STATE == GAMEMAZE, onRefresh, btns, X[GAMEMAZE], Y[GAMEMAZE], C[GAMEMAZE]);
-    BadAppleCore BAC(WCLK, STATE == BADAPPLE, STATE != BADAPPLE, BadAppleClock,, X[BADAPPLE], Y[BADAPPLE], C[BADAPPLE]);
+    //StartScreenCore SSC(WCLK, STATE == STARTSCREEN, onRefresh, X[STARTSCREEN], Y[STARTSCREEN], C[STARTSCREEN]);
+    //BarDisplayCore BDC(WCLK, STATE == VOLUMEBAR, onRefresh, statesV, X[VOLUMEBAR], Y[VOLUMEBAR], C[VOLUMEBAR]);
+    //MazeCore MC(WCLK, STATE == GAMEMAZE, onRefresh, btns, X[GAMEMAZE], Y[GAMEMAZE], C[GAMEMAZE]);
+    BadAppleCore BAC(WCLK, STATE == BADAPPLE, STATE != BADAPPLE, BadAppleClock,, X[BADAPPLE], Y[BADAPPLE], C[BADAPPLE], debugLED);
     DisplayRAM DRAM(Pix, ~WCLK, WCLK, 1'b1, X[STATE], Y[STATE], C[STATE], STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
 endmodule

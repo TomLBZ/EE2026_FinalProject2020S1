@@ -19,11 +19,13 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module TripleChannelClock(input CLOCK, input [2:0] RST, input [4:0] SlowBit, output FCLK, output MCLK, output SCLK);
+module QuadripleChannelClock(input CLOCK, input [2:0] RST, input [4:0] SlowBit, output FCLK, output MCLK, output SCLK, output CLK10HZ);
     reg [3:0] cf = 4'b0;//accumulator for the 6.25MHz clock, highest bit toggles
     reg [11:0] cm = 12'h0;//accumulator for the 20kHz clock, accumulates
     reg [31:0] cs = 32'h0;//accumulator for any other slow clock to be used later, toggles
+    reg [22:0] c10 = 23'h0;//accumulator for 10kHz clk
     reg mid = 0;
+    reg bad = 0;
     always @ (posedge CLOCK) begin
         if (RST > 0) begin
             if (RST[0]) cs <= 0;
@@ -34,11 +36,14 @@ module TripleChannelClock(input CLOCK, input [2:0] RST, input [4:0] SlowBit, out
             cs <= cs + 1;
             if (cm < 2499) cm <= cm + 1;
             else if (cm == 2499) begin mid <= ~mid; cm <= 0; end
+            if (c10 < 4999999) c10 <= c10 + 1;
+            else if (c10 == 4999999) begin bad <= ~bad; c10 <= 0; end
         end
     end
     assign FCLK = cf[3];//6.25MHz (0.005us ahead of main clk)
     assign SCLK = cs[SlowBit];//(0.005us ahead of main clk)
     assign MCLK = mid;//20kHz (0.005us ahead of main clk)
+    assign CLK10HZ = bad;//10Hz (0.005us ahead of main clk)
 endmodule
 
 module dff(input CLK, D, output reg Q=0);
@@ -184,16 +189,6 @@ module SwitchStates(input [15:0] sw, input CLK, output [15:0] IsSwitchOn, output
     assign SwitchOffPulses = OffPulses;
 endmodule
 
-module CLOCK10HZ(input CLK100MHZ, output CLK);
-    reg clk = 0;
-    reg [22:0] accumulator = 0;
-    always @ (posedge CLK100MHZ) begin
-        accumulator = accumulator + 1'b1;
-        if (accumulator == 23'd5000000) clk = ~clk;
-    end
-    assign CLK = clk ? 1 : 0;
-endmodule
-
 module CommandMUX41(input [1:0] STATE, input [63:0] CMD0, input [63:0] CMD1, input [63:0] CMD2, input [63:0] CMD3, output [63:0] CMD);
     reg [63:0] cmd;
     always @(*) begin
@@ -235,14 +230,12 @@ endmodule
 
 module Peripherals(
     input CLOCK, [2:0] clkReset, [4:0] slowBit, [4:0] btns,[15:0] sw,
-    output [3:0] Clock,//100M, 6.25M, 20k, _flexible_
+    output [4:0] Clock,//100M, 6.25M, 20k, _flexible_
     output [15:0] swStates, [15:0] swOnPulses, [15:0] swOffPulses,
-    output [4:0] btnStates, [4:0] btnPressPulses, [4:0] btnReleasePulses,
-    output BadAppleClock
+    output [4:0] btnStates, [4:0] btnPressPulses, [4:0] btnReleasePulses
     );
-    TripleChannelClock tcc(CLOCK,clkReset,slowBit,Clock[2],Clock[1],Clock[0]);
+    QuadripleChannelClock qcc(CLOCK,clkReset,slowBit,Clock[3],Clock[2],Clock[1], Clock[0]);
     ButtonStates BS(btns, CLOCK, btnStates, btnPressPulses, btnReleasePulses);
     SwitchStates SS(sw, CLOCK, swStates, swOnPulses, swOffPulses);
-    CLOCK10HZ C10(CLOCK, BadAppleClock);
-    assign Clock[3] = CLOCK;
+    assign Clock[4] = CLOCK;
 endmodule
