@@ -672,6 +672,7 @@ module Graphics(input [15:0]sw,input [4:0] BtnPressPulses, input [3:0] Volume, i
     BarDisplayCore BDC(WCLK, STATE == VOLUMEBAR, statesV, X[VOLUMEBAR], Y[VOLUMEBAR], C[VOLUMEBAR]);
     MazeCore MC(WCLK, STATE == GAMEMAZE, MazeState, X[GAMEMAZE], Y[GAMEMAZE], C[GAMEMAZE]);
     BadAppleCore BAC(WCLK, STATE == BADAPPLE, STATE != BADAPPLE, BadAppleClock,, X[BADAPPLE], Y[BADAPPLE], C[BADAPPLE]);
+    //change
     DisplayRAM DRAM(Pix, ~WCLK, WCLK, 1'b1, X[STATE], Y[STATE], C[STATE], STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
     game_maze(WCLK,BtnPressPulses[0], BtnPressPulses[1], BtnPressPulses[4], BtnPressPulses[3], BtnPressPulses[2],currentPixel, oled_data,MazeDState);//wait for new devel
 endmodule

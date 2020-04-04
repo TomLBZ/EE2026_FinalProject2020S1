@@ -270,6 +270,7 @@ module MazeSceneBuilder #(parameter scenesize = 32) (input CLK,input Enable, inp
     localparam [1:0] WIN = 2'b10;
     localparam [1:0] LOSE = 2'b11;
     `include "CommandFunctions.v"
+    //change
     //Background - MothCobblestone
     assign MazeScene[0] = QuickDrawSceneSprite(7'd0, 6'd0, WHITE, 3'd4, 2'd2 );//MothCobblestone (0,0), quadriple size
     assign MazeScene[1] = QuickDrawSceneSprite(7'd4, 6'd0, WHITE, 3'd4, 2'd2 );//MothCobblestone (1,0), quadriple size

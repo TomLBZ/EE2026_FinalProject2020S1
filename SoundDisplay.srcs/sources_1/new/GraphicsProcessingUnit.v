@@ -42,8 +42,11 @@ module MazeCore(input CLK, input ON, input [1:0] states, output [6:0] X, output 
     localparam [5:0] StrSize = 6'd34;
     wire [63:0] CmdMC;
     wire NextCmd;
-    MazeSceneBuilder #(32) MSB(NextCmd, ON, states, CmdMC, );
-    GraphicsProcessingUnit GPUVB(CmdMC, ON, CLK, ,,X,Y,C,NextCmd, );
+    wire [6:0] GPU_RADDR;
+    reg Mode = 1;//1 for instant access mode, 0 for clocked command queue mode
+    MazeSceneBuilder #(StrSize) MSB(NextCmd, ON, Mode, GPU_RADDR, states, CmdMC, );
+    //change
+    GraphicsProcessingUnit GPUVB(CmdMC, ON, CLK,OnRefresh ,GPU_RADDR,X,Y,C,NextCmd, );
 endmodule
 
 module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1:0] IMME, output [6:0] RADDR, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output DONE, output BUSY);//64-bit command
