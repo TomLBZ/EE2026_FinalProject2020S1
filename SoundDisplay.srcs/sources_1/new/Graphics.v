@@ -657,104 +657,20 @@ module OnJumpCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
     assign COLOR = 0;
 endmodule
 
-module Graphics(input [15:0]sw,input [4:0] BtnPressPulses, input [3:0] Volume, input onRefresh, input WCLK, input BadAppleClock, input [12:0] Pix, output [15:0] STREAM, output [15:0] debugLED);
+module Graphics(input [15:0] sw, input [3:0] Volume, input onRefresh, input WCLK, input BadAppleClock, input [12:0] Pix, output [15:0] STREAM, output [15:0] debugLED);
     localparam [1:0] STARTSCREEN = 2'd0;
     localparam [1:0] VOLUMEBAR = 2'd1;
     localparam [1:0] GAMEMAZE = 2'd2;
     localparam [1:0] BADAPPLE = 2'd3;
     wire [1:0] STATE = sw[14:13];
-    wire [10:0] statesV = {Volume[3:0],sw[5:0],onRefresh};
-    wire [1:0] MazeState = MazeDState;
+    wire [10:0] statesV = {Volume[3:0],sw[6:0]};
+    wire [1:0] MazeState = sw[8:7];
     wire [6:0] X [3:0];
     wire [5:0] Y [3:0];
     wire [15:0] C [3:0];
-    StartScreenCore SSC(WCLK, STATE == STARTSCREEN, X[STARTSCREEN], Y[STARTSCREEN], C[STARTSCREEN]);
-    BarDisplayCore BDC(WCLK, STATE == VOLUMEBAR, statesV, X[VOLUMEBAR], Y[VOLUMEBAR], C[VOLUMEBAR]);
-    MazeCore MC(WCLK, STATE == GAMEMAZE, MazeState, X[GAMEMAZE], Y[GAMEMAZE], C[GAMEMAZE]);
+    StartScreenCore SSC(WCLK, STATE == STARTSCREEN, onRefresh, X[STARTSCREEN], Y[STARTSCREEN], C[STARTSCREEN]);
+    BarDisplayCore BDC(WCLK, STATE == VOLUMEBAR, onRefresh, statesV, X[VOLUMEBAR], Y[VOLUMEBAR], C[VOLUMEBAR]);
+    MazeCore MC(WCLK, STATE == GAMEMAZE, onRefresh, MazeState, X[GAMEMAZE], Y[GAMEMAZE], C[GAMEMAZE]);
     BadAppleCore BAC(WCLK, STATE == BADAPPLE, STATE != BADAPPLE, BadAppleClock,, X[BADAPPLE], Y[BADAPPLE], C[BADAPPLE]);
-    //change
     DisplayRAM DRAM(Pix, ~WCLK, WCLK, 1'b1, X[STATE], Y[STATE], C[STATE], STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
-    game_maze(WCLK,BtnPressPulses[0], BtnPressPulses[1], BtnPressPulses[4], BtnPressPulses[3], BtnPressPulses[2],currentPixel, oled_data,MazeDState);//wait for new devel
 endmodule
-
-/*
-module useless();
-    localparam [1:0] STARTSCREEN = 2'd0;
-localparam [1:0] VOLUMEBAR = 2'd1;
-localparam [1:0] GAMEMAZE = 2'd2;
-localparam [1:0] BADAPPLE = 2'd3;
-wire [1:0] STATE = sw[14:13];
-wire [63:0] CmdSS;
-wire [63:0] CmdVB;
-wire [63:0] CmdGM;
-wire [63:0] CmdBA;
-wire [63:0] CmdQin;
-CommandMUX41 CM(STATE, CmdSS, CmdVB, CmdGM, CmdBA, CmdQin);
-wire [6:0] AddrSS;
-wire [6:0] AddrVB;
-wire [6:0] AddrGM;
-wire [6:0] AddrBA;
-wire [6:0] AddrQ;
-CommandAddressMUX41 CAM(STATE, AddrSS, AddrVB, AddrGM, AddrBA, AddrQ);
-localparam [4:0] StrSize = 5'd15;
-localparam [5:0] AV_Size = 6'd34;
-reg CmdSSPushed = 1'b0;
-reg CmdVBPushed = 1'b0;
-reg CmdGMPushed = 1'b0;
-reg CmdBAPushed = 1'b0;
-always @ (*) begin
-    case (STATE)
-        VOLUMEBAR:begin
-            CmdSSPushed = 1'b0;
-            CmdGMPushed = 1'b0;
-            CmdBAPushed = 1'b0;
-            if(AddrVB > StrSize) CmdVBPushed = 1'b1;
-        end
-        GAMEMAZE:begin
-            CmdSSPushed = 1'b0;
-            CmdVBPushed = 1'b0;
-            CmdGMPushed = 1'b1;
-            CmdBAPushed = 1'b0;
-        end
-        BADAPPLE:begin
-            CmdSSPushed = 1'b0;
-            CmdVBPushed = 1'b0;
-            CmdGMPushed = 1'b0;
-            CmdBAPushed = 1'b1;
-        end
-        default:begin//STARTSCREEN
-            CmdVBPushed = 1'b0;
-            CmdGMPushed = 1'b0;
-            CmdBAPushed = 1'b0;
-            if(AddrSS > StrSize) CmdSSPushed = 1'b1;
-        end
-    endcase
-end    
-wire StartScreenWriting = STATE == STARTSCREEN && ~CmdSSPushed;//finished writing all commands to the queue, then 0
-wire AudioVisualWriting = STATE == VOLUMEBAR  && ~CmdVBPushed;//finished writing all commands to the queue, then 0
-wire AnyWriting = StartScreenWriting | AudioVisualWriting;
-wire CmdQWriteClock = AnyWriting ? WCLK : 0;
-StartScreenSceneBuilder #(StrSize) SSSB(WCLK, StartScreenWriting, 2'b0, CmdSS, AddrSS);//to implement cursor if have time
-//wire [3:0] fakeVolume = sw[9:7];
-//reg fakeonRefresh = 0;
-AudioVisualizationSceneBuilder #(AV_Size) AVSB(WCLK, AudioVisualWriting, onRefresh, sw[1:0], sw[2], sw[3], sw[4], sw[5], Volume, CmdVB, AddrVB);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
-wire [6:0] GPU_RADDR;
-wire [63:0] CmdQout;
-wire GPU_DONE;
-wire GPU_BUSY;
-wire QueueReady = GPU_DONE;
-CommandQueue #(128) CMDQ(CmdQin, QueueReady, GPU_RADDR, CmdQWriteClock, AddrQ, CmdQout);//The GPU has no ram, thus this command queue is what the GPU will read commands from
-wire [6:0] X;
-wire [5:0] Y;
-wire [15:0] C;
-wire GPU_ON = sw[12] & ~AnyWriting;
-wire [1:0] ImmediateState = sw[14:13];
-GraphicsProcessingUnit GPU(CmdQout, GPU_ON, WCLK, ImmediateState, GPU_RADDR, X, Y, C, GPU_DONE, GPU_BUSY);
-wire BA_PLAYING = STATE == BADAPPLE;
-wire BA_WRITE;
-wire [12:0] DRAM_WADDR;
-wire [15:0] AppleColor;
-BadAppleCore BA(WCLK, BA_PLAYING, ~BA_PLAYING, BadAppleClock, BA_WRITE, DRAM_WADDR, AppleColor);//not using GPU, but rather uses its own video decoder (LBZ all rights reserved)
-wire [15:0] ColorInput = BA_PLAYING ? AppleColor : C;
-DisplayRAM DRAM(Pix, ~WCLK, WCLK, GPU_BUSY | BA_PLAYING, X, Y, BA_WRITE, DRAM_WADDR, ColorInput, STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
-endmodule*/

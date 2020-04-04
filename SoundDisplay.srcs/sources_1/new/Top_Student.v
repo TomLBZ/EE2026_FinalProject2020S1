@@ -19,7 +19,7 @@ module Top_Student (
     output [1:0] JAO, [7:0] JB, [15:0] led, [6:0] seg, [3:0] an
     ); 
     reg [2:0] clkrst = 0;//reset clock
-    reg [4:0] sbit = 5'd22;//slow clock's reading bit. Freq(sclk) = Freq(CLK) / 2^(sbit + 1).
+    reg [4:0] sbit = 5'd21;//slow clock's reading bit. Freq(sclk) = Freq(CLK) / 2^(sbit + 1).
     wire [3:0] CLK;//[100M, 6.25M, 20k, _flexible_]
     wire BadAppleClock;
     wire [15:0] SwStates;//the states of switches
@@ -43,12 +43,6 @@ module Top_Student (
     wire [15:0] mic_mapped;//processed data for led display
     AV_Indicator av1(CLK[3],CLK[1],CLK[0], mic_in,an,seg,mic_mapped,volume);
     B16_MUX led_mux(mic_mapped,{4'b0,mic_in},SwStates[15],led[15:0]);
-    wire [1:0] MazeDState;  
-    Graphics g(SwStates, volume, onRefresh, CLK[3], BadAppleClock, currentPixel, oled_data, led);  
-    
-    
-    
-    //wire [2:0]FREQ;
-    //Audio_FFT_discrete fft1(mic_in,CLK100MHZ,CLK[1],FREQ);
-    //assign led[2:0] = FREQ;
+    Graphics g(SwStates, volume, onRefresh, CLK[3], BadAppleClock, currentPixel, oled_data, led);    
+    //game_maze(CLK100MHZ,btn[0], btn[1], btn[4], btn[3], btn[2],currentPixel, oled_data);//wait for new devel
 endmodule
