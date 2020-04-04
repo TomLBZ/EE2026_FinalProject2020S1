@@ -19,35 +19,36 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module StartScreenCore(input CLK, input ON, output [6:0] X, output [5:0] Y, output [15:0] C);
+module StartScreenCore(input CLK, input ON, input onRefresh, output [6:0] X, output [5:0] Y, output [15:0] C);
     localparam [3:0] StrSize = 4'd15;
     wire [63:0] CmdSS;
     wire NextCmd;
     wire [6:0] GPU_RADDR;
-    reg Mode = 1;//1 for multicore mode, 0 for command queue mode
+    reg Mode = 1;//1 for instant access mode, 0 for clocked command queue mode
     StartScreenSceneBuilder #(StrSize) SSSB(NextCmd, ON, Mode, GPU_RADDR, , CmdSS,);//to implement cursor if have time
-    GraphicsProcessingUnit GPUSS(CmdSS, ON, CLK, ,GPU_RADDR,X,Y,C,NextCmd, );
+    GraphicsProcessingUnit GPUSS(CmdSS, ON, CLK,onRefresh ,GPU_RADDR,X,Y,C,NextCmd, );//use refresh signal as IMME for snbrnch
 endmodule
 
-module BarDisplayCore(input CLK, input ON, input [10:0] states, output [6:0] X, output [5:0] Y, output [15:0] C);
+module BarDisplayCore(input CLK, input ON, input onRefresh, input [10:0] states, output [6:0] X, output [5:0] Y, output [15:0] C);
     localparam [5:0] StrSize = 6'd34;
     wire [63:0] CmdVB;
     wire NextCmd;
     wire [6:0] GPU_RADDR;
-    reg Mode = 1;//1 for multicore mode, 0 for command queue mode
-    wire onRefresh = states[0];
-    wire [5:0] sw = states[6:1];
+    reg Mode = 1;//1 for instant access mode, 0 for clocked command queue mode
+    wire [6:0] sw = states[6:0];
     wire [3:0] Volume = states[10:7];
-    AudioVisualizationSceneBuilder #(StrSize) AVSB(NextCmd, ON, Mode, GPU_RADDR, onRefresh, sw[1:0], sw[2], sw[3], sw[4], sw[5], Volume, CmdVB,);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
-    GraphicsProcessingUnit GPUVB(CmdVB, ON, CLK, ,GPU_RADDR,X,Y,C,NextCmd, );
+    AudioVisualizationSceneBuilder #(StrSize) AVSB(NextCmd, ON, Mode, GPU_RADDR, onRefresh, sw[6], sw[1:0], sw[2], sw[3], sw[4], sw[5], Volume, CmdVB,);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
+    GraphicsProcessingUnit GPUVB(CmdVB, ON, CLK,onRefresh ,GPU_RADDR,X,Y,C,NextCmd, );//use onrefresh as IMME for branching
 endmodule
 
-module MazeCore(input CLK, input ON, input [1:0] states, output [6:0] X, output [5:0] Y, output [15:0] C);
-    localparam [5:0] StrSize = 6'd22;
+module MazeCore(input CLK, input ON, input OnRefresh, input [1:0] states, output [6:0] X, output [5:0] Y, output [15:0] C);
+    localparam [5:0] StrSize = 6'd23;
     wire [63:0] CmdMC;
     wire NextCmd;
-    MazeSceneBuilder #(StrSize) MSB(NextCmd, ON, states, CmdMC, );
-    GraphicsProcessingUnit GPUVB(CmdMC, ON, CLK, ,,X,Y,C,NextCmd, );
+    wire [6:0] GPU_RADDR;
+    reg Mode = 1;//1 for instant access mode, 0 for clocked command queue mode
+    MazeSceneBuilder #(StrSize) MSB(NextCmd, ON, Mode, GPU_RADDR, states, CmdMC, );
+    GraphicsProcessingUnit GPUVB(CmdMC, ON, CLK,OnRefresh ,GPU_RADDR,X,Y,C,NextCmd, );
 endmodule
 
 module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1:0] IMME, output [6:0] RADDR, output [6:0] X, output [5:0] Y, output [15:0] COLOR, output DONE, output BUSY);//64-bit command
@@ -66,15 +67,17 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
     localparam [3:0] SBNCH = 13;//cmd[0:6]RADDR,[7:8]CMP
     localparam [3:0] DBNCH = 14;//cmd[0:6]RADDR1,[7:13]RADDR2,[14:15]CMP
     localparam [3:0] JMP = 15;//cmd[0:6]RADDR;
-    localparam [3:0] CommandUpperBound = 9;
+    localparam [3:0] CommandUpperBound = 9;//below which commands
+    localparam [3:0] JumpLowerBound = 12;//above which jumps
     localparam [6:0] XupperBound = 96;
-    reg [1:0] STATE; initial STATE = 2'd1;
+    reg [1:0] STATE; initial STATE = 2'd0;
     reg [6:0] raddr; initial raddr = 7'b0;
     wire busy = STATE == STR;
     wire [15:0] B;//busy wires
     wire OnCommand = Command[63];
     wire [3:0] commandHead = Command[62:59];//read 4 bit head if OnCommand
-    assign DONE = busy && B[commandHead] == 0;//if OnCommand, check if current command is no longer busy. else set 1
+    wire done = (busy && B[commandHead] == 0) ? 1 : 0;
+    assign DONE = done;//if OnCommand, check if current command is no longer busy. else set 1
     wire [15:0] O;//on wires
     assign O[IDLE] = (commandHead == IDLE);
     assign O[PT] = OnCommand && (commandHead == PT);
@@ -92,18 +95,19 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
     assign O[SBNCH] = OnCommand && (commandHead == SBNCH);
     assign O[DBNCH] = OnCommand && (commandHead == DBNCH);
     assign O[JMP] = OnCommand && (commandHead == JMP);
+    wire TurnOn = ON & O[commandHead];
     always @ (posedge CLK) begin//change state
         case (STATE)
             IDL: begin
-                if (ON) STATE <= STR;//if on then start
+                if (TurnOn) STATE <= STR;//if on then start
                 else STATE <= IDL;//else idle
             end
             STR: begin
-                if (DONE) STATE <= STP;//if done then stop
+                if (done) STATE <= STP;//if done then stop
                 else STATE <= STR;//else start
             end
             STP: begin
-                if (ON) STATE <= STR;//if on then start
+                if (TurnOn) STATE <= STR;//if on then start
                 else STATE <= IDL;//else idle
             end
             default: STATE <= IDL;//default idle
@@ -131,11 +135,10 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
     OnSingleBranchCommand OSBC(CLK, O[SBNCH], Command, IMME, raddr, Xout[SBNCH], Yout[SBNCH], Cout[SBNCH], B[SBNCH]);
     OnDoubleBranchCommand ODBC(CLK, O[DBNCH], Command, IMME, Xout[DBNCH], Yout[DBNCH], Cout[DBNCH], B[DBNCH]);
     OnJumpCommand OJC(CLK, O[JMP], Command, Xout[JMP], Yout[JMP], Cout[JMP], B[JMP]);    
-    wire STPCLK = STATE == STP ? 1 : 0;
     always @ (*) begin
         if (busy) begin //state is str
             if(commandHead < CommandUpperBound) begin
-                if (Xout[commandHead] < XupperBound) begin
+                if (Xout[commandHead] < XupperBound) begin//in range
                     XO = Xout[commandHead];
                     YO = Yout[commandHead];
                     CO = Cout[commandHead];
@@ -143,20 +146,9 @@ module GraphicsProcessingUnit(input [63:0] Command,input ON, input CLK, input [1
             end  
         end
     end
-    always @ (posedge STPCLK) begin
-        if (commandHead >= CommandUpperBound) begin //special commands
-            case (commandHead)
-                SBNCH:begin 
-                    raddr = Xout[commandHead];
-                end
-                DBNCH:begin
-                    raddr = Xout[commandHead];
-                end
-                JMP:begin
-                    raddr = Xout[commandHead];
-                end
-                default:begin raddr = raddr + 1; end
-            endcase
+    always @ (posedge done) begin
+        if (commandHead > JumpLowerBound) begin //special commands: 13,14,15
+            raddr = Xout[commandHead];
         end else begin
             if (ON) raddr = raddr + 1;//normal commands
         end 

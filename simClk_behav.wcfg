@@ -11,93 +11,21 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="186600000001fs"></ZoomEndTime>
-      <Cursor1Time time="0fs"></Cursor1Time>
+      <ZoomStartTime time="72654503000fs"></ZoomStartTime>
+      <ZoomEndTime time="74324503001fs"></ZoomEndTime>
+      <Cursor1Time time="73468503000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="77"></NameColumnWidth>
-      <ValueColumnWidth column_width="69"></ValueColumnWidth>
+      <ValueColumnWidth column_width="65"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="20" />
-   <wvobject fp_name="/simClk/ts/g/GPU/CLK" type="logic">
-      <obj_property name="ElementShortName">CLK</obj_property>
-      <obj_property name="ObjectShortName">CLK</obj_property>
+   <WVObjectSize size="2" />
+   <wvobject fp_name="/simClk/ts/g/SSC/CmdSS" type="array">
+      <obj_property name="ElementShortName">CmdSS[63:0]</obj_property>
+      <obj_property name="ObjectShortName">CmdSS[63:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/Command" type="array">
-      <obj_property name="ElementShortName">Command[63:0]</obj_property>
-      <obj_property name="ObjectShortName">Command[63:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/commandHead" type="array">
-      <obj_property name="ElementShortName">commandHead[3:0]</obj_property>
-      <obj_property name="ObjectShortName">commandHead[3:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/STATE" type="array">
-      <obj_property name="ElementShortName">STATE[1:0]</obj_property>
-      <obj_property name="ObjectShortName">STATE[1:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/DONE" type="logic">
-      <obj_property name="ElementShortName">DONE</obj_property>
-      <obj_property name="ObjectShortName">DONE</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/QueueReady" type="logic">
-      <obj_property name="ElementShortName">QueueReady</obj_property>
-      <obj_property name="ObjectShortName">QueueReady</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/BUSY" type="logic">
-      <obj_property name="ElementShortName">BUSY</obj_property>
-      <obj_property name="ObjectShortName">BUSY</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/OnCommand" type="logic">
-      <obj_property name="ElementShortName">OnCommand</obj_property>
-      <obj_property name="ObjectShortName">OnCommand</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/CMDQ/RCLK" type="logic">
-      <obj_property name="ElementShortName">RCLK</obj_property>
-      <obj_property name="ObjectShortName">RCLK</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/CMDQ/RADDR" type="array">
-      <obj_property name="ElementShortName">RADDR[6:0]</obj_property>
-      <obj_property name="ObjectShortName">RADDR[6:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/XO" type="array">
-      <obj_property name="ElementShortName">XO[6:0]</obj_property>
-      <obj_property name="ObjectShortName">XO[6:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/YO" type="array">
-      <obj_property name="ElementShortName">YO[5:0]</obj_property>
-      <obj_property name="ObjectShortName">YO[5:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/raddr" type="array">
-      <obj_property name="ElementShortName">raddr[6:0]</obj_property>
-      <obj_property name="ObjectShortName">raddr[6:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/CO" type="array">
-      <obj_property name="ElementShortName">CO[15:0]</obj_property>
-      <obj_property name="ObjectShortName">CO[15:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/GPU/IMME" type="array">
-      <obj_property name="ElementShortName">IMME[1:0]</obj_property>
-      <obj_property name="ObjectShortName">IMME[1:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/AddrQ" type="array">
-      <obj_property name="ElementShortName">AddrQ[6:0]</obj_property>
-      <obj_property name="ObjectShortName">AddrQ[6:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/CmdQin" type="array">
-      <obj_property name="ElementShortName">CmdQin[63:0]</obj_property>
-      <obj_property name="ObjectShortName">CmdQin[63:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/CmdQout" type="array">
-      <obj_property name="ElementShortName">CmdQout[63:0]</obj_property>
-      <obj_property name="ObjectShortName">CmdQout[63:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/AVSB/CNT" type="array">
-      <obj_property name="ElementShortName">CNT[6:0]</obj_property>
-      <obj_property name="ObjectShortName">CNT[6:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/AVSB/CMD" type="array">
-      <obj_property name="ElementShortName">CMD[63:0]</obj_property>
-      <obj_property name="ObjectShortName">CMD[63:0]</obj_property>
+   <wvobject fp_name="/simClk/ts/g/SSC/SSSB/ADDR" type="array">
+      <obj_property name="ElementShortName">ADDR[6:0]</obj_property>
+      <obj_property name="ObjectShortName">ADDR[6:0]</obj_property>
    </wvobject>
 </wave_config>
