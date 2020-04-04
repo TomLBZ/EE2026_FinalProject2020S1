@@ -23,26 +23,30 @@ module StartScreenCore(input CLK, input ON, output [6:0] X, output [5:0] Y, outp
     localparam [3:0] StrSize = 4'd15;
     wire [63:0] CmdSS;
     wire NextCmd;
-    StartScreenSceneBuilder #(StrSize) SSSB(NextCmd, ON, , CmdSS,);//to implement cursor if have time
-    GraphicsProcessingUnit GPUSS(CmdSS, ON, CLK, ,,X,Y,C,NextCmd, );
+    wire [6:0] GPU_RADDR;
+    reg Mode = 1;//1 for multicore mode, 0 for command queue mode
+    StartScreenSceneBuilder #(StrSize) SSSB(NextCmd, ON, Mode, GPU_RADDR, , CmdSS,);//to implement cursor if have time
+    GraphicsProcessingUnit GPUSS(CmdSS, ON, CLK, ,GPU_RADDR,X,Y,C,NextCmd, );
 endmodule
 
 module BarDisplayCore(input CLK, input ON, input [10:0] states, output [6:0] X, output [5:0] Y, output [15:0] C);
     localparam [5:0] StrSize = 6'd34;
     wire [63:0] CmdVB;
     wire NextCmd;
+    wire [6:0] GPU_RADDR;
+    reg Mode = 1;//1 for multicore mode, 0 for command queue mode
     wire onRefresh = states[0];
     wire [5:0] sw = states[6:1];
     wire [3:0] Volume = states[10:7];
-    AudioVisualizationSceneBuilder #(StrSize) AVSB(NextCmd, ON, onRefresh, sw[1:0], sw[2], sw[3], sw[4], sw[5], Volume, CmdVB,);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
-    GraphicsProcessingUnit GPUVB(CmdVB, ON, CLK, ,,X,Y,C,NextCmd, );
+    AudioVisualizationSceneBuilder #(StrSize) AVSB(NextCmd, ON, Mode, GPU_RADDR, onRefresh, sw[1:0], sw[2], sw[3], sw[4], sw[5], Volume, CmdVB,);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
+    GraphicsProcessingUnit GPUVB(CmdVB, ON, CLK, ,GPU_RADDR,X,Y,C,NextCmd, );
 endmodule
 
 module MazeCore(input CLK, input ON, input [1:0] states, output [6:0] X, output [5:0] Y, output [15:0] C);
-    localparam [5:0] StrSize = 6'd34;
+    localparam [5:0] StrSize = 6'd22;
     wire [63:0] CmdMC;
     wire NextCmd;
-    MazeSceneBuilder #(32) MSB(NextCmd, ON, states, CmdMC, );
+    MazeSceneBuilder #(StrSize) MSB(NextCmd, ON, states, CmdMC, );
     GraphicsProcessingUnit GPUVB(CmdMC, ON, CLK, ,,X,Y,C,NextCmd, );
 endmodule
 
