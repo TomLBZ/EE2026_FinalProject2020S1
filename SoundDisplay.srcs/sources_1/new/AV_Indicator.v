@@ -74,3 +74,14 @@ module AV_Indicator(
     end
 
 endmodule
+
+module my_dff (input CLOCK, D, output reg Q = 0);
+    always @ (posedge CLOCK) Q <= D;
+endmodule
+module task1(input CLOCK, BTN, output Q);
+    wire Q1;
+    wire Q2;
+    my_dff f0(CLOCK, BTN, Q1);
+    my_dff f1(CLOCK, Q1, Q2);
+    assign Q = (Q1 & ~Q2);
+endmodule

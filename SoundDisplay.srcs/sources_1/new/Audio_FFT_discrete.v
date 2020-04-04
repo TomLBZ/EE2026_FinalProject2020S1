@@ -44,22 +44,31 @@ module Audio_FFT_discrete(input [11:0] mic_in,CLK,MCLK,output reg [2:0]FREQ);
         end
     end
     //sample volume at 20kHz frequency
+    reg onecycle = 1'b0;
     always @(posedge MCLK) begin
         if (counter == 14'd9999) begin
+        onecycle = 1'b1;
+        if(onecycle == 1'b1) FREQ = (RESULT_1000>RESULT_2000 && RESULT_1000>RESULT_3000) ? 3'b001 : 
+                                           (RESULT_2000>RESULT_3000)? 3'b011:3'b111;
         //reset counter value after the calculations are done
         end
         else begin
             counter <= counter + 1;    
             SAMPLE[counter] = mic_in;   //g(t)
             if(vart_1000==5'd20) begin
-                if(final_cal_1000 == 2'b10) begin    //reset after finish all calculations
                     vart_1000<= 5'b00001;
-                    FREQ = (RESULT_1000>RESULT_2000 && RESULT_1000>RESULT_3000) ? 3'b001 : 
-                           (RESULT_2000>RESULT_3000)? 3'b011:3'b111;
                 end
-            end
             else vart_1000 <= vart_1000 + 1'b1;
+            if(vart_2000==5'd10) begin
+                    vart_2000<= 5'b00001;
+            end
+            else vart_2000 <= vart_2000 + 1'b1;
+            if(vart_3000==5'd7) begin
+                    vart_3000<= 5'b00001;
+            end
+            else vart_3000 <= vart_3000 + 1'b1;
         end
+        
     end
     
     /*
@@ -69,13 +78,13 @@ module Audio_FFT_discrete(input [11:0] mic_in,CLK,MCLK,output reg [2:0]FREQ);
     
     
     // Section 1: 1000Hz
-    reg [28:0] RESULT_1000;
-    reg [28:0] REAL_1000;
-    reg [28:0] REAL_pos_1000;
-    reg [28:0] REAL_neg_1000;
-    reg [28:0] IMAG_1000;
-    reg [28:0] IMAG_pos_1000;
-    reg [28:0] IMAG_neg_1000;
+    reg [28:0] RESULT_1000 = 29'b0;
+    reg [28:0] REAL_1000= 29'b0;
+    reg [28:0] REAL_pos_1000= 29'b0;
+    reg [28:0] REAL_neg_1000= 29'b0;
+    reg [28:0] IMAG_1000= 29'b0;
+    reg [28:0] IMAG_pos_1000= 29'b0;
+    reg [28:0] IMAG_neg_1000= 29'b0;
     reg [8:0] angle_1000;   //0~360
     reg [8:0] angle_180_1000;
     reg [6:0] angle_90_1000;
@@ -119,20 +128,20 @@ module Audio_FFT_discrete(input [11:0] mic_in,CLK,MCLK,output reg [2:0]FREQ);
             IMAG_1000 = IMAG_pos_1000 - IMAG_neg_1000;
         end
         if (final_cal_1000 == 2'b01) begin
-            RESULT_1000 = IMAG_1000*IMAG_1000 + REAL_1000*REAL_1000;
+            RESULT_1000 <= RESULT_1000 + IMAG_1000*IMAG_1000 + REAL_1000*REAL_1000;
             final_cal_1000 = final_cal_1000 + 1;
         end
         if (final_cal_1000 -- 2'b10) final_cal_1000 <= 2'b00;
     end
 
     // Section 2: 2000Hz
-    reg [28:0] RESULT_2000;
-    reg [28:0] REAL_2000;
-    reg [28:0] REAL_pos_2000;
-    reg [28:0] REAL_neg_2000;
-    reg [28:0] IMAG_2000;
-    reg [28:0] IMAG_pos_2000;
-    reg [28:0] IMAG_neg_2000;
+    reg [28:0] RESULT_2000= 29'b0;
+    reg [28:0] REAL_2000= 29'b0;
+    reg [28:0] REAL_pos_2000= 29'b0;
+    reg [28:0] REAL_neg_2000= 29'b0;
+    reg [28:0] IMAG_2000= 29'b0;
+    reg [28:0] IMAG_pos_2000= 29'b0;
+    reg [28:0] IMAG_neg_2000= 29'b0;
     reg [8:0] angle_2000;   //0~360
     reg [8:0] angle_180_2000;
     reg [6:0] angle_90_2000;
@@ -185,13 +194,13 @@ module Audio_FFT_discrete(input [11:0] mic_in,CLK,MCLK,output reg [2:0]FREQ);
     
     
     // Section 3: 3000Hz
-    reg [28:0] RESULT_3000;
-    reg [28:0] REAL_3000;
-    reg [28:0] REAL_pos_3000;
-    reg [28:0] REAL_neg_3000;
-    reg [28:0] IMAG_3000;
-    reg [28:0] IMAG_pos_3000;
-    reg [28:0] IMAG_neg_3000;
+    reg [28:0] RESULT_3000= 29'b0;
+    reg [28:0] REAL_3000= 29'b0;
+    reg [28:0] REAL_pos_3000= 29'b0;
+    reg [28:0] REAL_neg_3000= 29'b0;
+    reg [28:0] IMAG_3000= 29'b0;
+    reg [28:0] IMAG_pos_3000= 29'b0;
+    reg [28:0] IMAG_neg_3000= 29'b0;
     reg [8:0] angle_3000;   //0~360
     reg [8:0] angle_180_3000;
     reg [6:0] angle_90_3000;

@@ -40,7 +40,18 @@ module BarDisplayCore(input CLK, input ON, input onRefresh, input [10:0] states,
     AudioVisualizationSceneBuilder #(StrSize) AVSB(NextCmd, ON, Mode, GPU_RADDR, onRefresh, sw[6], sw[1:0], sw[2], sw[3], sw[4], sw[5], Volume, CmdVB,);//[6:5]theme,[4]thick,[3]boarder,[2]background,[1]bar,[0]text
     GraphicsProcessingUnit GPUVB(CmdVB, ON, CLK,onRefresh ,GPU_RADDR,X,Y,C,NextCmd, );//use onrefresh as IMME for branching
 endmodule
-
+/*
+module my_dff (input CLOCK, D, output reg Q = 0);
+    always @ (posedge CLOCK) Q <= D;
+endmodule
+module task1(input CLOCK, BTN, output Q);
+    wire Q1;
+    wire Q2;
+    my_dff f0(CLOCK, BTN, Q1);
+    my_dff f1(CLOCK, Q1, Q2);
+    assign Q = (Q1 & ~Q2);
+endmodule
+*/
 module MazeCore(input CLK, input ON, input OnRefresh, input [4:0] btns, output [6:0] X, output [5:0] Y, output [15:0] C);
     localparam [5:0] StrSize = 6'd38;
     localparam [1:0] PLAYING = 2'b00;
@@ -55,26 +66,55 @@ module MazeCore(input CLK, input ON, input OnRefresh, input [4:0] btns, output [
     reg [5:0] cY = 6'd53;
     reg [1:0] MazeState; initial MazeState = START;
     wire Playing = MazeState == PLAYING ? 1 : 0;
+    
     wire Center = btns[0];
     wire Top = btns[1] & Playing;
     wire Left = btns[2] & Playing;
     wire Right = btns[3] & Playing;
     wire Bottom = btns[4] & Playing;
-    wire [6:0] Xleft = cX > 1'b0 ? cX - 1'b1 : 1'b0;
-    wire [6:0] Xright = cX < 7'd86 ? cX + 1'b1 : 7'd86;
-    wire [5:0] Yup = cY > 1'b0 ? cY - 1'b1 : 1'b0;
-    wire [5:0] Ydown = cY < 6'd54 ? cY + 1'b1 : 6'd54;
+    //wire [6:0] Xleft = cX > 1'b0 ? cX - 1'b1 : 1'b0;
+    //wire [6:0] Xright = cX < 7'd86 ? cX + 1'b1 : 7'd86;
+    //wire [5:0] Yup = cY > 1'b0 ? cY - 1'b1 : 1'b0;
+    //wire [5:0] Ydown = cY < 6'd54 ? cY + 1'b1 : 6'd54;
     reg Mode = 1;//1 for instant access mode, 0 for clocked command queue mode
+    
+    reg [1:0] gamestart=2'b00;
+    /*
     always @ (posedge AnyPressed) begin
-        if (Top) cY = Yup;
-        if (Bottom) cY = Ydown;
-        if (Left) cX = Xleft;
-        if (Right) cX = Xright;
-        if (Center) begin
+        if(gamestart == 2'b01) begin
+            cX = 7'd3;
+            cY = 6'd53;
+            gamestart = 2'b00;
+        end
+        else begin
+            if (Top) cY = Yup;
+            if (Bottom) cY = Ydown;
+            if (Left) cX = Xleft;
+            if (Right) cX = Xright;
+            if (Center) gamestart = 2'b01;
+        end
+    end
+    */
+    wire QC; wire QU; wire QD; wire QR; wire QL;
+    task1 ef0(CLK, btns[0], QC);
+    task1 ef1(CLK, btns[1], QU);
+    task1 ef2(CLK, btns[4], QD);
+    task1 ef3(CLK, btns[3], QR);
+    task1 ef4(CLK, btns[2], QL);
+    
+    always@(posedge CLK) begin
+        if(gamestart == 0) begin  
             cX = 7'd3;
             cY = 6'd53;
         end
+        else begin
+                if(QL==1 && cX > 1'b0) cX <= cX - 1;
+                if(QR==1 && cX < 7'd86) cX <= cX + 1;
+                if(QU==1 && cY > 1'b0) cY <= cY - 1;
+                if(QD==1 && cY < 6'd54) cY <= cY + 1;
+        end
     end
+    
     wire [12:0] OnRoad;
     assign OnRoad[0] = cY > 6'd1 && cY < 6'd5 && cX > 7'd81 && cX < 7'd86;//goal
     assign OnRoad[1] = cY > 6'd51 && cY < 6'd55 && cX > 7'd1 && cX < 7'd46;//1
@@ -92,14 +132,22 @@ module MazeCore(input CLK, input ON, input OnRefresh, input [4:0] btns, output [
     wire InBounds = OnRoad[1] | OnRoad[2] | OnRoad[3] | OnRoad[4] | OnRoad[5] | OnRoad[6] | OnRoad[7] | OnRoad[8] | OnRoad[9] | OnRoad[10] | OnRoad[11] | OnRoad[12];
     always @ (posedge CLK) begin
         case (MazeState)
-            START:if(Center) MazeState = PLAYING;//btn0
+            START:if(Center) begin
+                gamestart = 2'b01;
+                MazeState = PLAYING;//btn0
+            end
             PLAYING: begin
                 if (~InBounds) begin 
                     MazeState = LOSE; 
                 end 
-                if (OnRoad[0] == 1'b1) MazeState = WIN;
+                if (OnRoad[0] == 1'b1) begin
+                    MazeState = WIN;
+                end
             end
-            default: if(Center) MazeState = START;//win or lose
+            default: begin
+                if(Center) MazeState = START;//win or lose
+                gamestart = 2'b00;
+            end
         endcase
     end
     wire [1:0] Update = {AnyPressed, OnRefresh};
