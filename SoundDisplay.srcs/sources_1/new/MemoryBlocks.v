@@ -169,7 +169,7 @@ module SceneSpriteBlocks(input [6:0] SCN, output reg [15:0] COLOR[63:0]);
     end
 endmodule
 
-module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK,input Enable,input InstantAccessMode, input [6:0] ADDR, input Reflush,input FREEZE, input [1:0] THEME, input BD, input THK, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD, output [6:0] CNT);
+module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK,input Enable, input Reflush, input [1:0] THEME, input BD, input THK, input BAR, input TXT, input [3:0] LEVEL, output [63:0] CMD, output [6:0] CNT);
     reg [63:0] AudioBar [scenesize:0];//33 commands + 1 idle spaceholder
     reg [6:0] count = 7'b0;
     reg [63:0] cmd = 64'd0;
@@ -179,41 +179,41 @@ module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK,inp
     reg [15:0] MT [2:0] = {{5'd31,6'd63,5'd0},{5'd0,6'd0,5'd15},{5'd0,6'd63,5'd0}};// yellow, dark blue, green
     reg [15:0] LT [2:0] = {{5'd0,6'd63,5'd0},{5'd0,6'd0,5'd0},{5'd31,6'd0,5'd31}};// green, black, magenta
     `include "CommandFunctions.v"
-    assign AudioBar[0] = FREEZE ? JMP(6'd34) : IdleCmd();//if freeze jump to end, else edle
-    assign AudioBar[1] = FillRect(7'd0, 6'd0, 7'd95, 6'd63, BGT[THEME]);//Fill Background
-    assign AudioBar[2] = BD ? DrawRect(7'd0, 6'd0, 7'd95, 6'd63, BT[THEME]) : IdleCmd();// drawboarder outermost 1 pix at THK 1
-    assign AudioBar[3] = BD & THK ? DrawRect(7'd1, 6'd1, 7'd94, 6'd62, BT[THEME]) : IdleCmd();// drawboarder outermost 2 pix at THK 1
-    assign AudioBar[4] = BD & THK ? DrawRect(7'd2, 6'd2, 7'd93, 6'd61, BT[THEME]) : IdleCmd();// drawboarder outermost 3 pix at THK 1
-    assign AudioBar[5] = BAR ? FillRect(7'd42, 6'd58, 7'd53, 6'd59, LT[THEME]) : IdleCmd();//Fill BtmLevel1
-    assign AudioBar[6] = BAR & (LEVEL > 4'd0) ? FillRect(7'd42, 6'd55, 7'd53, 6'd56, LT[THEME]) : IdleCmd();//Fill BtmLevel2
-    assign AudioBar[7] = BAR & (LEVEL > 4'd1) ? FillRect(7'd42, 6'd52, 7'd53, 6'd53, LT[THEME]) : IdleCmd();//Fill BtmLevel3
-    assign AudioBar[8] = BAR & (LEVEL > 4'd2) ? FillRect(7'd42, 6'd49, 7'd53, 6'd50, LT[THEME]) : IdleCmd();//Fill BtmLevel4
-    assign AudioBar[9] = BAR & (LEVEL > 4'd3) ? FillRect(7'd42, 6'd46, 7'd53, 6'd47, LT[THEME]) : IdleCmd();//Fill BtmLevel5
-    assign AudioBar[10] = BAR & (LEVEL > 4'd4) ? FillRect(7'd42, 6'd43, 7'd53, 6'd44, LT[THEME]) : IdleCmd();//Fill MidLevel6
-    assign AudioBar[11] = BAR & (LEVEL > 4'd5) ? FillRect(7'd42, 6'd40, 7'd53, 6'd41, MT[THEME]) : IdleCmd();//Fill MidLevel1
-    assign AudioBar[12] = BAR & (LEVEL > 4'd6) ? FillRect(7'd42, 6'd37, 7'd53, 6'd38, MT[THEME]) : IdleCmd();//Fill MidLevel2
-    assign AudioBar[13] = BAR & (LEVEL > 4'd7) ? FillRect(7'd42, 6'd34, 7'd53, 6'd35, MT[THEME]) : IdleCmd();//Fill MidLevel3
-    assign AudioBar[14] = BAR & (LEVEL > 4'd8) ? FillRect(7'd42, 6'd31, 7'd53, 6'd32, MT[THEME]) : IdleCmd();//Fill MidLevel4
-    assign AudioBar[15] = BAR & (LEVEL > 4'd9) ? FillRect(7'd42, 6'd28, 7'd53, 6'd29, MT[THEME]) : IdleCmd();//Fill MidLevel5
-    assign AudioBar[16] = BAR & (LEVEL > 4'd10) ? FillRect(7'd42, 6'd25, 7'd53, 6'd26, HT[THEME]) : IdleCmd();//Fill TopLevel1
-    assign AudioBar[17] = BAR & (LEVEL > 4'd11) ? FillRect(7'd42, 6'd22, 7'd53, 6'd23, HT[THEME]) : IdleCmd();//Fill TopLevel2
-    assign AudioBar[18] = BAR & (LEVEL > 4'd12) ? FillRect(7'd42, 6'd19, 7'd53, 6'd20, HT[THEME]) : IdleCmd();//Fill TopLevel3
-    assign AudioBar[19] = BAR & (LEVEL > 4'd13) ? FillRect(7'd42, 6'd16, 7'd53, 6'd17, HT[THEME]) : IdleCmd();//Fill TopLevel4
-    assign AudioBar[20] = BAR & (LEVEL > 4'd14) ? FillRect(7'd42, 6'd13, 7'd53, 6'd14, HT[THEME]) : IdleCmd();//Fill TopLevel5    
-    assign AudioBar[21] = TXT ? DrawChar(7'd55, 6'd53, 20'd11, LT[THEME], 1'd0) : IdleCmd(); //L, original size
-    assign AudioBar[22] = TXT ? DrawChar(7'd60, 6'd53, 20'd14, LT[THEME], 1'd0) : IdleCmd(); //O, original size
-    assign AudioBar[23] = TXT ? DrawChar(7'd65, 6'd53, 20'd22, LT[THEME], 1'd0) : IdleCmd(); //W, original size
-    assign AudioBar[24] = TXT ? DrawChar(7'd75, 6'd53, 20'd21, LT[THEME], 1'd0) : IdleCmd(); //V, original size
-    assign AudioBar[25] = TXT ? DrawChar(7'd80, 6'd53, 20'd14, LT[THEME], 1'd0) : IdleCmd(); //O, original size
-    assign AudioBar[26] = TXT ? DrawChar(7'd85, 6'd53, 20'd11, LT[THEME], 1'd0) : IdleCmd(); //L, original size
-    assign AudioBar[27] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd55, 6'd13, 20'd7, HT[THEME], 1'd0) : IdleCmd(); //H, original size
-    assign AudioBar[28] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd60, 6'd13, 20'd8, HT[THEME], 1'd0) : IdleCmd(); //I, original size
-    assign AudioBar[29] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd65, 6'd13, 20'd6, HT[THEME], 1'd0) : IdleCmd(); //G, original size
-    assign AudioBar[30] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd70, 6'd13, 20'd7, HT[THEME], 1'd0) : IdleCmd(); //H, original size
-    assign AudioBar[31] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd75, 6'd13, 20'd21, HT[THEME], 1'd0) : IdleCmd(); //V, original size
-    assign AudioBar[32] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd80, 6'd13, 20'd14, HT[THEME], 1'd0) : IdleCmd(); //O, original size
-    assign AudioBar[33] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd85, 6'd13, 20'd11, HT[THEME], 1'd0) : IdleCmd(); //L, original size
-    assign AudioBar[34] = DBNCH(2'd0,6'd34,1'b1);//Jump to 0 on refresh, else loop here;
+    assign AudioBar[0] = FillRect(7'd0, 6'd0, 7'd95, 6'd63, BGT[THEME]);//Fill Background
+    assign AudioBar[1] = BD ? DrawRect(7'd0, 6'd0, 7'd95, 6'd63, BT[THEME]) : IdleCmd();// drawboarder outermost 1 pix at THK 1
+    assign AudioBar[2] = BD & THK ? DrawRect(7'd1, 6'd1, 7'd94, 6'd62, BT[THEME]) : IdleCmd();// drawboarder outermost 2 pix at THK 1
+    assign AudioBar[3] = BD & THK ? DrawRect(7'd2, 6'd2, 7'd93, 6'd61, BT[THEME]) : IdleCmd();// drawboarder outermost 3 pix at THK 1
+    assign AudioBar[4] = BAR ? FillRect(7'd42, 6'd58, 7'd53, 6'd59, LT[THEME]) : IdleCmd();//Fill BtmLevel1
+    assign AudioBar[5] = BAR & (LEVEL > 4'd0) ? FillRect(7'd42, 6'd55, 7'd53, 6'd56, LT[THEME]) : IdleCmd();//Fill BtmLevel2
+    assign AudioBar[6] = BAR & (LEVEL > 4'd1) ? FillRect(7'd42, 6'd52, 7'd53, 6'd53, LT[THEME]) : IdleCmd();//Fill BtmLevel3
+    assign AudioBar[7] = BAR & (LEVEL > 4'd2) ? FillRect(7'd42, 6'd49, 7'd53, 6'd50, LT[THEME]) : IdleCmd();//Fill BtmLevel4
+    assign AudioBar[8] = BAR & (LEVEL > 4'd3) ? FillRect(7'd42, 6'd46, 7'd53, 6'd47, LT[THEME]) : IdleCmd();//Fill BtmLevel5
+    assign AudioBar[9] = BAR & (LEVEL > 4'd4) ? FillRect(7'd42, 6'd43, 7'd53, 6'd44, LT[THEME]) : IdleCmd();//Fill MidLevel6
+    assign AudioBar[10] = BAR & (LEVEL > 4'd5) ? FillRect(7'd42, 6'd40, 7'd53, 6'd41, MT[THEME]) : IdleCmd();//Fill MidLevel1
+    assign AudioBar[11] = BAR & (LEVEL > 4'd6) ? FillRect(7'd42, 6'd37, 7'd53, 6'd38, MT[THEME]) : IdleCmd();//Fill MidLevel2
+    assign AudioBar[12] = BAR & (LEVEL > 4'd7) ? FillRect(7'd42, 6'd34, 7'd53, 6'd35, MT[THEME]) : IdleCmd();//Fill MidLevel3
+    assign AudioBar[13] = BAR & (LEVEL > 4'd8) ? FillRect(7'd42, 6'd31, 7'd53, 6'd32, MT[THEME]) : IdleCmd();//Fill MidLevel4
+    assign AudioBar[14] = BAR & (LEVEL > 4'd9) ? FillRect(7'd42, 6'd28, 7'd53, 6'd29, MT[THEME]) : IdleCmd();//Fill MidLevel5
+    assign AudioBar[15] = BAR & (LEVEL > 4'd10) ? FillRect(7'd42, 6'd25, 7'd53, 6'd26, HT[THEME]) : IdleCmd();//Fill TopLevel1
+    assign AudioBar[16] = BAR & (LEVEL > 4'd11) ? FillRect(7'd42, 6'd22, 7'd53, 6'd23, HT[THEME]) : IdleCmd();//Fill TopLevel2
+    assign AudioBar[17] = BAR & (LEVEL > 4'd12) ? FillRect(7'd42, 6'd19, 7'd53, 6'd20, HT[THEME]) : IdleCmd();//Fill TopLevel3
+    assign AudioBar[18] = BAR & (LEVEL > 4'd13) ? FillRect(7'd42, 6'd16, 7'd53, 6'd17, HT[THEME]) : IdleCmd();//Fill TopLevel4
+    assign AudioBar[19] = BAR & (LEVEL > 4'd14) ? FillRect(7'd42, 6'd13, 7'd53, 6'd14, HT[THEME]) : IdleCmd();//Fill TopLevel5    
+    assign AudioBar[20] = TXT ? DrawChar(7'd55, 6'd53, 20'd11, LT[THEME], 1'd0) : IdleCmd(); //L, original size
+    assign AudioBar[21] = TXT ? DrawChar(7'd60, 6'd53, 20'd14, LT[THEME], 1'd0) : IdleCmd(); //O, original size
+    assign AudioBar[22] = TXT ? DrawChar(7'd65, 6'd53, 20'd22, LT[THEME], 1'd0) : IdleCmd(); //W, original size
+    assign AudioBar[23] = TXT ? DrawChar(7'd75, 6'd53, 20'd21, LT[THEME], 1'd0) : IdleCmd(); //V, original size
+    assign AudioBar[24] = TXT ? DrawChar(7'd80, 6'd53, 20'd14, LT[THEME], 1'd0) : IdleCmd(); //O, original size
+    assign AudioBar[25] = TXT ? DrawChar(7'd85, 6'd53, 20'd11, LT[THEME], 1'd0) : IdleCmd(); //L, original size
+    assign AudioBar[26] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd55, 6'd13, 20'd7, HT[THEME], 1'd0) : IdleCmd(); //H, original size
+    assign AudioBar[27] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd60, 6'd13, 20'd8, HT[THEME], 1'd0) : IdleCmd(); //I, original size
+    assign AudioBar[28] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd65, 6'd13, 20'd6, HT[THEME], 1'd0) : IdleCmd(); //G, original size
+    assign AudioBar[29] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd70, 6'd13, 20'd7, HT[THEME], 1'd0) : IdleCmd(); //H, original size
+    assign AudioBar[30] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd75, 6'd13, 20'd21, HT[THEME], 1'd0) : IdleCmd(); //V, original size
+    assign AudioBar[31] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd80, 6'd13, 20'd14, HT[THEME], 1'd0) : IdleCmd(); //O, original size
+    assign AudioBar[32] = TXT & (LEVEL > 4'd10) ? DrawChar(7'd85, 6'd13, 20'd11, HT[THEME], 1'd0) : IdleCmd(); //L, original size
+    assign AudioBar[33] = JMP(1'b1);//Jump to 0;
+    assign AudioBar[34] = IdleCmd();
     always @(posedge CLK) begin
         if (Enable) begin
             cmd = AudioBar[count];
@@ -222,11 +222,11 @@ module AudioVisualizationSceneBuilder #(parameter scenesize = 34) (input CLK,inp
             else count = count + 1;
         end else count = 0;
     end
-    assign CMD = InstantAccessMode ? (ADDR < scenesize ? AudioBar[ADDR] : IdleCmd()) : cmd;
+    assign CMD = cmd;
     assign CNT = count;
 endmodule
 
-module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK,input Enable, input InstantAccessMode, input [6:0] ADDR, input [1:0] CURSORINDEX, output [63:0] CMD, output [6:0] CNT);
+module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK,input Enable, input [1:0] CURSORINDEX, output [63:0] CMD, output [6:0] CNT);
     reg [63:0] StartScreen [scenesize:0];//14 commands + 1 idle spaceholder
     reg [4:0] count = 5'b0;
     reg [63:0] cmd = 64'd0;
@@ -247,7 +247,7 @@ module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK,input Enab
     assign StartScreen[11] = DrawChar(7'd54, 6'd25, 20'd14, AQUA,1'd1); //O, double size
     assign StartScreen[12] = DrawChar(7'd65, 6'd25, 20'd12, AQUA,1'd1); //M, double size
     assign StartScreen[13] = DrawChar(7'd76, 6'd25, 20'd4, AQUA,1'd1); //E, double size
-    assign StartScreen[14] =  SBNCH(6'd0,1'b1);//JMP to 0 if on refresh. for the rest, holding the screen still
+    assign StartScreen[14] = JMP(4'd15);//JMP to this same command, holding the screen still
     assign StartScreen[15] = IdleCmd();
     always @(posedge CLK) begin
         if (Enable) begin
@@ -256,11 +256,11 @@ module StartScreenSceneBuilder #(parameter scenesize = 15) (input CLK,input Enab
             else count = count + 1;
         end else count = 0;
     end
-    assign CMD = InstantAccessMode ? (ADDR < scenesize ? StartScreen[ADDR] : IdleCmd()) : cmd;
+    assign CMD = cmd;
     assign CNT = count;
 endmodule
 
-module MazeSceneBuilder #(parameter scenesize = 23) (input CLK,input Enable, input InstantAccessMode, input [6:0] ADDR, input [1:0] STATE, output [63:0] CMD, output [6:0] CNT);
+module MazeSceneBuilder #(parameter scenesize = 32) (input CLK,input Enable, input [1:0] STATE, output [63:0] CMD, output [6:0] CNT);
     reg [63:0] MazeScene [scenesize:0];//32 commands
     reg [5:0] count = 0;
     reg [63:0] cmd;
@@ -296,16 +296,16 @@ module MazeSceneBuilder #(parameter scenesize = 23) (input CLK,input Enable, inp
     assign MazeScene[19] = STATE == LOSE ? DrawChar(7'd15, 6'd20, 20'd6, RED ,1'd0) : IdleCmd(); //O, original size
     assign MazeScene[20] = STATE == LOSE ? DrawChar(7'd20, 6'd20, 20'd6, RED ,1'd0) : IdleCmd(); //S, original size
     assign MazeScene[21] = STATE == LOSE ? DrawChar(7'd25, 6'd20, 20'd6, RED ,1'd0) : IdleCmd(); //E, original size
-    assign MazeScene[22] = DBNCH(2'd0,6'd6,1'b1);// if refresh then jump to start, else only render text
-    assign MazeScene[23] = IdleCmd();
+    assign MazeScene[22] = IdleCmd();
     always @(posedge CLK) begin
         if (Enable) begin
             cmd = MazeScene[count];
             if (count > scenesize) count = 0;
             else count = count + 1;
         end else count = 0;
+        cmd = MazeScene[count];
     end
-    assign CMD = InstantAccessMode ? (ADDR < scenesize ? MazeScene[ADDR] : IdleCmd()) : cmd;
+    assign CMD = cmd;
     assign CNT = count;
 endmodule
 

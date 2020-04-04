@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="72654503000fs"></ZoomStartTime>
-      <ZoomEndTime time="74324503001fs"></ZoomEndTime>
-      <Cursor1Time time="73468503000fs"></Cursor1Time>
+      <ZoomStartTime time="47100000000fs"></ZoomStartTime>
+      <ZoomEndTime time="89050000001fs"></ZoomEndTime>
+      <Cursor1Time time="62800000000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="77"></NameColumnWidth>
-      <ValueColumnWidth column_width="65"></ValueColumnWidth>
+      <ValueColumnWidth column_width="61"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="2" />
+   <WVObjectSize size="11" />
    <wvobject fp_name="/simClk/ts/g/SSC/CmdSS" type="array">
       <obj_property name="ElementShortName">CmdSS[63:0]</obj_property>
       <obj_property name="ObjectShortName">CmdSS[63:0]</obj_property>
@@ -27,5 +27,41 @@
    <wvobject fp_name="/simClk/ts/g/SSC/SSSB/ADDR" type="array">
       <obj_property name="ElementShortName">ADDR[6:0]</obj_property>
       <obj_property name="ObjectShortName">ADDR[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/CLK" type="logic">
+      <obj_property name="ElementShortName">CLK</obj_property>
+      <obj_property name="ObjectShortName">CLK</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/commandHead" type="array">
+      <obj_property name="ElementShortName">commandHead[3:0]</obj_property>
+      <obj_property name="ObjectShortName">commandHead[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/STATE" type="array">
+      <obj_property name="ElementShortName">STATE[1:0]</obj_property>
+      <obj_property name="ObjectShortName">STATE[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/Yout[15]" type="array">
+      <obj_property name="ElementShortName">[15][5:0]</obj_property>
+      <obj_property name="ObjectShortName">[15][5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/raddr" type="array">
+      <obj_property name="ElementShortName">raddr[6:0]</obj_property>
+      <obj_property name="ObjectShortName">raddr[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/RADDR" type="array">
+      <obj_property name="ElementShortName">RADDR[6:0]</obj_property>
+      <obj_property name="ObjectShortName">RADDR[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/done" type="logic">
+      <obj_property name="ElementShortName">done</obj_property>
+      <obj_property name="ObjectShortName">done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/O" type="array">
+      <obj_property name="ElementShortName">O[15:0]</obj_property>
+      <obj_property name="ObjectShortName">O[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/B" type="array">
+      <obj_property name="ElementShortName">B[15:0]</obj_property>
+      <obj_property name="ObjectShortName">B[15:0]</obj_property>
    </wvobject>
 </wave_config>
