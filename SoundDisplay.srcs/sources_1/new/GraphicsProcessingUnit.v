@@ -48,6 +48,7 @@ module MazeCore(input CLK, input ON, input OnRefresh, input [1:0] states, output
     wire [6:0] GPU_RADDR;
     reg Mode = 1;//1 for instant access mode, 0 for clocked command queue mode
     MazeSceneBuilder #(StrSize) MSB(NextCmd, ON, Mode, GPU_RADDR, states, CmdMC, );
+    //change
     GraphicsProcessingUnit GPUVB(CmdMC, ON, CLK,OnRefresh ,GPU_RADDR,X,Y,C,NextCmd, );
 endmodule
 
