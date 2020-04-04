@@ -672,5 +672,4 @@ module Graphics(input [15:0] sw, input [4:0] btns, input [3:0] Volume, input onR
     MazeCore MC(WCLK, STATE == GAMEMAZE, onRefresh, btns, X[GAMEMAZE], Y[GAMEMAZE], C[GAMEMAZE]);
     BadAppleCore BAC(WCLK, STATE == BADAPPLE, STATE != BADAPPLE, BadAppleClock,, X[BADAPPLE], Y[BADAPPLE], C[BADAPPLE]);
     DisplayRAM DRAM(Pix, ~WCLK, WCLK, 1'b1, X[STATE], Y[STATE], C[STATE], STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
-    //assign debugLED[15:0] = btns;
 endmodule
