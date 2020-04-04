@@ -18,11 +18,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-/*
-module mux_4to1_assign ( input [15:0] a, [15:0] b, [15:0] c, [15:0] d, [1:0] sel, [15:0] out);  
-   assign out = sel[1] ? (sel[0] ? d : c) : (sel[0] ? b : a); 
-endmodule
-*/
+
 module maze_pixel_mapping (input CLK, input [12:0] Pix, output reg [12:0] xvalue,reg [12:0] yvalue);
     always @ (posedge CLK) begin
         yvalue = Pix / 8'd96;   //0~64

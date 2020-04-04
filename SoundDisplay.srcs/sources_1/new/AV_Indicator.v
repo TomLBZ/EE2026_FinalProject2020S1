@@ -57,10 +57,11 @@ module AV_Indicator(
     end
     reg [11:0] baseline = 12'b011111111111;
     wire [11:0] mic_minus = mic_max > baseline ? mic_max - baseline : 12'b0;
+    reg [15:0] cnt = 16'b0000000000000000;
     always @ (posedge RefSCLK) begin
-        volume <= (mic_minus >> 7);
-        mic_max <= maxstin ? mic_in : state ? mic_max - 1 : mic_max;
-        digit = ~digit;
+            volume <= (mic_minus >> 7);
+            mic_max <= maxstin ? mic_in : state ? mic_max - 1 : mic_max;
+            digit = ~digit;
     end
     always @ (posedge SCLK) begin
         seg = SEG; 
