@@ -35,7 +35,7 @@ module Top_Student (
     wire onRefresh;//asserted for 1 clk cycle when drawing new frame on the screen
     wire sendingPixels;
     wire samplePixel;
-    //Oled_Display oled(CLK[3],reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
+    Oled_Display oled(CLK[3],reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
     wire [11:0] mic_in;//mic sample input from the mic
     Audio_Capture ac(CLK[4],CLK[2],JAI, JAO[0], JAO[1], mic_in);
     wire [3:0] volume;//current sound level from 0 to 15
