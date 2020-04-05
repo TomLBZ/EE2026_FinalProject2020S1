@@ -1,22 +1,18 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// Company: EE2026
+// Engineer: Liu Jingming
 // Create Date: 2020/04/04 14:59:24
-// Design Name: 
+// Design Name: FGPA Project for EE2026
 // Module Name: Audio_FFT_discrete
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
+// Project Name: FGPA Project for EE2026
+// Target Devices: Basys 3
+// Tool Versions: Vivado 2018.2
+// Description: This module calculates fast fourier transformation and match audio input to the closest frequency among 1000Hz, 2000Hz and 3000Hz.
+// Dependencies: NULL
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
 //////////////////////////////////////////////////////////////////////////////////
 
 //1000Hz-----3000Hz  
@@ -30,7 +26,6 @@ module Audio_FFT_discrete(input [11:0] mic_in,CLK,MCLK,output reg [2:0]FREQ);
     reg [4:0] vart_2000 = 5'b00001;  //change
     reg [4:0] vart_3000 = 5'b00001;  //change
     //FFT_clock clk(MCLK, FFTCLK); 
-    
     reg [28:0] RESULT_1000 = 29'b0;
     reg [28:0] REAL_1000= 29'b0;
     reg [28:0] REAL_pos_1000= 29'b0;
@@ -122,7 +117,6 @@ module Audio_FFT_discrete(input [11:0] mic_in,CLK,MCLK,output reg [2:0]FREQ);
     for now we have three frequencies, 1000Hz, 2000Hz, 3000Hz,
     */
     
-    
     // Section 1: 1000Hz
     FFT_sin sin_1000(angle_90_1000, SIN_value_1000);
     FFT_cos cos_1000(angle_90_1000, COS_value_1000);
@@ -204,8 +198,6 @@ module Audio_FFT_discrete(input [11:0] mic_in,CLK,MCLK,output reg [2:0]FREQ);
         end
         if (final_cal_2000 -- 2'b10) final_cal_2000 <= 2'b00;
     end
-    
-    
     
     // Section 3: 3000Hz
     FFT_sin sin_3000(angle_90_3000, SIN_value_3000);
