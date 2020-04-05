@@ -35,12 +35,15 @@ module Top_Student (
     wire onRefresh;//asserted for 1 clk cycle when drawing new frame on the screen
     wire sendingPixels;
     wire samplePixel;
-    Oled_Display oled(CLK[3],reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
+    //Oled_Display oled(CLK[3],reset,onRefresh,sendingPixels,samplePixel,currentPixel,oled_data,JB[0],JB[1],JB[3],JB[4],JB[5],JB[6],JB[7], testState);
     wire [11:0] mic_in;//mic sample input from the mic
     Audio_Capture ac(CLK[4],CLK[2],JAI, JAO[0], JAO[1], mic_in);
     wire [3:0] volume;//current sound level from 0 to 15
     wire [15:0] mic_mapped;//processed data for led display
     AV_Indicator av1(CLK[4],CLK[2],CLK[1], mic_in,an,seg,mic_mapped,volume);
-    B16_MUX led_mux(mic_mapped,{4'b0,mic_in},SwStates[15],led[15:0]);
     Graphics g(SwStates, BtnStates, BtnPressPulses, volume, onRefresh, CLK[4], CLK[0], currentPixel, oled_data, led);//use clk[0] for bad apple fps
+    wire [2:0]FREQ; 
+    wire [2:0] led_freq = (sw[10]==1'b1)?FREQ:3'b000;
+    B16_MUX led_mux(mic_mapped,{led_freq,1'b0,mic_in},SwStates[15],led[15:0]);
+    Audio_FFT_discrete fft(mic_in,CLK100MHZ,CLK[1],FREQ);  
 endmodule
