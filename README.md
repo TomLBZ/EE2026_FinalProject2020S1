@@ -9,15 +9,19 @@ It utilises a Digilent Pmod 96x64 pixel RGB OLED as display, and a Digilent Pmod
   <b>Geometry: </b><br>
   <br>
   <img src="images/OLED.jpg"alt="Geometry" width="192" height="128">
+  <br>
   <b>Welcome: </b><br>
   <br>
   <img src="images/Welcome.jpg"alt="Welcome" width="192" height="128">
+  <br>
   <b>Volume Bar: </b><br>
   <br>
   <img src="images/VolBar.jpg"alt="Volume Bar" width="192" height="128">
+  <br>
   <b>Touhou: </b><br>
   <br>
   <img src="images/2.jpg"alt="Touhou" width="192" height="128">
+  <br>
   <b>Good Game: </b><br>
   <br>
   <img src="images/GST.jpg"alt="Game Start" width="192" height="128"><img src="images/GG.jpg"alt="GG" width="192" height="128">
