@@ -69,6 +69,6 @@ module BadAppleCore(input CLK, input ON, input PAUSE, input Clk10Hz, output Writ
             end    
         end 
     end
-    assign DebugLED[12:1] = Frame;
-    assign DebugLED[0] = Write;
+    //assign DebugLED[12:1] = Frame;
+    //assign DebugLED[0] = Write;
 endmodule
