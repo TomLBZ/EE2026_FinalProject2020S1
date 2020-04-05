@@ -1,4 +1,32 @@
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/AV_Indicator.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module AV_Indicator
+INFO: [VRFC 10-311] analyzing module my_dff
+INFO: [VRFC 10-311] analyzing module task1
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Audio_Capture.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module Audio_Capture
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Oled_Display.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module Oled_Display
+WARNING: [VRFC 10-756] identifier state is used before its declaration [C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Oled_Display.v:106]
+WARNING: [VRFC 10-756] identifier state is used before its declaration [C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Oled_Display.v:108]
+WARNING: [VRFC 10-756] identifier state is used before its declaration [C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Oled_Display.v:110]
+WARNING: [VRFC 10-756] identifier state is used before its declaration [C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Oled_Display.v:111]
+WARNING: [VRFC 10-756] identifier state is used before its declaration [C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Oled_Display.v:112]
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Peripherals.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module QuadripleChannelClock
+INFO: [VRFC 10-311] analyzing module dff
+INFO: [VRFC 10-311] analyzing module pulser
+INFO: [VRFC 10-311] analyzing module M21
+INFO: [VRFC 10-311] analyzing module B16_MUX
+INFO: [VRFC 10-311] analyzing module ButtonStates
+INFO: [VRFC 10-311] analyzing module SwitchStates
+INFO: [VRFC 10-311] analyzing module CommandMUX41
+INFO: [VRFC 10-311] analyzing module CommandAddressMUX41
+INFO: [VRFC 10-311] analyzing module PixAddr13bMUX41
+INFO: [VRFC 10-311] analyzing module Peripherals
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Top_Student.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module Top_Student
 INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/BadApple.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module PixelFromPos
 INFO: [VRFC 10-311] analyzing module BadAppleCore
 INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/Li Bozhao/source/repos/EE2026_FinalProject2020S1/SoundDisplay.srcs/sources_1/new/Graphics.v" into library xil_defaultlib
 INFO: [VRFC 10-311] analyzing module OnIdleCommand

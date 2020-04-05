@@ -4,13 +4,13 @@
 // Engineer: Li Bozhao
 // Create Date: 03/13/2020 09:51:11 AM
 // Design Name: FGPA Project for EE2026
-// Module Name: OnPointCommand, OnLineCommand, OnCharCommand, OnRectCommand, OnCircCommand, OnSceneSpriteCommand, OnFillRectCommand, OnFillCircCommand, 
-//              Graphics
+// Module Name: OnIdleCommand, OnPointCommand, OnLineCommand, OnCharCommand, OnRectCommand, OnCircleCommand, OnSceneSpriteCommand, OnFillRectCommand, OnFillCircCommand, 
+//              OnSingleBranchCommand, OnDoubleBranchCommand, OnJumpCommand, Graphics
 // Project Name: FGPA Project for EE2026
 // Target Devices: Basys 3
 // Tool Versions: Vivado 2018.2
 // Description: This module can be used to draw geometric shapes and texts conveniently.
-// Dependencies: MemoryBlocks.v, CommandFunctions.v, Peripherals.v, BadApple.v
+// Dependencies: MemoryBlocks.v, CommandFunctions.v, Peripherals.v, BadApple.v, GraphicsProcessingUnit.v
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments: 
@@ -657,7 +657,7 @@ module OnJumpCommand(input CLK, input ON, input [63:0] CMD, output [6:0] X, outp
     assign COLOR = 0;
 endmodule
 
-module Graphics(input [15:0] sw, input [4:0] btns, input [3:0] Volume, input onRefresh, input WCLK, input BadAppleClock, input [12:0] Pix, output [15:0] STREAM, output [15:0] debugLED);
+module Graphics(input [15:0] sw, input [4:0] btns, input [4:0] btnPulses, input [3:0] Volume, input onRefresh, input WCLK, input BadAppleClock, input [12:0] Pix, output [15:0] STREAM, output [15:0] debugLED);
     localparam [1:0] STARTSCREEN = 2'd0;
     localparam [1:0] VOLUMEBAR = 2'd1;
     localparam [1:0] GAMEMAZE = 2'd2;
@@ -667,9 +667,9 @@ module Graphics(input [15:0] sw, input [4:0] btns, input [3:0] Volume, input onR
     wire [6:0] X [3:0];
     wire [5:0] Y [3:0];
     wire [15:0] C [3:0];
-    //StartScreenCore SSC(WCLK, STATE == STARTSCREEN, onRefresh, X[STARTSCREEN], Y[STARTSCREEN], C[STARTSCREEN]);
-    //BarDisplayCore BDC(WCLK, STATE == VOLUMEBAR, onRefresh, statesV, X[VOLUMEBAR], Y[VOLUMEBAR], C[VOLUMEBAR]);
-    //MazeCore MC(WCLK, STATE == GAMEMAZE, onRefresh, btns, X[GAMEMAZE], Y[GAMEMAZE], C[GAMEMAZE]);
+    StartScreenCore SSC(WCLK, STATE == STARTSCREEN, onRefresh, X[STARTSCREEN], Y[STARTSCREEN], C[STARTSCREEN]);
+    BarDisplayCore BDC(WCLK, STATE == VOLUMEBAR, onRefresh, statesV, X[VOLUMEBAR], Y[VOLUMEBAR], C[VOLUMEBAR]);
+    MazeCore MC(WCLK, STATE == GAMEMAZE, onRefresh, btns, btnPulses, X[GAMEMAZE], Y[GAMEMAZE], C[GAMEMAZE]);
     BadAppleCore BAC(WCLK, STATE == BADAPPLE, STATE != BADAPPLE, BadAppleClock,, X[BADAPPLE], Y[BADAPPLE], C[BADAPPLE], debugLED);
     DisplayRAM DRAM(Pix, ~WCLK, WCLK, 1'b1, X[STATE], Y[STATE], C[STATE], STREAM); //using negedge of WCLK to read, posedge to write, white when CPU is rendering
 endmodule

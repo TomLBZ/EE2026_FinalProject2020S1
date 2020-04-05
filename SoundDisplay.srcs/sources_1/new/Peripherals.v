@@ -2,21 +2,17 @@
 //////////////////////////////////////////////////////////////////////////////////
 // Company: EE2026
 // Engineer: Li Bozhao
-// 
 // Create Date: 03/13/2020 07:10:27 PM
 // Design Name: FGPA Project for EE2026
-// Module Name: TripleChannelClock,dff, pulser, btnDebouncer, M21,B12_MUX,swState,srLatch,Peripherals
+// Module Name:  QuadripleChannelClock, dff, pulser, M21, B16_MUX, ButtonStates, SwitchStates, CommandMUX41, CommandAddressMUX41, PixAddr13bMUX41, Peripherals
 // Project Name: FGPA Project for EE2026
 // Target Devices: Basys3
 // Tool Versions: Vivado 2018.2
 // Description: This module provides peripheral utilities needed for the project that are unrelated to sound or display but might be useful for both.
-// 
 // Dependencies: NULL
-// 
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments: 
-// 
 //////////////////////////////////////////////////////////////////////////////////
 
 module QuadripleChannelClock(input CLOCK, input [2:0] RST, input [4:0] SlowBit, output FCLK, output MCLK, output SCLK, output CLK10HZ);
@@ -47,9 +43,7 @@ module QuadripleChannelClock(input CLOCK, input [2:0] RST, input [4:0] SlowBit, 
 endmodule
 
 module dff(input CLK, D, output reg Q=0);
-    always @ (posedge CLK) begin
-        Q<=D;
-    end
+    always @ (posedge CLK)  Q<=D;
 endmodule
 
 module pulser(input D,input CLK, output out);

@@ -4,7 +4,8 @@
 // Engineer: Li Bozhao
 // Create Date: 03/16/2020 08:58:28 AM
 // Design Name: FGPA Project for EE2026
-// Module Name: DisplayRAM, CommandQueue, DisplayCommandCore, CharBlocks, SceneSpriteBlocks
+// Module Name: DisplayRAM, CommandQueue, ReadOnlyBadAppleCompressedData, CharBlocks, SceneSpriteBlocks, 
+//              AudioVisualizationSceneBuilder, StartScreenSceneBuilder, MazeSceneBuilder, FFT_sin, FFT_cos
 // Project Name: FGPA Project for EE2026
 // Target Devices: Basys3
 // Tool Versions: Vivado 2018.2
@@ -13,7 +14,6 @@
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-//
 //////////////////////////////////////////////////////////////////////////////////
 module DisplayRAM(input [12:0] readPix, input AsyncReadCLK, input WCLK, input Write, input [6:0] X, input [5:0] Y, input [15:0] COLOR, output [15:0] STREAM);
     reg [15:0] DRAM [6143:0];
@@ -329,8 +329,7 @@ module MazeSceneBuilder #(parameter scenesize = 38) (input CLK,input Enable, inp
     assign CNT = count;
 endmodule
 
-//Divide by 4096
-module FFT_sin (input [90:0] angle, output [12:0] SIN_value);
+module FFT_sin (input [90:0] angle, output [12:0] SIN_value);//Divide by 4096
     reg [12:0] SIN_TABLE[90:0];
     always @(*) begin
         SIN_TABLE = {13'd0,13'd71,13'd142,13'd214,13'd285,13'd356,13'd428,13'd499,13'd570,13'd640,
@@ -345,7 +344,6 @@ module FFT_sin (input [90:0] angle, output [12:0] SIN_value);
     end
     assign SIN_value = SIN_TABLE [angle];
 endmodule
-
 
 module FFT_cos (input [90:0] angle, output [12:0] COS_value);
     reg [12:0] COS_TABLE[90:0];

@@ -11,57 +11,89 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="47100000000fs"></ZoomStartTime>
-      <ZoomEndTime time="89050000001fs"></ZoomEndTime>
-      <Cursor1Time time="62800000000fs"></Cursor1Time>
+      <ZoomStartTime time="147753400000fs"></ZoomStartTime>
+      <ZoomEndTime time="147922000001fs"></ZoomEndTime>
+      <Cursor1Time time="147877000000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="77"></NameColumnWidth>
-      <ValueColumnWidth column_width="61"></ValueColumnWidth>
+      <NameColumnWidth column_width="76"></NameColumnWidth>
+      <ValueColumnWidth column_width="58"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="11" />
-   <wvobject fp_name="/simClk/ts/g/SSC/CmdSS" type="array">
-      <obj_property name="ElementShortName">CmdSS[63:0]</obj_property>
-      <obj_property name="ObjectShortName">CmdSS[63:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/SSC/SSSB/ADDR" type="array">
-      <obj_property name="ElementShortName">ADDR[6:0]</obj_property>
-      <obj_property name="ObjectShortName">ADDR[6:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/CLK" type="logic">
+   <WVObjectSize size="19" />
+   <wvobject fp_name="/simClk/ts/g/BAC/CLK" type="logic">
       <obj_property name="ElementShortName">CLK</obj_property>
       <obj_property name="ObjectShortName">CLK</obj_property>
    </wvobject>
-   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/commandHead" type="array">
-      <obj_property name="ElementShortName">commandHead[3:0]</obj_property>
-      <obj_property name="ObjectShortName">commandHead[3:0]</obj_property>
+   <wvobject fp_name="/simClk/ts/g/BAC/Clk10Hz" type="logic">
+      <obj_property name="ElementShortName">Clk10Hz</obj_property>
+      <obj_property name="ObjectShortName">Clk10Hz</obj_property>
    </wvobject>
-   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/STATE" type="array">
-      <obj_property name="ElementShortName">STATE[1:0]</obj_property>
-      <obj_property name="ObjectShortName">STATE[1:0]</obj_property>
+   <wvobject fp_name="/simClk/ts/g/BAC/Write" type="logic">
+      <obj_property name="ElementShortName">Write</obj_property>
+      <obj_property name="ObjectShortName">Write</obj_property>
    </wvobject>
-   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/Yout[15]" type="array">
-      <obj_property name="ElementShortName">[15][5:0]</obj_property>
-      <obj_property name="ObjectShortName">[15][5:0]</obj_property>
+   <wvobject fp_name="/simClk/ts/g/BAC/X" type="array">
+      <obj_property name="ElementShortName">X[6:0]</obj_property>
+      <obj_property name="ObjectShortName">X[6:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/raddr" type="array">
-      <obj_property name="ElementShortName">raddr[6:0]</obj_property>
-      <obj_property name="ObjectShortName">raddr[6:0]</obj_property>
+   <wvobject fp_name="/simClk/ts/g/BAC/Y" type="array">
+      <obj_property name="ElementShortName">Y[5:0]</obj_property>
+      <obj_property name="ObjectShortName">Y[5:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/RADDR" type="array">
-      <obj_property name="ElementShortName">RADDR[6:0]</obj_property>
-      <obj_property name="ObjectShortName">RADDR[6:0]</obj_property>
+   <wvobject fp_name="/simClk/ts/g/BAC/C" type="array">
+      <obj_property name="ElementShortName">C[15:0]</obj_property>
+      <obj_property name="ObjectShortName">C[15:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/done" type="logic">
-      <obj_property name="ElementShortName">done</obj_property>
-      <obj_property name="ObjectShortName">done</obj_property>
+   <wvobject fp_name="/simClk/ts/g/BAC/AddrCount" type="array">
+      <obj_property name="ElementShortName">AddrCount[17:0]</obj_property>
+      <obj_property name="ObjectShortName">AddrCount[17:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/O" type="array">
-      <obj_property name="ElementShortName">O[15:0]</obj_property>
-      <obj_property name="ObjectShortName">O[15:0]</obj_property>
+   <wvobject fp_name="/simClk/ts/g/BAC/Data" type="array">
+      <obj_property name="ElementShortName">Data[7:0]</obj_property>
+      <obj_property name="ObjectShortName">Data[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simClk/ts/g/SSC/GPUSS/B" type="array">
-      <obj_property name="ElementShortName">B[15:0]</obj_property>
-      <obj_property name="ObjectShortName">B[15:0]</obj_property>
+   <wvobject fp_name="/simClk/ts/g/BAC/LEN" type="array">
+      <obj_property name="ElementShortName">LEN[6:0]</obj_property>
+      <obj_property name="ObjectShortName">LEN[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/BAC/x1" type="array">
+      <obj_property name="ElementShortName">x1[6:0]</obj_property>
+      <obj_property name="ObjectShortName">x1[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/BAC/x2" type="array">
+      <obj_property name="ElementShortName">x2[6:0]</obj_property>
+      <obj_property name="ObjectShortName">x2[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/BAC/PosOnFrame" type="array">
+      <obj_property name="ElementShortName">PosOnFrame[12:0]</obj_property>
+      <obj_property name="ObjectShortName">PosOnFrame[12:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/BAC/PixelCounter" type="array">
+      <obj_property name="ElementShortName">PixelCounter[12:0]</obj_property>
+      <obj_property name="ObjectShortName">PixelCounter[12:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/BAC/vDup" type="array">
+      <obj_property name="ElementShortName">vDup[1:0]</obj_property>
+      <obj_property name="ObjectShortName">vDup[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/BAC/StartPos" type="array">
+      <obj_property name="ElementShortName">StartPos[12:0]</obj_property>
+      <obj_property name="ObjectShortName">StartPos[12:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/BAC/PosUBound" type="array">
+      <obj_property name="ElementShortName">PosUBound[12:0]</obj_property>
+      <obj_property name="ObjectShortName">PosUBound[12:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/BAC/DONEFRAME" type="logic">
+      <obj_property name="ElementShortName">DONEFRAME</obj_property>
+      <obj_property name="ObjectShortName">DONEFRAME</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/BAC/Frame" type="array">
+      <obj_property name="ElementShortName">Frame[11:0]</obj_property>
+      <obj_property name="ObjectShortName">Frame[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simClk/ts/g/BAC/NextFrame" type="array">
+      <obj_property name="ElementShortName">NextFrame[11:0]</obj_property>
+      <obj_property name="ObjectShortName">NextFrame[11:0]</obj_property>
    </wvobject>
 </wave_config>

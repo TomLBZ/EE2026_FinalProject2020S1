@@ -1,10 +1,7 @@
 `timescale 1ns / 1ps
-
 //////////////////////////////////////////////////////////////////////////////////
 // Company: EE2026
-// Engineer: Li Bozhao
 // Engineer: Liu Jingjing
-// 
 // Create Date: 03/19/2020 10:53:20 AM
 // Design Name: FGPA Project for EE2026
 // Module Name: AV_Indicator
@@ -12,13 +9,10 @@
 // Target Devices: Basys3
 // Tool Versions: Vivado 2018.2
 // Description: This module operates 7-seg display based on mic input.
-// 
 // Dependencies: NULL
-// 
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments: 
-// 
 //////////////////////////////////////////////////////////////////////////////////
     
 module AV_Indicator(
@@ -36,16 +30,15 @@ module AV_Indicator(
     reg digit = 1'b0;
     reg [6:0] seg;
     wire [3:0] vol_mod_10 = volume > 4'd9 ? volume - 4'd10 : volume;
-    wire maxstin = mic_max < mic_in;
-    
+    wire maxstin = mic_max < mic_in;    
     assign an = ~(mask << digit);     //shift 1/0 bit
     assign led = (16'b1111111111111111 >> (5'd15 - volume));  
     reg [11:0] baseline = 12'b011111111111;
     wire [11:0] mic_minus = mic_max > baseline ? mic_max - baseline : 12'b0;
     reg [15:0] cnt = 16'b0000000000000000;
     always @ (posedge RefSCLK) begin
-            volume <= (mic_minus >> 7);
-            digit = ~digit;
+        volume <= (mic_minus >> 7);
+        digit = ~digit;
     end
     always @ (posedge SCLK) begin
         mic_max <= maxstin ? mic_in : mic_max - 1;
@@ -53,11 +46,9 @@ module AV_Indicator(
     end 
     always@(*)begin
         if (digit) begin//10th
-            //an = 4'b1101;
             if(volume < 4'd10) SEG = 7'b1111111;
             else SEG = 7'b1111001;
         end else begin//1st
-            //an = 4'b1110;
             case (vol_mod_10)
                 4'd0: SEG = 7'b1000000;
                 4'd1: SEG = 7'b1111001;
@@ -72,16 +63,4 @@ module AV_Indicator(
             endcase
         end
     end
-
-endmodule
-
-module my_dff (input CLOCK, D, output reg Q = 0);
-    always @ (posedge CLOCK) Q <= D;
-endmodule
-module task1(input CLOCK, BTN, output Q);
-    wire Q1;
-    wire Q2;
-    my_dff f0(CLOCK, BTN, Q1);
-    my_dff f1(CLOCK, Q1, Q2);
-    assign Q = (Q1 & ~Q2);
 endmodule
